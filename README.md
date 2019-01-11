@@ -4,7 +4,7 @@ Hadoop Data Pipeline Automation Tool
 
 ## How it works
 
-Pipewrench uses [SchemaCrawler]() to query a database throught JDBC, then generates pipeline code
+Pipewrench uses [SchemaCrawler](https://www.schemacrawler.com/) to query database table metadata throught JDBC, then generates pipeline code
 from a series of templates that when executed can be used to ingest or transform data.
 
 ## Config File
