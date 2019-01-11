@@ -1,10 +1,13 @@
 package io.phdata.pipewrench
 
+import java.io.FileNotFoundException
+
 import com.typesafe.scalalogging.LazyLogging
 import io.phdata.pipewrench.configuration.ConfigurationBuilder
 import io.phdata.pipewrench.configuration.Default
 import io.phdata.pipewrench.configuration.YamlSupport
 import io.phdata.pipewrench.pipeline.PipelineBuilder
+import io.phdata.pipewrench.schemacrawler.SchemaCrawlerImpl
 import io.phdata.pipewrench.util.FileUtil
 
 object App extends YamlSupport with Default with FileUtil with LazyLogging {
@@ -21,16 +24,28 @@ object App extends YamlSupport with Default with FileUtil with LazyLogging {
         createDir(outputDirectory)
         val pipewrenchConfiguration = ConfigurationBuilder.build(configuration)
         pipewrenchConfiguration.writeYamlFile(s"$outputDirectory/pipewrench-configuration.yml")
+        SchemaCrawlerImpl.getErdOutput(pipewrenchConfiguration.configuration.jdbc, outputDirectory)
+        SchemaCrawlerImpl.getHtmlOutput(pipewrenchConfiguration.configuration.jdbc, outputDirectory)
 
       case Some(cli.produceScripts) =>
         val configuration = readPipewrenchConfigurationFile(cli.produceScripts.filePath())
-        val typeMapping = readTypeMappingFile(
-          cli.produceScripts.typeMappingFile.getOrElse(TYPE_MAPPING_FILE))
+        val typeMappingFile = cli.produceScripts.typeMappingFile()
+        val templateDir = cli.produceScripts.templateDirectory()
+
+        if (!fileExists(typeMappingFile)) {
+          throw new FileNotFoundException(s"Type mapping file not found: '$typeMappingFile'.")
+        }
+
+        if (!directoryExists(templateDir)) {
+          throw new FileNotFoundException(s"Template directory not found '$templateDir'")
+        }
+
+        val typeMapping = readTypeMappingFile(typeMappingFile)
         createDir(cli.produceScripts.outputPath.getOrElse(OUTPUT_DIRECTORY))
         PipelineBuilder.build(
           configuration,
           typeMapping,
-          cli.produceScripts.templateDirectory.getOrElse(TEMPLATE_DIRECTORY),
+          templateDir,
           cli.produceScripts.outputPath.getOrElse(OUTPUT_DIRECTORY)
         )
 

@@ -33,7 +33,7 @@ class Cli(args: Seq[String]) extends ScallopConf(args) {
     val templateDirectory: ScallopOption[String] = opt[String](
       "template-directory",
       descr = "Template directory path",
-      required = false
+      required = true
     )
   }
 
