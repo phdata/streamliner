@@ -1,5 +1,7 @@
 package io.phdata.pipewrench
 
+import java.io.FileNotFoundException
+
 import com.typesafe.scalalogging.LazyLogging
 import io.phdata.pipewrench.configuration.ConfigurationBuilder
 import io.phdata.pipewrench.configuration.Default
@@ -27,13 +29,23 @@ object App extends YamlSupport with Default with FileUtil with LazyLogging {
 
       case Some(cli.produceScripts) =>
         val configuration = readPipewrenchConfigurationFile(cli.produceScripts.filePath())
-        val typeMapping = readTypeMappingFile(
-          cli.produceScripts.typeMappingFile.getOrElse(TYPE_MAPPING_FILE))
+        val typeMappingFile = cli.produceScripts.typeMappingFile()
+        val templateDir = cli.produceScripts.templateDirectory()
+
+        if (!fileExists(typeMappingFile)) {
+          throw new FileNotFoundException(s"Type mapping file not found: '$typeMappingFile'.")
+        }
+
+        if (!directoryExists(templateDir)) {
+          throw new FileNotFoundException(s"Template directory not found '$templateDir'")
+        }
+
+        val typeMapping = readTypeMappingFile(typeMappingFile)
         createDir(cli.produceScripts.outputPath.getOrElse(OUTPUT_DIRECTORY))
         PipelineBuilder.build(
           configuration,
           typeMapping,
-          cli.produceScripts.templateDirectory.getOrElse(TEMPLATE_DIRECTORY),
+          templateDir,
           cli.produceScripts.outputPath.getOrElse(OUTPUT_DIRECTORY)
         )
 

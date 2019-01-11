@@ -30,13 +30,13 @@ class Cli(args: Seq[String]) extends ScallopConf(args) {
       required = false)
 
     val typeMappingFile: ScallopOption[String] =
-      opt[String]("type-mapping", 'm', descr = "Path to data type mapping file", required = false)
+      opt[String]("type-mapping", 'm', descr = "Path to data type mapping file", required = true)
 
     val templateDirectory: ScallopOption[String] = opt[String](
       "template-directory",
       't',
       descr = "Template directory path",
-      required = false
+      required = true
     )
   }
 

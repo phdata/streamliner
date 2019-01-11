@@ -1,9 +1,6 @@
 package io.phdata.pipewrench.configuration
 
 trait Default {
-
-  lazy val TYPE_MAPPING_FILE = "src/main/resources/type-mapping.yml"
-  lazy val TEMPLATE_DIRECTORY = "src/main/resources/templates"
   lazy val OUTPUT_DIRECTORY = "output"
 
   def scriptsDirectory(configuration: Configuration, outputDirectory: String): String =

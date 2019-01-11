@@ -2,8 +2,11 @@ package io.phdata.pipewrench.util
 
 import java.io.File
 import java.io.FileWriter
+import java.nio.file.Files
+import java.nio.file.Paths
 
 import com.typesafe.scalalogging.LazyLogging
+
 import scala.io.Source
 
 trait FileUtil extends LazyLogging {
@@ -41,5 +44,13 @@ trait FileUtil extends LazyLogging {
       logger.debug(s"Creating directory: $path")
       f.mkdirs()
     }
+  }
+
+  def directoryExists(path: String) = {
+    fileExists(path)
+  }
+
+  def fileExists(path: String) = {
+    Files.exists(Paths.get(path))
   }
 }
