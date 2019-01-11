@@ -1,0 +1,11 @@
+<%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
+<%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
+<%@ val typeMapping: io.phdata.pipewrench.configuration.TypeMapping%>
+<% val columns = io.phdata.pipewrench.util.TemplateFunction.columnOrCast(configuration, table, typeMapping, "AVRO", "KUDU") %>
+set sync_ddl=1;
+USE `${configuration.hadoop.stagingDatabase.name}`;
+REFRESH `${configuration.hadoop.stagingDatabase.name}`.`stg_${table.destinationName}`;
+USE `${configuration.hadoop.reportingDatabase.name}`;
+UPSERT INTO `${configuration.hadoop.reportingDatabase.name}`.`${table.destinationName}` SELECT
+${columns}
+FROM `${configuration.hadoop.stagingDatabase.name}`.`${table.destinationName}` ORDER BY `${table.checkColumn.get}` ASC;

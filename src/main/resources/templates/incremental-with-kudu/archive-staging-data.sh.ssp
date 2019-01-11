@@ -1,0 +1,11 @@
+<%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
+<%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
+#!/bin/bash
+set -x
+
+INGEST_DATE=`date +"%Y-%m-%d_%H-%M-%S"`
+
+hdfs dfs -mkdir -p ${configuration.hadoop.stagingDatabase}/arch_${table.destinationName}/ingest_date=$INGEST_DATE
+hdfs dfs -mv ${configuration.hadoop.stagingDatabase}/stg_${table.destinationName}/*.avro ${configuration.hadoop.stagingDatabase}/arch_${table.destinationName}/ingest_date=$INGEST_DATE/.
+
+${configuration.hadoop.impalaShellCommand} -q "ALTER TABLE `${configuration.hadoop.stagingDatabase.name}`.`arch_${table.destinationName}` ADD PARTITION (ingest_date='$INGEST_DATE');"

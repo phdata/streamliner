@@ -1,0 +1,4 @@
+<%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
+<%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
+USE `${configuration.hadoop.stagingDatabase.name}`;
+DROP TABLE IF EXISTS `${configuration.hadoop.stagingDatabase.name}`.`arch_${table.destinationName}` PURGE;

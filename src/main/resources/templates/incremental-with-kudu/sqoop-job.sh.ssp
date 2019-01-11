@@ -1,0 +1,6 @@
+<%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
+<%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
+#!/usr/bin/env bash
+
+set -eu
+sqoop job --exec '${configuration.name}/${configuration.environment}/${table.destinationName}'

@@ -1,0 +1,30 @@
+<%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
+<%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
+#!/usr/bin/env bash
+
+set -x
+
+PARTITION_FILE="${configuration.hadoop.stagingDatabase.path}/part_${table.destinationName}/.latest-partition"
+PARTITION_NUMBER=1
+
+if $(hdfs dfs -test -e $PARTITION_FILE); then
+    PARTITION_NUMBER=$(hdfs dfs -cat $PARTITION_FILE)
+
+    if [[ $PARTITION_NUMBER -eq 4 ]]; then
+        PARTITION_NUMBER=1
+    else
+        PARTITION_NUMBER=$((PARTITION_NUMBER+1))
+    fi
+fi
+
+${configuration.hadoop.impalaShellCommand} -f insert-overwrite-partitioned.sql --var=ingest_partition=$PARTITION_NUMBER
+
+if [ $? -eq 0 ]; then
+    ${configuration.hadoop.impalaShellCommand} -f alter-report-table-location.sql --var=ingest_partition=$PARTITION_NUMBER
+
+    if $(hdfs dfs -test -e $PARTITION_FILE); then
+        hdfs dfs -rm -skipTrash $PARTITION_FILE
+    fi
+
+    echo $PARTITION_NUMBER | hdfs dfs -put - $PARTITION_FILE
+fi

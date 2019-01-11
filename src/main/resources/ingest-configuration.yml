@@ -1,0 +1,18 @@
+name: "" # Unique name for data ingestion
+environment: "" # Environment identifier
+pipeline: "" # Pipeline name must match a directory in the the provided template folder
+jdbc:
+  url: "" # JDBC Connection url
+  username: "" # JDBC Username
+  password: "" # JDBC Password
+  schema: "" # JDBC Schema / database name
+hadoop:
+  username: "" # Hadoop service account
+  password: "" # Hadoop service account password
+  impalaShellCommand: "" # Impala shell command copied from CM
+  stagingDatabase:
+    name: "" # Staging database
+    path: "" # Staging database hdfs path
+  reportingDatabase:
+    name: "" # Reporting database name (these can be the same as staging database if template allows)
+    path: "" # Reporting database path (these can be the same as staging database if template allows)

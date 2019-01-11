@@ -1,0 +1,11 @@
+<%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
+<%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
+#!/usr/bin/env bash
+
+DIRECTORY="${configuration.hadoop.reportingDatabase.path}/${table.destinationName}"
+
+if $(hdfs dfs -test -d $DIRECTORY); then
+    hdfs dfs -rm -r -f $DIRECTORY
+else
+    echo "Directory: $DIRECTORY does not exist, nothing to delete"
+fi

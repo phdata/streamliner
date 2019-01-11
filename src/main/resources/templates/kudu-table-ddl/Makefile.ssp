@@ -1,0 +1,18 @@
+<%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
+<%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
+impala-cmd=${configuration.hadoop.impalaShellCommand} -f
+
+compute-stats-kudu: compute-stats-kudu.sql
+    $(impala-cmd) compute-stats-kudu.sql
+
+create-kudu-table: create-kudu-table.sql
+    $(impala-cmd) create-kudu-table.sql
+
+drop-kudu-table: drop-kudu-table.sql
+    $(impala-cmd) drop-kudu-table.sql
+
+targets: ## Print out a list of available targets
+    @fgrep -h ": " $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/:.*//'
+
+help:  ## Print help message
+    @fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'

@@ -1,0 +1,24 @@
+<%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
+<%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
+<%@ val typeMapping: io.phdata.pipewrench.configuration.TypeMapping%>
+set sync_ddl=1;
+USE `${configuration.hadoop.reportingDatabase.name}`;
+CREATE TABLE IF NOT EXISTS `${configuration.hadoop.reportingDatabase.name}`.`${table.destinationName}` (
+#for (column <- table.columns)
+    <% val mappedDataType = io.phdata.pipewrench.util.TemplateFunction.mapDataType(column, typeMapping, "KUDU")%>
+    `${column.destinationName}` ${mappedDataType} COMMENT '${column.comment.getOrElse("")}',
+#end
+PRIMARY KEY (${io.phdata.pipewrench.util.TemplateFunction.primaryKeys(table)})
+)
+#if (table.primaryKeys.nonEmpty)
+PARTITION BY HASH (${table.primaryKeys.map(k => s"`$k`").mkString(",")}) PARTITIONS ${table.numberOfPartitions.getOrElse(2)}
+#end
+COMMENT '${table.comment.getOrElse("")}'
+STORED AS KUDU
+#if (table.metadata.isDefined)
+TBLPROPERTIES(
+    <% val metadata = table.metadata.get.map(md => s"'${md._1}' = '${md._2}").mkString(",\n") %>
+${metadata}
+)
+#end;
+

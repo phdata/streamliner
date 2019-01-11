@@ -1,0 +1,26 @@
+<%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
+<%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
+<%@ val typeMapping: io.phdata.pipewrench.configuration.TypeMapping%>
+set sync_ddl=1;
+USE `${configuration.hadoop.stagingDatabase.name}`;
+CREATE TABLE IF NOT EXISTS `${configuration.hadoop.stagingDatabase.name}`.`stg_${table.destinationName}` (
+<%
+    val columnDefinitions = table.columns.map {
+    column =>
+        val mappedDataType = io.phdata.pipewrench.util.TemplateFunction.mapDataType(column, typeMapping, "PARQUET")
+        val dataType = if (mappedDataType.equalsIgnoreCase("DECIMAL")) {
+            s"DECIMAL(${column.precision.get}, ${column.scale.get})"
+        } else {
+            mappedDataType
+        }
+        s"`${column.destinationName}` $dataType COMMENT '${column.comment.getOrElse("")}'"
+    }.mkString(",\n")
+%>
+${columnDefinitions}
+)
+COMMENT '${table.comment.getOrElse("")}'
+STORED AS AVRO
+LOCATION '${configuration.hadoop.stagingDatabase.path}/stg_${table.destinationName}'
+TBLPROPERTIES(
+'avro.schema.url' = '${configuration.hadoop.stagingDatabase.path}/stg_${table.destinationName}/.meta/stg_${table.destinationName}.avsc'
+)

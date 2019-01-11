@@ -1,0 +1,26 @@
+<%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
+<%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
+<% val tableColumns = io.phdata.pipewrench.util.TemplateFunction.sourceColumns(configuration, table)%>
+#!/usr/bin/env bash
+set -eu
+sqoop import \
+    -D 'mapred.job.name="Sqoop Job - name: ${configuration.name} environment: ${configuration.environment} table: ${table.sourceName}"' \\
+    --connect '${configuration.jdbc.url}' \\
+    --username '${configuration.jdbc.username}' \\
+    --password '${configuration.jdbc.password}' \\
+    --driver '${configuration.jdbc.driverClass.get}' \\
+    --delete-target-dir \\
+    --target-dir '${configuration.hadoop.stagingDatabase.path}/stg_${table.destinationName}/' \\
+    --temporary-rootdir '${configuration.hadoop.stagingDatabase.path}/stg_${table.destinationName}/' \\
+    --as-avrodatafile \\
+    --fetch-size 10000 \\
+    --compress \\
+    --compression-codec snappy \\
+    -m ${table.numberOfMappers.getOrElse(1)} \\
+#if (table.splitByColumn.isDefined) {
+    --splitBy ${table.splitByColumn.get} \\
+#end
+    --query 'SELECT
+${tableColumns}
+FROM ${configuration.jdbc.schema}.${table.sourceName}
+WHERE $CONDITIONS'

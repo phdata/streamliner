@@ -1,0 +1,83 @@
+<%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
+<%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
+impala-cmd=${configuration.hadoop.impalaShellCommand} -f
+
+alter-report-table-location: alter-report-table-location.sh
+    ./run-with-logging.sh ./alter-report-table-location.sh $@
+
+compute-stats-staging-table: compute-stats-staging.sql
+    $(impala-cmd) compute-stats-staging.sql
+
+compute-stats-partitioned-table: compute-stats-partitioned.sql
+    $(impala-cmd) compute-stats-partitioned.sql
+
+compute-stats-report-table: compute-stats-report.sql
+    $(impala-cmd) compute-stats-report.sql
+
+copy-avro-schema-to-hdfs: copy-avro-schema.sh
+    ./run-with-logging.sh ./copy-avro-schema.sh $@
+
+create-staging-table: create-staging-table.sql
+    $(impala-cmd) create-staging-table.sql
+
+create-partitioned-table: create-partitioned-table.sql
+    $(impala-cmd) create-partitioned-table.sql
+
+create-report-table: create-report-table.sql
+    $(impala-cmd) create-report-table.sql
+
+delete-partitioned-hdfs: delete-partitioned-hdfs.sh
+    ./run-with-logging.sh delete-partitioned-hdfs.sh $@
+
+delete-report-hdfs: delete-report-hdfs.sh
+    ./run-with-logging.sh delete-report-hdfs.sh $@
+
+delete-staging-hdfs: delete-staging-hdfs.sh
+    ./run-with-logging.sh delete-staging-hdfs.sh $@
+
+drop-staging-table: drop-staging-table.sql
+    $(impala-cmd) drop-staging-table.sql
+
+drop-partitioned-table: drop-partitioned-table.sql
+    $(impala-cmd) drop-partitioned-table.sql
+
+drop-report-table: drop-report-table.sql
+    $(impala-cmd) drop-report-table.sql
+
+invalidate-metadata-staging: invalidate-metadata-staging.sql
+    $(impala-cmd) invalidate-metadata-staging.sql
+
+sqoop-exec: sqoop-job.sh
+    ./run-with-logging.sh ./sqoop-job.sh $@
+
+first-run:
+    $(MAKE) sqoop-exec
+    $(MAKE) copy-avro-schema-to-hdfs
+    $(MAKE) create-partitioned-table
+    $(MAKE) create-report-table
+    $(MAKE) create-staging-table
+    $(MAKE) invalidate-metadata-staging
+    $(MAKE) alter-report-table-location
+    $(MAKE) compute-stats-partitioned-table
+    $(MAKE) compute-stats-report-table
+
+run:
+    $(MAKE) sqoop-exec
+    $(MAKE) invalidate-metadata-staging
+    $(MAKE) alter-report-table-location
+    $(MAKE) compute-stats-partitioned-table
+    $(MAKE) compute-stats-report-table
+
+clean:
+    $(MAKE) drop-partitioned-table
+    $(MAKE) drop-report-table
+    $(MAKE) drop-staging-table
+    $(MAKE) delete-partitioned-hdfs
+    $(MAKE) delete-report-hdfs
+    $(MAKE) delete-staging-hdfs
+
+targets: ## Print out a list of available targets
+    @fgrep -h ": " $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/:.*//'
+
+help:  ## Print help message
+    @fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'

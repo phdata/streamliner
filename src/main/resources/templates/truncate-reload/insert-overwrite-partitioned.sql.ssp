@@ -1,0 +1,10 @@
+<%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
+<%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
+<%@ val typeMapping: io.phdata.pipewrench.configuration.TypeMapping%>
+<% val columns = io.phdata.pipewrench.util.TemplateFunction.columnOrCast(configuration, table, typeMapping, "AVRO", "PARQUET") %>
+<% val partition = "${var:ingest_partition}"%>
+USE `${configuration.hadoop.stagingDatabase.name}`;
+INSERT OVERWRITE TABLE `${configuration.hadoop.stagingDatabase.name}`.`part_${table.destinationName}` PARTITION (ingest_partition=${partition})
+SELECT
+${columns}
+FROM `${configuration.hadoop.stagingDatabase.name}`.`stg_${table.destinationName}`;
