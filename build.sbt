@@ -5,6 +5,8 @@ scalaVersion := "2.11.12"
 
 val schemaCrawlerVersion = "15.03.04"
 
+scalafmtOnCompile := true
+
 libraryDependencies ++= Seq(
   "ch.qos.logback" % "logback-classic" % "1.2.3",
   "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2",

@@ -4,13 +4,17 @@ import java.sql.Connection
 
 import io.phdata.pipewrench.configuration.Jdbc
 import schemacrawler.schema.Catalog
-import schemacrawler.schemacrawler.{DatabaseConnectionOptions, RegularExpressionInclusionRule, SchemaCrawlerOptionsBuilder, SchemaInfoLevelBuilder}
+import schemacrawler.schemacrawler.DatabaseConnectionOptions
+import schemacrawler.schemacrawler.RegularExpressionInclusionRule
+import schemacrawler.schemacrawler.SchemaCrawlerOptionsBuilder
+import schemacrawler.schemacrawler.SchemaInfoLevelBuilder
 import schemacrawler.utility.SchemaCrawlerUtility
 
 object SchemaCrawlerImpl {
 
   def getCatalog(jdbc: Jdbc): Catalog = {
-    val options = SchemaCrawlerOptionsBuilder.builder()
+    val options = SchemaCrawlerOptionsBuilder
+      .builder()
       .withSchemaInfoLevel(SchemaInfoLevelBuilder.standard())
       .includeSchemas(new RegularExpressionInclusionRule(jdbc.schema))
       .toOptions
