@@ -9,7 +9,11 @@ object PipelineBuilder extends FileUtil with Default with LazyLogging {
 
   private lazy val engine: TemplateEngine = new TemplateEngine
 
-  def build(configuration: PipewrenchConfiguration, typeMapping: TypeMapping, templateDirectory: String, outputDirectory: String): Unit = {
+  def build(
+      configuration: PipewrenchConfiguration,
+      typeMapping: TypeMapping,
+      templateDirectory: String,
+      outputDirectory: String): Unit = {
     val pipelineTemplates = s"$templateDirectory/${configuration.configuration.pipeline}"
     val files = listFilesInDir(pipelineTemplates)
     val templateFiles = files.filter(f => f.getName.endsWith(".ssp"))
@@ -17,30 +21,31 @@ object PipelineBuilder extends FileUtil with Default with LazyLogging {
 
     engine.escapeMarkup = false
 
-    configuration.tables.foreach {
-      table =>
-        checkConfiguration(configuration.configuration, table)
-        val tableDir = s"${scriptsDirectory(configuration.configuration, outputDirectory)}/${table.destinationName}"
-        createDir(tableDir)
+    configuration.tables.foreach { table =>
+      checkConfiguration(configuration.configuration, table)
+      val tableDir =
+        s"${scriptsDirectory(configuration.configuration, outputDirectory)}/${table.destinationName}"
+      createDir(tableDir)
 
-        templateFiles.foreach {
-          templateFile =>
-            val rendered = engine.layout(
-              templateFile.getPath,
-              Map("configuration" -> configuration.configuration, "table" -> table, "typeMapping" -> typeMapping))
-            val replaced = rendered.replace("    ", "\t")
-            logger.debug(replaced)
-            val fileName = s"$tableDir/${templateFile.getName.replace(".ssp", "")}"
-            writeFile(replaced, fileName)
-            isExecutable(fileName)
-        }
-        nonTemplateFiles.foreach {
-          nonTemplateFile =>
-            val content = readFile(nonTemplateFile.getPath)
-            val fileName = s"$tableDir/${nonTemplateFile.getName}"
-            writeFile(content, fileName)
-            isExecutable(fileName)
-        }
+      templateFiles.foreach { templateFile =>
+        val rendered = engine.layout(
+          templateFile.getPath,
+          Map(
+            "configuration" -> configuration.configuration,
+            "table" -> table,
+            "typeMapping" -> typeMapping))
+        val replaced = rendered.replace("    ", "\t")
+        logger.debug(replaced)
+        val fileName = s"$tableDir/${templateFile.getName.replace(".ssp", "")}"
+        writeFile(replaced, fileName)
+        isExecutable(fileName)
+      }
+      nonTemplateFiles.foreach { nonTemplateFile =>
+        val content = readFile(nonTemplateFile.getPath)
+        val fileName = s"$tableDir/${nonTemplateFile.getName}"
+        writeFile(content, fileName)
+        isExecutable(fileName)
+      }
     }
   }
 
@@ -62,13 +67,15 @@ object PipelineBuilder extends FileUtil with Default with LazyLogging {
 
   private def checkCheckColumn(table: TableDefinition): Unit = {
     if (table.checkColumn.isEmpty) {
-      throw new RuntimeException(s"Check column for table: ${table.sourceName} is empty, cannot execute incremental sqoop job")
+      throw new RuntimeException(
+        s"Check column for table: ${table.sourceName} is empty, cannot execute incremental sqoop job")
     }
   }
 
   private def checkPrimaryKeys(table: TableDefinition): Unit = {
     if (table.primaryKeys.isEmpty) {
-      throw new RuntimeException(s"Primary keys for table: ${table.sourceName} are empty, cannot create Kudu table.")
+      throw new RuntimeException(
+        s"Primary keys for table: ${table.sourceName} are empty, cannot create Kudu table.")
     }
   }
 }

@@ -1,6 +1,7 @@
 package io.phdata.pipewrench.util
 
-import java.io.{File, FileWriter}
+import java.io.File
+import java.io.FileWriter
 
 import com.typesafe.scalalogging.LazyLogging
 import scala.io.Source

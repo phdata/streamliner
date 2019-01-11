@@ -2,7 +2,8 @@ package io.phdata.pipewrench.configuration
 
 import com.typesafe.scalalogging.LazyLogging
 import io.phdata.pipewrench.schemacrawler.SchemaCrawlerImpl
-import schemacrawler.schema.{Column => SchemaCrawlerColumn, Table => SchemaCrawlerTable}
+import schemacrawler.schema.{Column => SchemaCrawlerColumn}
+import schemacrawler.schema.{Table => SchemaCrawlerTable}
 
 import collection.JavaConverters._
 
@@ -11,26 +12,33 @@ object ConfigurationBuilder extends LazyLogging {
   def build(configuration: Configuration): PipewrenchConfiguration = {
     val catalog = SchemaCrawlerImpl.getCatalog(configuration.jdbc)
 
-    val tables = catalog.getSchemas.asScala.find(s => s.getFullName.equals(configuration.jdbc.schema)) match {
-      case Some(schema) =>
-        catalog.getTables(schema).asScala.map {
-          parsedTable =>
-            configuration.jdbc.tables match {
-              case Some(userDefinedTables) =>
-                userDefinedTables.find(t => t.name.equals(parsedTable.getName)) match {
-                  case Some(userDefinedTable) => enhanceTableDefinition(mapTableDefinition(parsedTable), userDefinedTable)
-                  case None => mapTableDefinition(parsedTable)
-                }
-              case None =>
-                mapTableDefinition(parsedTable)
+    val tables =
+      catalog.getSchemas.asScala.find(s => s.getFullName.equals(configuration.jdbc.schema)) match {
+        case Some(schema) =>
+          catalog
+            .getTables(schema)
+            .asScala
+            .map { parsedTable =>
+              configuration.jdbc.tables match {
+                case Some(userDefinedTables) =>
+                  userDefinedTables.find(t => t.name.equals(parsedTable.getName)) match {
+                    case Some(userDefinedTable) =>
+                      enhanceTableDefinition(mapTableDefinition(parsedTable), userDefinedTable)
+                    case None => mapTableDefinition(parsedTable)
+                  }
+                case None =>
+                  mapTableDefinition(parsedTable)
+              }
             }
-        }.toSeq
-      case None =>
-        throw new RuntimeException(s"Schema: ${configuration.jdbc.schema}, does not exist in source system")
-    }
+            .toSeq
+        case None =>
+          throw new RuntimeException(
+            s"Schema: ${configuration.jdbc.schema}, does not exist in source system")
+      }
 
     val enhancedConfiguration = configuration.copy(
-      jdbc = configuration.jdbc.copy(driverClass = Some(catalog.getJdbcDriverInfo.getDriverClassName))
+      jdbc =
+        configuration.jdbc.copy(driverClass = Some(catalog.getJdbcDriverInfo.getDriverClassName))
     )
 
     val pipewrenchConfiguration = PipewrenchConfiguration(enhancedConfiguration, tables)
@@ -51,13 +59,15 @@ object ConfigurationBuilder extends LazyLogging {
 
   private def checkPrimaryKeys(table: TableDefinition): Unit = {
     if (table.primaryKeys.isEmpty) {
-      logger.warn(s"No primary keys are defined for table: ${table.sourceName}, kudu table creation will fail for this table unless the primary keys are added manually")
+      logger.warn(
+        s"No primary keys are defined for table: ${table.sourceName}, kudu table creation will fail for this table unless the primary keys are added manually")
     }
   }
 
   private def checkCheckColumn(table: TableDefinition): Unit = {
     if (table.checkColumn.isEmpty) {
-      logger.warn(s"No check column is defined for table: ${table.sourceName}, sqoop incremental import will fail for this table unless the checkColumn is added manually")
+      logger.warn(
+        s"No check column is defined for table: ${table.sourceName}, sqoop incremental import will fail for this table unless the checkColumn is added manually")
     }
   }
 
@@ -71,7 +81,9 @@ object ConfigurationBuilder extends LazyLogging {
     )
   }
 
-  private def enhanceTableDefinition(table: TableDefinition, userDefined: Table): TableDefinition = {
+  private def enhanceTableDefinition(
+      table: TableDefinition,
+      userDefined: Table): TableDefinition = {
     checkNumberOfMappers(userDefined)
 
     table.copy(
@@ -111,7 +123,8 @@ object ConfigurationBuilder extends LazyLogging {
       case Some(numberOfPartitions) =>
         if (numberOfPartitions > 1) {
           if (table.splitByColumn.isEmpty) {
-            throw new RuntimeException(s"Table: $table, has number of mappers greater than 1 with no splitByColumn defined Sqoop import will fail for this table")
+            throw new RuntimeException(
+              s"Table: $table, has number of mappers greater than 1 with no splitByColumn defined Sqoop import will fail for this table")
           }
         }
       case None => // no-op

@@ -16,9 +16,14 @@ trait YamlSupport extends DefaultYamlProtocol with FileUtil {
   implicit def configurationYamlFormat = yamlFormat5(Configuration.apply)
   implicit def pipewrenchConfigurationYamlFormat = yamlFormat2(PipewrenchConfiguration.apply)
 
-  def readConfigurationFile(path: String): Configuration = readFile(path).parseYaml.convertTo[Configuration]
-  def readPipewrenchConfigurationFile(path: String): PipewrenchConfiguration = readFile(path).parseYaml.convertTo[PipewrenchConfiguration]
-  def readTypeMappingFile(path: String): TypeMapping = readFile(path).parseYaml.convertTo[TypeMapping]
+  def readConfigurationFile(path: String): Configuration =
+    readFile(path).parseYaml.convertTo[Configuration]
+
+  def readPipewrenchConfigurationFile(path: String): PipewrenchConfiguration =
+    readFile(path).parseYaml.convertTo[PipewrenchConfiguration]
+
+  def readTypeMappingFile(path: String): TypeMapping =
+    readFile(path).parseYaml.convertTo[TypeMapping]
 
   implicit class WritePipewrenchConfigurationYamlFile(configuration: PipewrenchConfiguration) {
     def writeYamlFile(path: String): Unit = writeFile(configuration.toYaml.prettyPrint, path)
