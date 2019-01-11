@@ -6,7 +6,6 @@ import io.phdata.pipewrench.util.FileUtil
 
 trait YamlSupport extends DefaultYamlProtocol with FileUtil {
 
-  implicit def typeMappingYamlFormat = yamlFormat1(TypeMapping.apply)
   implicit def columnDefinitionYamlFormat = yamlFormat6(ColumnDefinition.apply)
   implicit def tableDefinitionYamlFormat = yamlFormat10(TableDefinition.apply)
   implicit def tableYamlFormat = yamlFormat6(Table.apply)
@@ -22,8 +21,8 @@ trait YamlSupport extends DefaultYamlProtocol with FileUtil {
   def readPipewrenchConfigurationFile(path: String): PipewrenchConfiguration =
     readFile(path).parseYaml.convertTo[PipewrenchConfiguration]
 
-  def readTypeMappingFile(path: String): TypeMapping =
-    readFile(path).parseYaml.convertTo[TypeMapping]
+  def readTypeMappingFile(path: String): Map[String, Map[String, String]] =
+    readFile(path).parseYaml.convertTo[Map[String, Map[String, String]]]
 
   implicit class WritePipewrenchConfigurationYamlFile(configuration: PipewrenchConfiguration) {
     def writeYamlFile(path: String): Unit = writeFile(configuration.toYaml.prettyPrint, path)

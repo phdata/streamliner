@@ -1,6 +1,6 @@
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
-<%@ val typeMapping: io.phdata.pipewrench.configuration.TypeMapping%>
+<%@ val typeMapping: Map[String, Map[String, String]]%>
 set sync_ddl=1;
 USE `${configuration.hadoop.stagingDatabase.name}`;
 CREATE TABLE IF NOT EXISTS `${configuration.hadoop.stagingDatabase.name}`.`stg_${table.destinationName}` (

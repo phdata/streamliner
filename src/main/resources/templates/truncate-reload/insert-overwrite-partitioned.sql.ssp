@@ -1,6 +1,6 @@
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
-<%@ val typeMapping: io.phdata.pipewrench.configuration.TypeMapping%>
+<%@ val typeMapping: Map[String, Map[String, String]]%>
 <% val columns = io.phdata.pipewrench.util.TemplateFunction.columnOrCast(configuration, table, typeMapping, "AVRO", "PARQUET") %>
 <% val partition = "${var:ingest_partition}"%>
 USE `${configuration.hadoop.stagingDatabase.name}`;

@@ -11,7 +11,7 @@ object PipelineBuilder extends FileUtil with Default with LazyLogging {
 
   def build(
       configuration: PipewrenchConfiguration,
-      typeMapping: TypeMapping,
+      typeMapping: Map[String, Map[String, String]],
       templateDirectory: String,
       outputDirectory: String): Unit = {
     val pipelineTemplates = s"$templateDirectory/${configuration.configuration.pipeline}"

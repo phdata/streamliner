@@ -3,16 +3,15 @@ package io.phdata.pipewrench.util
 import io.phdata.pipewrench.configuration.ColumnDefinition
 import io.phdata.pipewrench.configuration.Configuration
 import io.phdata.pipewrench.configuration.TableDefinition
-import io.phdata.pipewrench.configuration.TypeMapping
 
 object TemplateFunction {
 
   def mapDataType(
       column: ColumnDefinition,
-      typeMapping: TypeMapping,
+      typeMapping: Map[String, Map[String, String]],
       storageFormat: String): String = {
     val cColumn = checkOracleNumberType(column)
-    typeMapping.dataTypes.get(cColumn.dataType.toLowerCase) match {
+    typeMapping.get(cColumn.dataType.toLowerCase) match {
       case Some(dataTypeMap) =>
         dataTypeMap.get(storageFormat.toLowerCase) match {
           case Some(dataType) => dataType
@@ -41,7 +40,7 @@ object TemplateFunction {
   def columnOrCast(
       configuration: Configuration,
       table: TableDefinition,
-      typeMapping: TypeMapping,
+      typeMapping: Map[String, Map[String, String]],
       sourceFormat: String,
       targetFormat: String): String =
     table.columns
