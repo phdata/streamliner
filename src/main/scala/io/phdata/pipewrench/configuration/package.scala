@@ -56,7 +56,4 @@ package object configuration {
       comment: Option[String] = None,
       precision: Option[Int] = None,
       scale: Option[Int] = None)
-
-  case class TypeMapping(dataTypes: Map[String, Map[String, String]])
-
 }
