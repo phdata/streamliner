@@ -5,6 +5,7 @@ import io.phdata.pipewrench.configuration.ConfigurationBuilder
 import io.phdata.pipewrench.configuration.Default
 import io.phdata.pipewrench.configuration.YamlSupport
 import io.phdata.pipewrench.pipeline.PipelineBuilder
+import io.phdata.pipewrench.schemacrawler.SchemaCrawlerImpl
 import io.phdata.pipewrench.util.FileUtil
 
 object App extends YamlSupport with Default with FileUtil with LazyLogging {
@@ -21,6 +22,8 @@ object App extends YamlSupport with Default with FileUtil with LazyLogging {
         createDir(outputDirectory)
         val pipewrenchConfiguration = ConfigurationBuilder.build(configuration)
         pipewrenchConfiguration.writeYamlFile(s"$outputDirectory/pipewrench-configuration.yml")
+        SchemaCrawlerImpl.getErdOutput(pipewrenchConfiguration.configuration.jdbc, outputDirectory)
+        SchemaCrawlerImpl.getHtmlOutput(pipewrenchConfiguration.configuration.jdbc, outputDirectory)
 
       case Some(cli.produceScripts) =>
         val configuration = readPipewrenchConfigurationFile(cli.produceScripts.filePath())
