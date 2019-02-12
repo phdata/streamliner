@@ -27,13 +27,13 @@ create-report-table: create-report-table.sql
     $(impala-cmd) create-report-table.sql
 
 delete-partitioned-hdfs: delete-partitioned-hdfs.sh
-    ./run-with-logging.sh delete-partitioned-hdfs.sh $@
+    ./run-with-logging.sh ./delete-partitioned-hdfs.sh $@
 
 delete-report-hdfs: delete-report-hdfs.sh
-    ./run-with-logging.sh delete-report-hdfs.sh $@
+    ./run-with-logging.sh ./delete-report-hdfs.sh $@
 
 delete-staging-hdfs: delete-staging-hdfs.sh
-    ./run-with-logging.sh delete-staging-hdfs.sh $@
+    ./run-with-logging.sh ./delete-staging-hdfs.sh $@
 
 drop-staging-table: drop-staging-table.sql
     $(impala-cmd) drop-staging-table.sql
