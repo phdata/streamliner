@@ -91,9 +91,9 @@ object TemplateFunction {
         } else {
           if (sourceDataType.equalsIgnoreCase("STRING") && targetDataType.equalsIgnoreCase(
               "DECIMAL")) {
-            s"CAST(`${column.destinationName}` AS DECIMAL(${column.precision.get}, ${column.scale.get}) AS `${column.destinationName}`"
+            s"CAST(`${column.destinationName}` AS DECIMAL(${column.precision.get}, ${column.scale.get})) AS `${column.destinationName}`"
           } else {
-            s"CAST(`${column.destinationName}` AS $targetDataType) AS `${column.destinationName}`"
+            s"CAST(`${column.destinationName}` AS $targetDataType) `${column.destinationName}`"
           }
         }
       }
