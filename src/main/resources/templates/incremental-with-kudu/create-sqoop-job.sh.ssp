@@ -1,6 +1,7 @@
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
 <% val tableColumns = io.phdata.pipewrench.util.TemplateFunction.sourceColumns(configuration, table)%>
+<% val javaColumnMap = io.phdata.pipewrench.util.TemplateFunction.sqoopMapJavaColumn(table)%>
 #!/usr/bin/env bash
 sqoop job -D 'sqoop.metastore.client.record.password=true'  -D 'mapreduce.job.name=Sqoop Incremental Job - name: ${configuration.name} environment: ${configuration.environment} table: ${table.destinationName}' \\
     --create '${configuration.name}/${configuration.environment}/${table.destinationName}' \\
@@ -14,6 +15,9 @@ sqoop job -D 'sqoop.metastore.client.record.password=true'  -D 'mapreduce.job.na
     --append \\
 #if (table.splitByColumn.isDefined) {
     --splitBy ${table.splitByColumn.get} \\
+#end
+#if (javaColumnMap.isDefined)
+    --map-column-java ${javaColumnMap} \\
 #end
     --check-column ${table.splitByColumn.get} \\
     --as-avrodatafile \\

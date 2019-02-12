@@ -1,5 +1,5 @@
 name := "pipewrench"
-version := "0.1"
+version := "1.0-SNAPSHOT"
 organization := "io.phdata.pipewrench"
 scalaVersion := "2.11.12"
 

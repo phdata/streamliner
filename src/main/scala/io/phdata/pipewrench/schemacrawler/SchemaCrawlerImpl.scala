@@ -9,7 +9,9 @@ import schemacrawler.schema.Catalog
 import schemacrawler.schemacrawler._
 import schemacrawler.tools.executable.SchemaCrawlerExecutable
 import schemacrawler.tools.integration.graph.GraphOutputFormat
-import schemacrawler.tools.options.{OutputFormat, OutputOptionsBuilder, TextOutputFormat}
+import schemacrawler.tools.options.OutputFormat
+import schemacrawler.tools.options.OutputOptionsBuilder
+import schemacrawler.tools.options.TextOutputFormat
 import schemacrawler.utility.SchemaCrawlerUtility
 
 object SchemaCrawlerImpl extends FileUtil {
@@ -31,9 +33,10 @@ object SchemaCrawlerImpl extends FileUtil {
     execute(jdbc, GraphOutputFormat.png, path, fileName)
   }
 
-  def execute(jdbc: Jdbc, outputFormat: OutputFormat, path: String, fileName: String) : Unit = {
+  def execute(jdbc: Jdbc, outputFormat: OutputFormat, path: String, fileName: String): Unit = {
     createDir(path)
-    val outputOptions = OutputOptionsBuilder.newOutputOptions(outputFormat, Paths.get(s"$path/$fileName"))
+    val outputOptions =
+      OutputOptionsBuilder.newOutputOptions(outputFormat, Paths.get(s"$path/$fileName"))
     val executable = new SchemaCrawlerExecutable("schema")
     executable.setSchemaCrawlerOptions(getOptions(jdbc))
     executable.setOutputOptions(outputOptions)

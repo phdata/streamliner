@@ -2,6 +2,7 @@ package io.phdata.pipewrench.configuration
 
 import com.typesafe.scalalogging.LazyLogging
 import io.phdata.pipewrench.schemacrawler.SchemaCrawlerImpl
+import io.phdata.pipewrench.util.TemplateFunction
 import schemacrawler.schema.{Column => SchemaCrawlerColumn}
 import schemacrawler.schema.{Table => SchemaCrawlerTable}
 
@@ -74,7 +75,7 @@ object ConfigurationBuilder extends LazyLogging {
   private def mapTableDefinition(table: SchemaCrawlerTable): TableDefinition = {
     TableDefinition(
       sourceName = table.getName,
-      destinationName = cleanse(table.getName),
+      destinationName = TemplateFunction.cleanse(table.getName),
       comment = Option(table.getRemarks),
       primaryKeys = table.getColumns.asScala.filter(c => c.isPartOfPrimaryKey).map(_.getName),
       columns = table.getColumns.asScala.map(mapColumnDefinition)
@@ -95,23 +96,10 @@ object ConfigurationBuilder extends LazyLogging {
     )
   }
 
-  private def cleanse(s: String): String = {
-    val specialCharRegex = "(/|-|\\(|\\)|\\s|\\$)".r
-    val specialChars = specialCharRegex.replaceAllIn(s.toLowerCase, "_")
-    val dupsRegex = "(_{2,})".r
-    val dups = dupsRegex.replaceAllIn(specialChars, "_")
-
-    if (dups.startsWith("/") || dups.startsWith("_")) {
-      dups.substring(1, dups.length)
-    } else {
-      dups
-    }
-  }
-
   private def mapColumnDefinition(column: SchemaCrawlerColumn): ColumnDefinition =
     ColumnDefinition(
       sourceName = column.getName,
-      destinationName = cleanse(column.getName),
+      destinationName = TemplateFunction.cleanse(column.getName),
       dataType = column.getColumnDataType.toString,
       comment = Option(column.getRemarks),
       precision = Option(column.getSize),

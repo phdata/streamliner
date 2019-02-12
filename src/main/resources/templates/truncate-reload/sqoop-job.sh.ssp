@@ -1,6 +1,7 @@
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
 <% val tableColumns = io.phdata.pipewrench.util.TemplateFunction.sourceColumns(configuration, table)%>
+<% val javaColumnMap = io.phdata.pipewrench.util.TemplateFunction.sqoopMapJavaColumn(table)%>
 #!/usr/bin/env bash
 set -eu
 sqoop import \
@@ -19,6 +20,9 @@ sqoop import \
     -m ${table.numberOfMappers.getOrElse(1)} \\
 #if (table.splitByColumn.isDefined) {
     --splitBy ${table.splitByColumn.get} \\
+#end
+#if (javaColumnMap.isDefined)
+    --map-column-java ${javaColumnMap} \\
 #end
     --query 'SELECT
 ${tableColumns}

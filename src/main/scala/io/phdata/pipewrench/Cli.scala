@@ -15,6 +15,14 @@ class Cli(args: Seq[String]) extends ScallopConf(args) {
       "output-path",
       descr = "Directory path where Pipewrench configuration should be written to",
       required = false)
+
+    val createDocs: ScallopOption[Boolean] = opt[Boolean](
+      "create-docs",
+      descr =
+        "Flag to indicate whether the HTML and ERD documentation should be produced.  NOTE: GraphViz must be installed",
+      required = false,
+      default = Some(false)
+    )
   }
 
   val produceScripts = new Subcommand("scripts") {
