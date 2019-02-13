@@ -14,6 +14,8 @@ import schemacrawler.tools.options.OutputOptionsBuilder
 import schemacrawler.tools.options.TextOutputFormat
 import schemacrawler.utility.SchemaCrawlerUtility
 
+import collection.JavaConverters._
+
 object SchemaCrawlerImpl extends FileUtil {
 
   def getCatalog(jdbc: Jdbc): Catalog = {
@@ -49,6 +51,7 @@ object SchemaCrawlerImpl extends FileUtil {
       .builder()
       .withSchemaInfoLevel(SchemaInfoLevelBuilder.standard())
       .includeSchemas(new RegularExpressionInclusionRule(jdbc.schema))
+      .tableTypes(jdbc.tableTypes.asJava)
       .toOptions
 
   private def getConnection(jdbc: Jdbc): Connection = {

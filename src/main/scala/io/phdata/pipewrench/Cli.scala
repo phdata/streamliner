@@ -18,8 +18,7 @@ class Cli(args: Seq[String]) extends ScallopConf(args) {
 
     val createDocs: ScallopOption[Boolean] = opt[Boolean](
       "create-docs",
-      descr =
-        "Flag to indicate whether the HTML and ERD documentation should be produced",
+      descr = "Flag to indicate whether the HTML and ERD documentation should be produced",
       required = false,
       default = Some(false)
     )
