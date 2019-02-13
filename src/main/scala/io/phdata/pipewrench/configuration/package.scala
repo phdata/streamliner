@@ -7,7 +7,8 @@ package object configuration {
       environment: String,
       pipeline: String,
       jdbc: Jdbc,
-      hadoop: Hadoop)
+      hadoop: Hadoop,
+      tables: Option[Seq[TableDefinition]] = None)
 
   case class Jdbc(
       driverClass: Option[String],
@@ -34,8 +35,6 @@ package object configuration {
       splitByColumn: Option[String] = None,
       numberOfPartitions: Option[Int] = Some(2),
       metadata: Option[Map[String, String]])
-
-  case class PipewrenchConfiguration(configuration: Configuration, tables: Seq[TableDefinition])
 
   case class TableDefinition(
       sourceName: String,

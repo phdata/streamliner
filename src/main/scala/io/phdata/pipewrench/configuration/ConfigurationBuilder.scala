@@ -10,7 +10,7 @@ import collection.JavaConverters._
 
 object ConfigurationBuilder extends LazyLogging {
 
-  def build(configuration: Configuration): PipewrenchConfiguration = {
+  def build(configuration: Configuration): Configuration = {
     val catalog = SchemaCrawlerImpl.getCatalog(configuration.jdbc)
 
     val tables =
@@ -39,20 +39,20 @@ object ConfigurationBuilder extends LazyLogging {
 
     val enhancedConfiguration = configuration.copy(
       jdbc =
-        configuration.jdbc.copy(driverClass = Some(catalog.getJdbcDriverInfo.getDriverClassName))
+        configuration.jdbc.copy(driverClass = Some(catalog.getJdbcDriverInfo.getDriverClassName)),
+      tables = Some(tables)
     )
 
-    val pipewrenchConfiguration = PipewrenchConfiguration(enhancedConfiguration, tables)
-    checkConfiguration(pipewrenchConfiguration)
-    pipewrenchConfiguration
+    checkConfiguration(enhancedConfiguration)
+    enhancedConfiguration
   }
 
-  private def checkConfiguration(pipewrenchConfiguration: PipewrenchConfiguration): Unit = {
-    for (table <- pipewrenchConfiguration.tables) {
-      if (pipewrenchConfiguration.configuration.pipeline.equalsIgnoreCase("INCREMENTAL-WITH-KUDU")) {
+  private def checkConfiguration(configuration: Configuration): Unit = {
+    for (table <- configuration.tables.get) {
+      if (configuration.pipeline.equalsIgnoreCase("INCREMENTAL-WITH-KUDU")) {
         checkPrimaryKeys(table)
         checkCheckColumn(table)
-      } else if (pipewrenchConfiguration.configuration.pipeline.equalsIgnoreCase("KUDU-TABLE-DLL")) {
+      } else if (configuration.pipeline.equalsIgnoreCase("KUDU-TABLE-DLL")) {
         checkPrimaryKeys(table)
       }
     }

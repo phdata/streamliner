@@ -22,17 +22,17 @@ object App extends YamlSupport with Default with FileUtil with LazyLogging {
         val outputDirectory =
           configurationOutputDirectory(configuration, cli.configuration.outputPath.toOption)
         createDir(outputDirectory)
-        val pipewrenchConfiguration = ConfigurationBuilder.build(configuration)
-        pipewrenchConfiguration.writeYamlFile(s"$outputDirectory/pipewrench-configuration.yml")
+        val enhancedConfiguration = ConfigurationBuilder.build(configuration)
+        enhancedConfiguration.writeYamlFile(s"$outputDirectory/pipewrench-configuration.yml")
         if (cli.configuration.createDocs()) {
           SchemaCrawlerImpl
-            .getErdOutput(pipewrenchConfiguration.configuration.jdbc, outputDirectory)
+            .getErdOutput(enhancedConfiguration.jdbc, outputDirectory)
           SchemaCrawlerImpl
-            .getHtmlOutput(pipewrenchConfiguration.configuration.jdbc, outputDirectory)
+            .getHtmlOutput(enhancedConfiguration.jdbc, outputDirectory)
         }
 
       case Some(cli.produceScripts) =>
-        val configuration = readPipewrenchConfigurationFile(cli.produceScripts.filePath())
+        val configuration = readConfigurationFile(cli.produceScripts.filePath())
         val typeMappingFile = cli.produceScripts.typeMappingFile()
         val templateDir = cli.produceScripts.templateDirectory()
 
