@@ -8,7 +8,7 @@ sqoop import \
     -D 'mapred.job.name="Sqoop Job - name: ${configuration.name} environment: ${configuration.environment} table: ${table.sourceName}"' \\
     --connect '${configuration.jdbc.url}' \\
     --username '${configuration.jdbc.username}' \\
-    --password '${configuration.jdbc.password}' \\
+    --password-file '${configuration.jdbc.passwordFile}' \\
     --driver '${configuration.jdbc.driverClass.get}' \\
     --delete-target-dir \\
     --target-dir '${configuration.hadoop.stagingDatabase.path}/stg_${table.destinationName}/' \\

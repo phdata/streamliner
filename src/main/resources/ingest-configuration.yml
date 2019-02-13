@@ -1,10 +1,10 @@
 name: "" # Unique name for data ingestion
 environment: "" # Environment identifier
-pipeline: "" # Pipeline name must match a directory in the the provided template folder
+pipeline: "" # Pipeline name must match a directory in the the provided template folder (ie incremental-with-kudu, kudu-table-ddl, truncate-reload)
 jdbc:
   url: "" # JDBC Connection url
   username: "" # JDBC Username
-  password: "" # JDBC Password
+  passwordFile: "" # HDFS location of password file
   schema: "" # JDBC Schema / database name
   tableTypes: # Controls the types of tables included in the configuration output
     - tables

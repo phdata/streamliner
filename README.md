@@ -15,11 +15,11 @@ Pipewrench works off the parameters in the ingest-configuration file.
 ```
 name: "" # Unique name for data ingestion
 environment: "" # Environment identifier
-pipeline: "" # Pipeline name must match a directory in the the provided template folder
+pipeline: "" # Pipeline name must match a directory in the the provided template folder (ie incremental-with-kudu, kudu-table-ddl, truncate-reload)
 jdbc:
   url: "" # JDBC Connection url
   username: "" # JDBC Username
-  password: "" # JDBC Password
+  passwordFile: "" # HDFS location of password file
   schema: "" # JDBC Schema / database name
   tableTypes: # Controls the types of tables included in the configuration output
     - tables
@@ -60,10 +60,18 @@ decimal:
 
 Generating ingest configuration (`ingest-configuration.yml`):
 
+### Configuration
+Without Generating Docs
 ```bash
-pipewrench configuration --configuration <conf.yml>
+pipewrench configuration --configuration <ingest-configuration.yml> --database-password <database password> 
 ```
 
+With Generating Docs
+```bash
+pipewrench configuration --configuration <ingest-configuration.yml> --database-password <database password> --create-docs
+```
+
+### Scripts
 Generating scripts:
 
 ```bash

@@ -10,6 +10,8 @@ import io.phdata.pipewrench.pipeline.PipelineBuilder
 import io.phdata.pipewrench.schemacrawler.SchemaCrawlerImpl
 import io.phdata.pipewrench.util.FileUtil
 
+import scala.io.StdIn
+
 object App extends YamlSupport with Default with FileUtil with LazyLogging {
 
   def main(args: Array[String]): Unit = {
@@ -17,18 +19,24 @@ object App extends YamlSupport with Default with FileUtil with LazyLogging {
 
     cli.subcommand match {
       case Some(cli.configuration) =>
+        val databasePassword = cli.configuration.databasePassword.toOption match {
+          case Some(password) => password
+          case None =>
+            print("Enter database password: ")
+            StdIn.readLine()
+        }
         val configuration = readConfigurationFile(cli.configuration.filePath())
 
         val outputDirectory =
           configurationOutputDirectory(configuration, cli.configuration.outputPath.toOption)
         createDir(outputDirectory)
-        val enhancedConfiguration = ConfigurationBuilder.build(configuration)
+        val enhancedConfiguration = ConfigurationBuilder.build(configuration, databasePassword)
         enhancedConfiguration.writeYamlFile(s"$outputDirectory/pipewrench-configuration.yml")
         if (cli.configuration.createDocs()) {
           SchemaCrawlerImpl
-            .getErdOutput(enhancedConfiguration.jdbc, outputDirectory)
+            .getErdOutput(enhancedConfiguration.jdbc, databasePassword, outputDirectory)
           SchemaCrawlerImpl
-            .getHtmlOutput(enhancedConfiguration.jdbc, outputDirectory)
+            .getHtmlOutput(enhancedConfiguration.jdbc, databasePassword, outputDirectory)
         }
 
       case Some(cli.produceScripts) =>

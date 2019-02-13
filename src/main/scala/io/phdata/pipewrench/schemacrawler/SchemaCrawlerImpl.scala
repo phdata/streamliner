@@ -18,31 +18,36 @@ import collection.JavaConverters._
 
 object SchemaCrawlerImpl extends FileUtil {
 
-  def getCatalog(jdbc: Jdbc): Catalog = {
+  def getCatalog(jdbc: Jdbc, password: String): Catalog = {
     val options = getOptions(jdbc)
-    SchemaCrawlerUtility.getCatalog(getConnection(jdbc), options)
+    SchemaCrawlerUtility.getCatalog(getConnection(jdbc, password), options)
   }
 
-  def getHtmlOutput(jdbc: Jdbc, outputPath: String): Unit = {
+  def getHtmlOutput(jdbc: Jdbc, password: String, outputPath: String): Unit = {
     val path = s"$outputPath/docs"
     val fileName = "schema.html"
-    execute(jdbc, TextOutputFormat.html, path, fileName)
+    execute(jdbc, password, TextOutputFormat.html, path, fileName)
   }
 
-  def getErdOutput(jdbc: Jdbc, outputPath: String): Unit = {
+  def getErdOutput(jdbc: Jdbc, password: String, outputPath: String): Unit = {
     val path = s"$outputPath/docs"
     val fileName = "schema.png"
-    execute(jdbc, GraphOutputFormat.png, path, fileName)
+    execute(jdbc, password, GraphOutputFormat.png, path, fileName)
   }
 
-  def execute(jdbc: Jdbc, outputFormat: OutputFormat, path: String, fileName: String): Unit = {
+  def execute(
+      jdbc: Jdbc,
+      password: String,
+      outputFormat: OutputFormat,
+      path: String,
+      fileName: String): Unit = {
     createDir(path)
     val outputOptions =
       OutputOptionsBuilder.newOutputOptions(outputFormat, Paths.get(s"$path/$fileName"))
     val executable = new SchemaCrawlerExecutable("schema")
     executable.setSchemaCrawlerOptions(getOptions(jdbc))
     executable.setOutputOptions(outputOptions)
-    executable.setConnection(getConnection(jdbc))
+    executable.setConnection(getConnection(jdbc, password))
     executable.execute()
   }
 
@@ -54,9 +59,9 @@ object SchemaCrawlerImpl extends FileUtil {
       .tableTypes(jdbc.tableTypes.asJava)
       .toOptions
 
-  private def getConnection(jdbc: Jdbc): Connection = {
+  private def getConnection(jdbc: Jdbc, password: String): Connection = {
     val con = new DatabaseConnectionOptions(jdbc.url)
-    con.getConnection(jdbc.username, jdbc.password)
+    con.getConnection(jdbc.username, password)
   }
 
 }

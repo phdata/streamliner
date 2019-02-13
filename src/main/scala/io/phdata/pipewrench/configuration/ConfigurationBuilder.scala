@@ -10,8 +10,8 @@ import collection.JavaConverters._
 
 object ConfigurationBuilder extends LazyLogging {
 
-  def build(configuration: Configuration): Configuration = {
-    val catalog = SchemaCrawlerImpl.getCatalog(configuration.jdbc)
+  def build(configuration: Configuration, password: String): Configuration = {
+    val catalog = SchemaCrawlerImpl.getCatalog(configuration.jdbc, password)
 
     val tables =
       catalog.getSchemas.asScala.find(s => s.getFullName.equals(configuration.jdbc.schema)) match {
