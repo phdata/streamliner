@@ -13,10 +13,9 @@ sqoop job -D 'sqoop.metastore.client.record.password=true'  -D 'mapreduce.job.na
     --target-dir '${configuration.hadoop.stagingDatabase.path}/stg_${table.destinationName}/' \\
     --temporary-rootdir '${configuration.hadoop.stagingDatabase.path}/stg_${table.destinationName}/' \\
     --append \\
-#if (table.splitByColumn.isDefined) {
+#if (table.splitByColumn.isDefined)
     --splitBy ${table.splitByColumn.get} \\
-#end
-#if (javaColumnMap.isDefined)
+#elseif (javaColumnMap.isDefined)
     --map-column-java ${javaColumnMap} \\
 #end
     --check-column ${table.splitByColumn.get} \\
