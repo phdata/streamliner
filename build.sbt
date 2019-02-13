@@ -19,6 +19,7 @@ libraryDependencies ++= Seq(
   "us.fatehi" % "schemacrawler-oracle" % schemaCrawlerVersion,
   "us.fatehi" % "schemacrawler-db2" % schemaCrawlerVersion,
   "us.fatehi" % "schemacrawler-sqlserver" % schemaCrawlerVersion,
+  "guru.nidi" % "graphviz-java" % "0.8.1",
   "org.scalatra.scalate" %% "scalate-core" % "1.9.0"
 )
 

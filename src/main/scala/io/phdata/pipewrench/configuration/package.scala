@@ -16,12 +16,11 @@ package object configuration {
       username: String,
       password: String,
       schema: String,
+      tableTypes: Seq[String],
       tables: Option[Seq[Table]],
       metadata: Option[Map[String, String]])
 
   case class Hadoop(
-      username: String,
-      password: String,
       impalaShellCommand: String,
       stagingDatabase: Database,
       reportingDatabase: Database)

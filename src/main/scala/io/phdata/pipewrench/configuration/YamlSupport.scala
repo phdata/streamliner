@@ -10,8 +10,8 @@ trait YamlSupport extends DefaultYamlProtocol with FileUtil {
   implicit def tableDefinitionYamlFormat = yamlFormat10(TableDefinition.apply)
   implicit def tableYamlFormat = yamlFormat6(Table.apply)
   implicit def databaseYamlFormat = yamlFormat2(Database.apply)
-  implicit def hadoopYamlFormat = yamlFormat5(Hadoop.apply)
-  implicit def jdbcYamlFormat = yamlFormat7(Jdbc.apply)
+  implicit def hadoopYamlFormat = yamlFormat3(Hadoop.apply)
+  implicit def jdbcYamlFormat = yamlFormat8(Jdbc.apply)
   implicit def configurationYamlFormat = yamlFormat6(Configuration.apply)
 
   def readConfigurationFile(path: String): Configuration =

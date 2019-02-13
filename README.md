@@ -21,9 +21,10 @@ jdbc:
   username: "" # JDBC Username
   password: "" # JDBC Password
   schema: "" # JDBC Schema / database name
+  tableTypes: # Controls the types of tables included in the configuration output
+    - tables
+    - vieews
 hadoop:
-  username: "" # Hadoop service account
-  password: "" # Hadoop service account password
   impalaShellCommand: "" # Impala shell command copied from CM
   stagingDatabase:
     name: "" # Staging database
