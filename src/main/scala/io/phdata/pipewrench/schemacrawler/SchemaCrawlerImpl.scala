@@ -18,9 +18,9 @@ import collection.JavaConverters._
 
 object SchemaCrawlerImpl extends FileUtil {
 
-  def getCatalog(jdbc: Jdbc): Catalog = {
+  def getCatalog(jdbc: Jdbc, password: String): Catalog = {
     val options = getOptions(jdbc)
-    SchemaCrawlerUtility.getCatalog(getConnection(jdbc), options)
+    SchemaCrawlerUtility.getCatalog(getConnection(jdbc, password), options)
   }
 
   def getHtmlOutput(jdbc: Jdbc, outputPath: String): Unit = {
@@ -54,9 +54,9 @@ object SchemaCrawlerImpl extends FileUtil {
       .tableTypes(jdbc.tableTypes.asJava)
       .toOptions
 
-  private def getConnection(jdbc: Jdbc): Connection = {
+  private def getConnection(jdbc: Jdbc, password: String): Connection = {
     val con = new DatabaseConnectionOptions(jdbc.url)
-    con.getConnection(jdbc.username, jdbc.password)
+    con.getConnection(jdbc.username, password)
   }
 
 }

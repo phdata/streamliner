@@ -9,7 +9,7 @@ sqoop job -D 'sqoop.metastore.client.record.password=true'  -D 'mapreduce.job.na
     --driver '${configuration.jdbc.driverClass.get}' \\
     --connect '${configuration.jdbc.url}' \\
     --username '${configuration.jdbc.username}' \\
-    --password '${configuration.jdbc.password}' \\
+    --password-file '${configuration.jdbc.passwordFile}' \\
     --target-dir '${configuration.hadoop.stagingDatabase.path}/stg_${table.destinationName}/' \\
     --temporary-rootdir '${configuration.hadoop.stagingDatabase.path}/stg_${table.destinationName}/' \\
     --append \\

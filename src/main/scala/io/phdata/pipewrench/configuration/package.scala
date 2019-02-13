@@ -14,7 +14,7 @@ package object configuration {
       driverClass: Option[String],
       url: String,
       username: String,
-      password: String,
+      passwordFile: String,
       schema: String,
       tableTypes: Seq[String],
       tables: Option[Seq[Table]],
