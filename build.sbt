@@ -1,7 +1,7 @@
 import sbt._
 
 name := "pipewrench"
-version := "1.0"
+version := "1.1-SNAPSHOT"
 organization := "io.phdata.pipewrench"
 scalaVersion := "2.11.12"
 
