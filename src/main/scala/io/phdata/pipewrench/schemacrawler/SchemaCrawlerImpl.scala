@@ -51,13 +51,20 @@ object SchemaCrawlerImpl extends FileUtil {
     executable.execute()
   }
 
-  private def getOptions(jdbc: Jdbc): SchemaCrawlerOptions =
-    SchemaCrawlerOptionsBuilder
+  private def getOptions(jdbc: Jdbc): SchemaCrawlerOptions = {
+    val options = SchemaCrawlerOptionsBuilder
       .builder()
       .withSchemaInfoLevel(SchemaInfoLevelBuilder.standard())
       .includeSchemas(new RegularExpressionInclusionRule(jdbc.schema))
       .tableTypes(jdbc.tableTypes.asJava)
-      .toOptions
+    jdbc.tables match {
+      case Some(tables) =>
+        val tableList = tables.map(t => s"${jdbc.schema}.${t.name}").mkString("|")
+        options.includeTables(new RegularExpressionInclusionRule(s"($tableList)"))
+      case None => // no-op
+    }
+    options.toOptions
+  }
 
   private def getConnection(jdbc: Jdbc, password: String): Connection = {
     val con = new DatabaseConnectionOptions(jdbc.url)
