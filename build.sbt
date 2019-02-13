@@ -25,6 +25,13 @@ mappings in Universal ++= {
     f -> s"conf/${f.name}"
   }
 }
+
+mappings in Universal ++= {
+  ((sourceDirectory in Compile).value / "resources" / "templates" * "*").get.map { f =>
+    f -> s"templates/${f.name}"
+  }
+}
+
 mappings in Universal ++= {
   ((sourceDirectory in Compile).value / "resources" / "templates" / "truncate-reload" * "*").get.map { f =>
     f -> s"templates/truncate-reload/${f.name}"
