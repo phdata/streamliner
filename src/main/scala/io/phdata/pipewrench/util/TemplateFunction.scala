@@ -25,6 +25,45 @@ object TemplateFunction {
     }
   }
 
+  def sqoopMapJavaColumn(tableDefinition: TableDefinition): Option[String] = {
+    val map = tableDefinition.columns.flatMap { column =>
+      val stringTypes =
+        Seq("clob", "longvarbinary", "varbinary", "rowid", "blob", "nclob", "text", "binary")
+      val intTypes = Seq("tinyint", "int", "smallint", "integer", "short")
+      val floatTypes = Seq("float")
+      val longDataTypes = Seq("bigint")
+      if (stringTypes.contains(column.dataType.toLowerCase)) {
+        Some(s"${column.destinationName}=String")
+      } else if (floatTypes.contains(column.dataType.toLowerCase)) {
+        Some(s"${column.destinationName}=Float")
+      } else if (intTypes.contains(column.dataType.toLowerCase)) {
+        Some(s"${column.destinationName}=Integer")
+      } else if (longDataTypes.contains(column.dataType.toLowerCase)) {
+        Some(s"${column.destinationName}=Long")
+      } else {
+        None
+      }
+    }
+    if (map.isEmpty) {
+      None
+    } else {
+      Some(map.mkString(","))
+    }
+  }
+
+  def cleanse(s: String): String = {
+    val specialCharRegex = "(/|-|\\(|\\)|\\s|\\$)".r
+    val specialChars = specialCharRegex.replaceAllIn(s.toLowerCase, "_")
+    val dupsRegex = "(_{2,})".r
+    val dups = dupsRegex.replaceAllIn(specialChars, "_")
+
+    if (dups.startsWith("/") || dups.startsWith("_")) {
+      dups.substring(1, dups.length)
+    } else {
+      dups
+    }
+  }
+
   def sourceColumns(configuration: Configuration, table: TableDefinition): String =
     table.columns
       .map { column =>
@@ -52,7 +91,7 @@ object TemplateFunction {
         } else {
           if (sourceDataType.equalsIgnoreCase("STRING") && targetDataType.equalsIgnoreCase(
               "DECIMAL")) {
-            s"CAST(`${column.destinationName}` AS DECIMAL(${column.precision.get}, ${column.scale.get}) AS `${column.destinationName}`"
+            s"CAST(`${column.destinationName}` AS DECIMAL(${column.precision.get}, ${column.scale.get})) AS `${column.destinationName}`"
           } else {
             s"CAST(`${column.destinationName}` AS $targetDataType) AS `${column.destinationName}`"
           }
