@@ -32,13 +32,14 @@ object TemplateFunction {
       val intTypes = Seq("tinyint", "int", "smallint", "integer", "short")
       val floatTypes = Seq("float")
       val longDataTypes = Seq("bigint")
-      if (stringTypes.contains(column.dataType.toLowerCase)) {
+      val dataType = checkOracleNumberType(column).dataType.toLowerCase
+      if (stringTypes.contains(dataType)) {
         Some(s"${column.destinationName}=String")
-      } else if (floatTypes.contains(column.dataType.toLowerCase)) {
+      } else if (floatTypes.contains(dataType)) {
         Some(s"${column.destinationName}=Float")
-      } else if (intTypes.contains(column.dataType.toLowerCase)) {
+      } else if (intTypes.contains(dataType)) {
         Some(s"${column.destinationName}=Integer")
-      } else if (longDataTypes.contains(column.dataType.toLowerCase)) {
+      } else if (longDataTypes.contains(dataType)) {
         Some(s"${column.destinationName}=Long")
       } else {
         None
