@@ -23,26 +23,31 @@ object SchemaCrawlerImpl extends FileUtil {
     SchemaCrawlerUtility.getCatalog(getConnection(jdbc, password), options)
   }
 
-  def getHtmlOutput(jdbc: Jdbc, outputPath: String): Unit = {
+  def getHtmlOutput(jdbc: Jdbc, password: String, outputPath: String): Unit = {
     val path = s"$outputPath/docs"
     val fileName = "schema.html"
-    execute(jdbc, TextOutputFormat.html, path, fileName)
+    execute(jdbc, password, TextOutputFormat.html, path, fileName)
   }
 
-  def getErdOutput(jdbc: Jdbc, outputPath: String): Unit = {
+  def getErdOutput(jdbc: Jdbc, password: String, outputPath: String): Unit = {
     val path = s"$outputPath/docs"
     val fileName = "schema.png"
-    execute(jdbc, GraphOutputFormat.png, path, fileName)
+    execute(jdbc, password, GraphOutputFormat.png, path, fileName)
   }
 
-  def execute(jdbc: Jdbc, outputFormat: OutputFormat, path: String, fileName: String): Unit = {
+  def execute(
+      jdbc: Jdbc,
+      password: String,
+      outputFormat: OutputFormat,
+      path: String,
+      fileName: String): Unit = {
     createDir(path)
     val outputOptions =
       OutputOptionsBuilder.newOutputOptions(outputFormat, Paths.get(s"$path/$fileName"))
     val executable = new SchemaCrawlerExecutable("schema")
     executable.setSchemaCrawlerOptions(getOptions(jdbc))
     executable.setOutputOptions(outputOptions)
-    executable.setConnection(getConnection(jdbc))
+    executable.setConnection(getConnection(jdbc, password))
     executable.execute()
   }
 

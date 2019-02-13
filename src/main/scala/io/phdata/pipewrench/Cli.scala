@@ -21,6 +21,7 @@ class Cli(args: Seq[String]) extends ScallopConf(args) {
       descr = "Database password",
       required = false
     )
+
     val createDocs: ScallopOption[Boolean] = opt[Boolean](
       "create-docs",
       descr = "Flag to indicate whether the HTML and ERD documentation should be produced",
