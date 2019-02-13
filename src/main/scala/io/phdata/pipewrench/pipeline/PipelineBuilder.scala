@@ -14,8 +14,7 @@ object PipelineBuilder extends FileUtil with Default with LazyLogging {
       typeMapping: Map[String, Map[String, String]],
       templateDirectory: String,
       outputDirectory: String): Unit = {
-    val pipelineTemplates = s"$templateDirectory/${configuration.configuration.pipeline}"
-    val files = listFilesInDir(pipelineTemplates)
+    val files = listFilesInDir(s"$templateDirectory/${configuration.configuration.pipeline}")
     val templateFiles = files.filter(f => f.getName.endsWith(".ssp"))
     val nonTemplateFiles = files.filterNot(f => f.getName.endsWith(".ssp"))
 
@@ -47,6 +46,20 @@ object PipelineBuilder extends FileUtil with Default with LazyLogging {
         isExecutable(fileName)
       }
     }
+    writeSchemaMakeFile(configuration, templateDirectory, outputDirectory)
+  }
+
+  private def writeSchemaMakeFile(
+      configuration: PipewrenchConfiguration,
+      templateDirectory: String,
+      outputDirectory: String): Unit = {
+    val templateFile = s"$templateDirectory/Makefile.ssp"
+    val rendered = engine.layout(templateFile, Map("tables" -> configuration.tables))
+    val replaced = rendered.replace("    ", "\t")
+    logger.debug(replaced)
+    writeFile(
+      replaced,
+      s"${scriptsDirectory(configuration.configuration, outputDirectory)}/Makefile")
   }
 
   private def isExecutable(path: String): Unit = {

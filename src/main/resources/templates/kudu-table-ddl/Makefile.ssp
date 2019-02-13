@@ -11,6 +11,15 @@ create-kudu-table: create-kudu-table.sql
 drop-kudu-table: drop-kudu-table.sql
     $(impala-cmd) drop-kudu-table.sql
 
+first-run:
+    $(MAKE) first-run
+
+run:
+    $(MAKE) compute-stats-kudu
+
+clean:
+    $(MAKE) drop-kudu-table
+
 targets: ## Print out a list of available targets
     @fgrep -h ": " $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/:.*//'
 
