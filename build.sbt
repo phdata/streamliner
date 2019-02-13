@@ -69,7 +69,7 @@ publishTo := {
 
 publish in Rpm := (rpmArtifactoryPublish in Rpm).value
 
-rpmLicense := Some("")
+rpmLicense := Some("License: GPLv2")
 rpmVendor := "phData"
 rpmArtifactoryUrl in Rpm := artifactoryUrl
 rpmArtifactoryRepo in Rpm := {
