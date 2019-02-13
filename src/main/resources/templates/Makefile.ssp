@@ -9,7 +9,7 @@ first-run-all: ${firstRunTables}
 
 run-all: ${runTables}
 
-clean-all ${cleanTables}
+clean-all: ${cleanTables}
 
 #for (table <- tables)
 first-run-${table.destinationName}:
