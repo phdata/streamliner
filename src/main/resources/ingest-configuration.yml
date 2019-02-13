@@ -7,8 +7,12 @@ jdbc:
   passwordFile: "" # HDFS location of password file
   schema: "" # JDBC Schema / database name
   tableTypes: # Controls the types of tables included in the configuration output
-    - tables
-    - vieews
+    - table
+    - view
+# OPTIONAL: table whitelisting
+#  table:
+#    - name: table1
+#    - name: table2
 hadoop:
   impalaShellCommand: "" # Impala shell command copied from CM
   stagingDatabase:
