@@ -1,7 +1,8 @@
 import sbt._
+import sys.process._
 
 name := "pipewrench"
-version := "1.1"
+version := {"bash ./version" !!}.trim
 organization := "io.phdata.pipewrench"
 scalaVersion := "2.11.12"
 
