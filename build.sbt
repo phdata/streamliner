@@ -1,8 +1,11 @@
 import sbt._
-import sys.process._
+
+import scala.io.Source
+
+def versionFromFile: String = Source.fromFile("version").getLines().mkString("")
 
 name := "pipewrench"
-version := {"bash ./version" !!}.trim
+version := versionFromFile
 organization := "io.phdata.pipewrench"
 scalaVersion := "2.11.12"
 
