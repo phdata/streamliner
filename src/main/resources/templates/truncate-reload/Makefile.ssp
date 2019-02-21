@@ -66,6 +66,7 @@ first-run:
 
 run:
     $(MAKE) sqoop-exec
+    $(MAKE) copy-avro-schema-to-hdfs
     $(MAKE) invalidate-metadata-staging
     $(MAKE) alter-report-table-location
     $(MAKE) compute-stats-partitioned-table

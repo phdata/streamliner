@@ -2,6 +2,8 @@
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
 #!/usr/bin/env bash
 
+set -euox pipefail
+
 DIRECTORY="${configuration.hadoop.stagingDatabase.path}/part_${table.destinationName}"
 
 if $(hdfs dfs -test -d $DIRECTORY); then

@@ -1,7 +1,8 @@
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
 #!/bin/bash
-set -x
+
+set -euox pipefail
 
 INGEST_DATE=`date +"%Y-%m-%d_%H-%M-%S"`
 

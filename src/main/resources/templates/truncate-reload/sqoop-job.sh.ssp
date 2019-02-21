@@ -3,7 +3,9 @@
 <% val tableColumns = io.phdata.pipewrench.util.TemplateFunction.sourceColumns(configuration, table)%>
 <% val javaColumnMap = io.phdata.pipewrench.util.TemplateFunction.sqoopMapJavaColumn(table)%>
 #!/usr/bin/env bash
-set -eu
+
+set -euox pipefail
+
 sqoop import \
     -D 'mapred.job.name="Sqoop Job - name: ${configuration.name} environment: ${configuration.environment} table: ${table.sourceName}"' \\
     --connect '${configuration.jdbc.url}' \\
