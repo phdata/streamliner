@@ -3,6 +3,9 @@
 <% val tableColumns = io.phdata.pipewrench.util.TemplateFunction.sourceColumns(configuration, table)%>
 <% val javaColumnMap = io.phdata.pipewrench.util.TemplateFunction.sqoopMapJavaColumn(table)%>
 #!/usr/bin/env bash
+
+set -euox pipefail
+
 sqoop job -D 'sqoop.metastore.client.record.password=true'  -D 'mapreduce.job.name=Sqoop Incremental Job - name: ${configuration.name} environment: ${configuration.environment} table: ${table.destinationName}' \\
     --create '${configuration.name}/${configuration.environment}/${table.destinationName}' \\
     -- import \\

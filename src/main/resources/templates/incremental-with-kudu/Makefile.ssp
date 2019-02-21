@@ -86,6 +86,8 @@ run:
     $(MAKE) compute-stats-archive
     $(MAKE) invalidate-metadata-staging
     $(MAKE) sqoop-job
+    $(MAKE) copy-archive-avro-schema
+    $(MAKE) copy-staging-avro-schema
     $(MAKE) upsert
 
 clean:
