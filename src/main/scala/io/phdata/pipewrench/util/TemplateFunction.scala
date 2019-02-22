@@ -69,7 +69,15 @@ object TemplateFunction {
     table.columns
       .map { column =>
         val f = if (configuration.jdbc.driverClass.get.contains("oracle")) {
-          column.sourceName + " AS " + "\"" + column.destinationName + "\""
+          table.checkColumn match {
+            case Some(checkColumn) =>
+              if (column.sourceName.equalsIgnoreCase(checkColumn)) {
+                column.sourceName
+              } else {
+                column.sourceName + " AS " + "\"" + column.destinationName + "\""
+              }
+            case None => column.sourceName + " AS " + "\"" + column.destinationName + "\""
+          }
         } else {
           "\"" + column.sourceName + "\" AS " + column.destinationName
         }

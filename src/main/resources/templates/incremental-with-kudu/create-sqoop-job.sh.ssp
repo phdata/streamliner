@@ -13,6 +13,7 @@ sqoop job -D 'sqoop.metastore.client.record.password=true'  -D 'mapreduce.job.na
     --connect '${configuration.jdbc.url}' \\
     --username '${configuration.jdbc.username}' \\
     --password-file '${configuration.jdbc.passwordFile}' \\
+    --incremental append  \\
     --target-dir '${configuration.hadoop.stagingDatabase.path}/stg_${table.destinationName}/' \\
     --temporary-rootdir '${configuration.hadoop.stagingDatabase.path}/stg_${table.destinationName}/' \\
     --append \\
@@ -21,7 +22,7 @@ sqoop job -D 'sqoop.metastore.client.record.password=true'  -D 'mapreduce.job.na
 #elseif (javaColumnMap.isDefined)
     --map-column-java ${javaColumnMap} \\
 #end
-    --check-column ${table.splitByColumn.get} \\
+    --check-column ${table.checkColumn.get} \\
     --as-avrodatafile \\
     --fetch-size 10000 \\
     --compress  \\

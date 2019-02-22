@@ -60,7 +60,7 @@ invalidate-metadata-staging: invalidate-metadata-staging.sql
     $(impala-cmd) invalidate-metadata-staging.sql
 
 sqoop-job: sqoop-job.sh
-    ./run-with-logging.sh ./sqoop-job.sh.sh $@
+    ./run-with-logging.sh ./sqoop-job.sh $@
 
 upsert-report-table: upsert-report-table.sql
     $(impala-cmd) upsert-report-table.sql
