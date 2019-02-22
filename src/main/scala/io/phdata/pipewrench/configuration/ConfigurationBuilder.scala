@@ -100,7 +100,7 @@ object ConfigurationBuilder extends LazyLogging {
     ColumnDefinition(
       sourceName = column.getName,
       destinationName = TemplateFunction.cleanse(column.getName),
-      dataType = column.getColumnDataType.toString,
+      dataType = column.getColumnDataType.getName,
       comment = Option(column.getRemarks),
       precision = Option(column.getSize),
       scale = Option(column.getDecimalDigits)

@@ -1,3 +1,8 @@
+timestamp(6):
+  kudu: timestamp
+  impala: timestamp
+  parquet: timestamp
+  avro: bigint
 bigint:
   kudu: bigint
   impala: bigint
