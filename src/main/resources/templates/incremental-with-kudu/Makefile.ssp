@@ -15,7 +15,7 @@ compute-stats-staging: compute-stats-staging.sql
     $(impala-cmd) compute-stats-staging.sql
 
 copy-archive-avro-schema: copy-archive-avro-schema.sh
-    ./run-with-logging.sh ./archive-staging-data.sh $@
+    ./run-with-logging.sh ./copy-archive-avro-schema.sh $@
 
 copy-staging-avro-schema: copy-staging-avro-schema.sh
     ./run-with-logging.sh ./copy-staging-avro-schema.sh $@
