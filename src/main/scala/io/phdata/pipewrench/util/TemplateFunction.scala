@@ -88,7 +88,7 @@ object TemplateFunction {
         val sourceDataType = mapDataType(column, typeMapping, sourceFormat)
         val targetDataType = mapDataType(column, typeMapping, targetFormat)
         if (sourceDataType.equals(targetDataType)) {
-          column.destinationName
+          s"`${column.destinationName}`"
         } else {
           if (sourceDataType.equalsIgnoreCase("STRING") && targetDataType.equalsIgnoreCase(
               "DECIMAL")) {
