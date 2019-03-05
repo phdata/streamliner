@@ -3,7 +3,6 @@
 <%@ val typeMapping: Map[String, Map[String, String]]%>
 <% val columns = io.phdata.pipewrench.util.TemplateFunction.columnOrCast(configuration, table, typeMapping, "AVRO", "PARQUET") %>
 <% val partition = "${var:ingest_partition}"%>
-USE `${configuration.hadoop.stagingDatabase.name}`;
 INSERT OVERWRITE TABLE `${configuration.hadoop.stagingDatabase.name}`.`part_${table.destinationName}` PARTITION (ingest_partition=${partition})
 SELECT
 ${columns}

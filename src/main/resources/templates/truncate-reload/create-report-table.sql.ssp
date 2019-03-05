@@ -2,7 +2,6 @@
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
 <%@ val typeMapping: Map[String, Map[String, String]]%>
 set sync_ddl=1;
-USE `${configuration.hadoop.reportingDatabase.name}`;
 CREATE TABLE IF NOT EXISTS `${configuration.hadoop.reportingDatabase.name}`.`${table.destinationName}` (
 <%
     val columnDefinitions = table.columns.map {
