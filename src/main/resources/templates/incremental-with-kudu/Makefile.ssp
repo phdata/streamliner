@@ -71,7 +71,7 @@ first-run:
     $(MAKE) copy-archive-avro-schema
     $(MAKE) copy-staging-avro-schema
     $(MAKE) create-archive-table
-    $(MAKE) create-reporting-table
+    $(MAKE) create-report-table
     $(MAKE) create-staging-table
     $(MAKE) upsert
 
@@ -93,10 +93,9 @@ run:
 clean:
     $(MAKE) delete-sqoop-job
     $(MAKE) drop-archive-table
-    $(MAKE) drop-reporting-table
+    $(MAKE) drop-report-table
     $(MAKE) drop-staging-table
     $(MAKE) delete-archive-hdfs
-    $(MAKE) delete-reporting-hdfs
     $(MAKE) delete-staging-hdfs
     $(MAKE) delete-generated-avro-schema
 
