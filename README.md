@@ -25,7 +25,7 @@ jdbc:
     - table
     - view
 # OPTIONAL: table whitelisting
-#  table:
+#  tables:
 #    - name: table1
 #    - name: table2
 hadoop:

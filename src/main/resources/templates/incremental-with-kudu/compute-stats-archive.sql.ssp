@@ -1,4 +1,3 @@
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
-USE `${configuration.hadoop.stagingDatabase.name}`;
 COMPUTE INCREMENTAL STATS `${configuration.hadoop.stagingDatabase.name}`.`arch_${table.destinationName}`;
