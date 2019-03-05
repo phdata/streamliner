@@ -17,14 +17,16 @@ libraryDependencies ++= Seq(
   "ch.qos.logback" % "logback-classic" % "1.2.3",
   "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2",
   "org.rogach" %% "scallop" % "3.1.1",
-  "net.jcazevedo" %% "moultingyaml" % "0.4.0",
+  "io.circe" %% "circe-yaml" % "0.8.0",
+  "io.circe" %% "circe-generic" % "0.8.0",
   "us.fatehi" % "schemacrawler-mysql" % schemaCrawlerVersion,
   "us.fatehi" % "schemacrawler-postgresql" % schemaCrawlerVersion,
   "us.fatehi" % "schemacrawler-oracle" % schemaCrawlerVersion,
   "us.fatehi" % "schemacrawler-db2" % schemaCrawlerVersion,
   "us.fatehi" % "schemacrawler-sqlserver" % schemaCrawlerVersion,
   "guru.nidi" % "graphviz-java" % "0.8.1",
-  "org.scalatra.scalate" %% "scalate-core" % "1.9.0"
+  "org.scalatra.scalate" %% "scalate-core" % "1.9.0",
+  "org.scalatest" %% "scalatest" % "3.0.5" % "test"
 )
 
 mappings in Universal ++= {

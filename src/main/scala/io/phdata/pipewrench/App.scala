@@ -31,7 +31,7 @@ object App extends YamlSupport with Default with FileUtil with LazyLogging {
           configurationOutputDirectory(configuration, cli.configuration.outputPath.toOption)
         createDir(outputDirectory)
         val enhancedConfiguration = ConfigurationBuilder.build(configuration, databasePassword)
-        enhancedConfiguration.writeYamlFile(s"$outputDirectory/pipewrench-configuration.yml")
+        writeYamlFile(enhancedConfiguration, s"$outputDirectory/pipewrench-configuration.yml")
         if (cli.configuration.createDocs()) {
           SchemaCrawlerImpl
             .getErdOutput(enhancedConfiguration.jdbc, databasePassword, outputDirectory)

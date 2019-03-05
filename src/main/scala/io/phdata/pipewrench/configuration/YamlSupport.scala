@@ -1,27 +1,46 @@
 package io.phdata.pipewrench.configuration
-
-import net.jcazevedo.moultingyaml.DefaultYamlProtocol
-import net.jcazevedo.moultingyaml._
+import io.circe.generic.AutoDerivation
+import io.circe.yaml.Printer
+import io.circe.yaml.parser
 import io.phdata.pipewrench.util.FileUtil
+import io.circe.syntax._
 
-trait YamlSupport extends DefaultYamlProtocol with FileUtil {
+trait YamlSupport extends FileUtil with AutoDerivation {
 
-  implicit def columnDefinitionYamlFormat = yamlFormat6(ColumnDefinition.apply)
-  implicit def tableDefinitionYamlFormat = yamlFormat10(TableDefinition.apply)
-  implicit def tableYamlFormat = yamlFormat6(Table.apply)
-  implicit def databaseYamlFormat = yamlFormat2(Database.apply)
-  implicit def hadoopYamlFormat = yamlFormat3(Hadoop.apply)
-  implicit def jdbcYamlFormat = yamlFormat8(Jdbc.apply)
-  implicit def configurationYamlFormat = yamlFormat6(Configuration.apply)
+  type TypeMapping = Map[String, Map[String, String]]
 
-  def readConfigurationFile(path: String): Configuration =
-    readFile(path).parseYaml.convertTo[Configuration]
+  def readConfigurationFile(path: String): Configuration = parseConfiguration(readFile(path))
 
-  def readTypeMappingFile(path: String): Map[String, Map[String, String]] =
-    readFile(path).parseYaml.convertTo[Map[String, Map[String, String]]]
+  protected def parseConfiguration(yaml: String): Configuration = parser.parse(yaml) match {
+    case Right(v) =>
+      v.as[Configuration] match {
+        case Right(c) => c
+        case Left(err) => throw err
 
-  implicit class WritePipewrenchConfigurationYamlFile(configuration: Configuration) {
-    def writeYamlFile(path: String): Unit = writeFile(configuration.toYaml.prettyPrint, path)
+      }
+    case Left(err) => throw err
+  }
+
+  def readTypeMappingFile(path: String): TypeMapping = parseTypeMapping(readFile(path))
+
+  protected def parseTypeMapping(yaml: String) = parser.parse(yaml) match {
+    case Right(v) =>
+      v.as[TypeMapping] match {
+        case Right(c) => c
+        case Left(err) => throw err
+      }
+    case Left(err) => throw err
+  }
+
+  protected def prettyPrintConfiguration(configuration: Configuration): String = {
+    val json = configuration.asJson
+    Printer(dropNullKeys = true, mappingStyle = Printer.FlowStyle.Block)
+      .pretty(json)
+  }
+
+  def writeYamlFile(configuration: Configuration, path: String): Unit = {
+    val printed = prettyPrintConfiguration(configuration)
+    writeFile(printed, path)
   }
 
 }
