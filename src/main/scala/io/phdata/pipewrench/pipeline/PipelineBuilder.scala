@@ -81,7 +81,7 @@ object PipelineBuilder extends FileUtil with Default with LazyLogging {
   private def checkCheckColumn(table: TableDefinition): Unit = {
     if (table.checkColumn.isEmpty) {
       throw new RuntimeException(
-        s"Check column for table: ${table.sourceName} is empty, cannot execute incremental sqoop job")
+        s"'checkColumn' for table: ${table.sourceName} is empty, cannot execute incremental sqoop job")
     }
   }
 

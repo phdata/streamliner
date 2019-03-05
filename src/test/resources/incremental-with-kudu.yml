@@ -1,0 +1,56 @@
+name: phdata-oracle
+jdbc:
+  url: jdbc:oracle:thin:@oraclerds.caewceohkuoi.us-east-1.rds.amazonaws.com:1521:ORCL
+  username: HR
+  driverClass: oracle.jdbc.OracleDriver
+  schema: HR
+  tableTypes:
+  - table
+  passwordFile: hdfs:///user/tfoerster/oracle_password
+pipeline: incremental-with-kudu
+hadoop:
+  impalaShellCommand: impala-shell -i worker1.valhalla.phdata.io -d default -k --ssl --ca_cert=/opt/cloudera/security/pki/x509/truststore.pem
+  stagingDatabase:
+    name: user_tfoerster
+    path: hdfs:///user/tfoerster/db
+  reportingDatabase:
+    name: user_tfoerster
+    path: hdfs:///user/tfoerster/db
+environment: dev
+tables:
+- primaryKeys:
+  - DEPARTMENT_ID
+  sourceName: DEPARTMENTS
+  destinationName: departments
+  checkColumn: ID
+  columns:
+  - precision: 4
+    scale: 0
+    sourceName: DEPARTMENT_ID
+    destinationName: department_id
+    comment: Primary key column of departments table.
+    dataType: NUMBER
+  - precision: 30
+    scale: 0
+    sourceName: DEPARTMENT_NAME
+    destinationName: department_name
+    comment: |-
+      A not null column that shows name of a department. Administration,
+      Marketing, Purchasing, Human Resources, Shipping, IT, Executive, Public
+      Relations, Sales, Finance, and Accounting.
+    dataType: VARCHAR2
+  - precision: 6
+    scale: 0
+    sourceName: MANAGER_ID
+    destinationName: manager_id
+    comment: Manager_id of a department. Foreign key to employee_id column of employees table. The manager_id column of the employee table references this column.
+    dataType: NUMBER
+  - precision: 4
+    scale: 0
+    sourceName: LOCATION_ID
+    destinationName: location_id
+    comment: Location id where a department is located. Foreign key to location_id column of locations table.
+    dataType: NUMBER
+  comment: |-
+    Departments table that shows details of departments where employees
+    work. Contains 27 rows; references with locations, employees, and job_history tables.

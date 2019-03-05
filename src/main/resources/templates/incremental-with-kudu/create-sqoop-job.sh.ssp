@@ -21,7 +21,9 @@ sqoop job -D 'sqoop.metastore.client.record.password=true'  -D 'mapreduce.job.na
 #elseif (javaColumnMap.isDefined)
     --map-column-java ${javaColumnMap} \\
 #end
-    --check-column ${table.splitByColumn.get} \\
+#if (table.checkColumn.isDefined)
+    --check-column ${table.checkColumn.get} \\
+#end
     --as-avrodatafile \\
     --fetch-size 10000 \\
     --compress  \\

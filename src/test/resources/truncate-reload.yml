@@ -1,0 +1,44 @@
+name: phdata-oracle
+jdbc:
+  url: jdbc:oracle:thin:@oraclerds.caewceohkuoi.us-east-1.rds.amazonaws.com:1521:ORCL
+  username: HR
+  driverClass: oracle.jdbc.OracleDriver
+  schema: HR
+  tableTypes:
+  - table
+  passwordFile: hdfs:///user/tfoerster/oracle_password
+pipeline: truncate-reload
+hadoop:
+  impalaShellCommand: impala-shell -i worker1.valhalla.phdata.io -d default -k --ssl --ca_cert=/opt/cloudera/security/pki/x509/truststore.pem
+  stagingDatabase:
+    name: user_tfoerster
+    path: hdfs:///user/tfoerster/db
+  reportingDatabase:
+    name: user_tfoerster
+    path: hdfs:///user/tfoerster/db
+environment: dev
+tables:
+- primaryKeys:
+  - COUNTRY_ID
+  sourceName: COUNTRIES
+  destinationName: countries
+  columns:
+  - precision: 2
+    scale: 0
+    sourceName: COUNTRY_ID
+    destinationName: country_id
+    comment: Primary key of countries table.
+    dataType: CHAR
+  - precision: 40
+    scale: 0
+    sourceName: COUNTRY_NAME
+    destinationName: country_name
+    comment: Country name
+    dataType: VARCHAR2
+  - precision: 0
+    scale: -127
+    sourceName: REGION_ID
+    destinationName: region_id
+    comment: Region ID for the country. Foreign key to region_id column in the departments table.
+    dataType: NUMBER
+  comment: country table. Contains 25 rows. References with locations table.
