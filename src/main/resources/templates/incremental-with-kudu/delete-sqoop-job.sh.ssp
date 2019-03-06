@@ -2,6 +2,6 @@
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
 
-set -euox pipefail
+set -euo pipefail
 
 sqoop job --delete '${configuration.name}/${configuration.environment}/${table.destinationName}'

@@ -5,7 +5,7 @@
 # sqoop-create: sqoop-create.sh #### Create Sqoop job
 #        ./run-with-logging.sh sqoop-create.sh $@
 
-set -euox pipefail
+set -u
 
 RED='\033[0;31m'
 NC='\033[0m'

@@ -2,7 +2,7 @@
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
 #!/usr/bin/env bash
 
-set -euox pipefail
+set -euo pipefail
 
 DIRECTORY="${configuration.hadoop.stagingDatabase.path}/stg_${table.destinationName}"
 

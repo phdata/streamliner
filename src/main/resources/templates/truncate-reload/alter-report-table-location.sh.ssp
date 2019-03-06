@@ -2,7 +2,7 @@
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
 #!/usr/bin/env bash
 
-set -euox pipefail
+set -euo pipefail
 
 PARTITION_FILE="${configuration.hadoop.stagingDatabase.path}/part_${table.destinationName}/.latest-partition"
 PARTITION_NUMBER=1
