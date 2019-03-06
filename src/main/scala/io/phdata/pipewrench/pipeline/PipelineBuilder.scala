@@ -29,6 +29,7 @@ object PipelineBuilder extends FileUtil with Default with LazyLogging {
       createDir(tableDir)
 
       templateFiles.foreach { templateFile =>
+        logger.info(s"Rendering file $templateFile")
         val rendered = engine.layout(
           templateFile.getPath,
           Map("configuration" -> configuration, "table" -> table, "typeMapping" -> typeMapping))
