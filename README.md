@@ -62,22 +62,22 @@ decimal:
 
 ## Usage
 
-Generating ingest configuration (`ingest-configuration.yml`):
+Generating ingest configuration from a database (`ingest-configuration.yml`):
 
 ### Configuration
 Without Generating Docs
 ```bash
-pipewrench configuration --configuration <ingest-configuration.yml> --database-password <database password> 
+pipewrench schema --config <ingest-configuration.yml> --database-password <database password>
 ```
 
 With Generating Docs
 ```bash
-pipewrench configuration --configuration <ingest-configuration.yml> --database-password <database password> --create-docs
+pipewrench schema --config <ingest-configuration.yml> --database-password <database password> --create-docs
 ```
 
 ### Scripts
 Generating scripts:
 
 ```bash
-pipewrench scripts --configuration <ingest-configuration.yml> --template-directory <template-directory> --type-mapping <type-mapping.yml>
+pipewrench scripts --config <ingest-configuration.yml> --template-directory <template-directory> --type-mapping <type-mapping.yml>
 ```

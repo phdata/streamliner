@@ -34,21 +34,21 @@ object App extends YamlSupport with Default with FileUtil with LazyLogging {
     val cli = new Cli(args)
 
     cli.subcommand match {
-      case Some(cli.configuration) =>
-        val databasePassword = cli.configuration.databasePassword.toOption match {
+      case Some(cli.schema) =>
+        val databasePassword = cli.schema.databasePassword.toOption match {
           case Some(password) => password
           case None =>
             print("Enter database password: ")
             StdIn.readLine()
         }
-        val configuration = readConfigurationFile(cli.configuration.filePath())
+        val configuration = readConfigurationFile(cli.schema.filePath())
 
         val outputDirectory =
-          configurationOutputDirectory(configuration, cli.configuration.outputPath.toOption)
+          configurationOutputDirectory(configuration, cli.schema.outputPath.toOption)
         createDir(outputDirectory)
         val enhancedConfiguration = ConfigurationBuilder.build(configuration, databasePassword)
         writeYamlFile(enhancedConfiguration, s"$outputDirectory/pipewrench-configuration.yml")
-        if (cli.configuration.createDocs()) {
+        if (cli.schema.createDocs()) {
           SchemaCrawlerImpl
             .getErdOutput(enhancedConfiguration.jdbc, databasePassword, outputDirectory)
           SchemaCrawlerImpl
@@ -78,7 +78,7 @@ object App extends YamlSupport with Default with FileUtil with LazyLogging {
         )
 
       case None =>
-        logger.error("Please provide a valid sub command options are `configuration` and `scripts`")
+        logger.error("Please provide a valid sub command options are `schema` and `scripts`")
 
     }
   }

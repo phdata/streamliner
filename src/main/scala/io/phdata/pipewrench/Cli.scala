@@ -22,10 +22,10 @@ import org.rogach.scallop.Subcommand
 
 class Cli(args: Seq[String]) extends ScallopConf(args) {
 
-  val configuration = new Subcommand("configuration") {
+  val schema = new Subcommand("schema") {
 
     val filePath: ScallopOption[String] =
-      opt[String]("configuration", descr = "Path to ingest configuration", required = true)
+      opt[String]("config", descr = "Path to ingest configuration", required = true)
 
     val outputPath: ScallopOption[String] = opt[String](
       "output-path",
@@ -49,7 +49,7 @@ class Cli(args: Seq[String]) extends ScallopConf(args) {
   val produceScripts = new Subcommand("scripts") {
 
     val filePath: ScallopOption[String] =
-      opt[String]("configuration", descr = "Path to pipewrench configuration", required = true)
+      opt[String]("config", descr = "Path to pipewrench configuration", required = true)
 
     val outputPath: ScallopOption[String] = opt[String](
       "output-path",
@@ -66,7 +66,7 @@ class Cli(args: Seq[String]) extends ScallopConf(args) {
     )
   }
 
-  addSubcommand(configuration)
+  addSubcommand(schema)
   addSubcommand(produceScripts)
 
   verify()
