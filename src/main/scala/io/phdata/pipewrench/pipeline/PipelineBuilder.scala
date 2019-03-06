@@ -1,5 +1,7 @@
 package io.phdata.pipewrench.pipeline
 
+import java.io.File
+
 import com.typesafe.scalalogging.LazyLogging
 import io.phdata.pipewrench.configuration._
 import io.phdata.pipewrench.util.FileUtil
@@ -58,7 +60,9 @@ object PipelineBuilder extends FileUtil with Default with LazyLogging {
   }
 
   private def isExecutable(path: String): Unit = {
-    if (path.contains(".sh")) {
+    val file = new File(path)
+    logger.debug(s"File executable flag ${file.canExecute()}: '$path'")
+    if (file.canExecute) {
       setExecutable(path)
     }
   }
