@@ -1,3 +1,0 @@
--e 03/06/19 07:01:15|truncate-reload|[0;32mPASS[0m: echo hello foo
--e 03/06/19 07:04:10|truncate-reload|[0;32mPASS[0m: echo hello bla
--e 03/06/19 07:04:18|truncate-reload|[0;31mFAIL[0m: false bla 
