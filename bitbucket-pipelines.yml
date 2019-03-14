@@ -3,6 +3,16 @@ image: bitbucketpipelines/scala-sbt:scala-2.12
 pipelines:
   default:
     - step:
+        name: Unit tests
         script:
           - sbt test
           - sbt scalafmtCheck 
+    - step:
+        name: Integration tests
+        deployment: test
+        script:
+          - ./manage_mysql_docker.sh create
+          - sbt it:test
+          - ./manage_mysql_docker.sh destroy
+        services:
+          - docker
