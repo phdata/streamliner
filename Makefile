@@ -22,7 +22,9 @@ test:
 	sbt test
 
 itest:
+	./manage_mysql_docker.sh create
 	sbt it:test
+	./manage_mysql_docker.sh destroy
 
 install-here: remove-install
 	unzip target/universal/pipewrench-$$(cat version)
