@@ -20,7 +20,7 @@ trait Default {
   lazy val OUTPUT_DIRECTORY = "output"
 
   def scriptsDirectory(configuration: Configuration, outputDirectory: String): String =
-    s"${dir(configuration, outputDirectory)}/scripts"
+    s"$outputDirectory/${configuration.pipeline}"
 
   def configurationOutputDirectory(
       configuration: Configuration,
@@ -28,6 +28,5 @@ trait Default {
     dir(configuration, outputDirectory.getOrElse(OUTPUT_DIRECTORY))
 
   private def dir(configuration: Configuration, path: String): String =
-    s"$path/${configuration.name}/${configuration.environment}"
-
+    s"$path/${configuration.name}"
 }
