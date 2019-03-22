@@ -138,4 +138,13 @@ object TemplateFunction {
       columnDefinition
     }
   }
+
+  def orderColumns(table: TableDefinition): Seq[ColumnDefinition] = {
+    val primaryKeys = table.primaryKeys
+    val primaryKeyColumnDefs =
+      table.columns.filter(column => primaryKeys.contains(column.sourceName))
+    val nonPrimaryKeyColumnDefs =
+      table.columns.filter(column => !primaryKeys.contains(column.sourceName))
+    primaryKeyColumnDefs ++ nonPrimaryKeyColumnDefs
+  }
 }
