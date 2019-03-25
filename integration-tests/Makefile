@@ -13,20 +13,20 @@
 # limitations under the License.
 
 package:
-	sbt universal:packageBin
+	$(MAKE) -C ../ package
 
 clean: remove-install
-	sbt clean
-
-test:
-	sbt test
+	$(MAKE) -C ../ clean
 
 itest:
-	integration-tests/run-integration-tests.sh create
-	(sbt it:test && integration-tests/run-integration-tests.sh destroy) || integration-tests/run-integration-tests.sh destroy
+	$(MAKE) -C ../ itest
+	$(MAKE) install-here
+	./run-integration-tests.sh
 
-install-here: remove-install
-	unzip target/universal/pipewrench-$$(cat version)
+install-here: remove-install package
+	unzip ../target/universal/pipewrench-$$(cat ../version) -d pipewrench
+	mv pipewrench/pipewrench-$$(cat ../version)/* ./pipewrench
+	rm -rf ./pipewrench/pipewrench-$$(cat ../version)
 
 remove-install:
-	rm -rf pipewrench-$$(cat version)
+	rm -rf ./pipewrench

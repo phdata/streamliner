@@ -27,7 +27,8 @@ drop-kudu-table: drop-kudu-table.sql
     $(impala-cmd) drop-kudu-table.sql
 
 first-run:
-    $(MAKE) first-run
+    $(MAKE) create-kudu-table
+	$(MAKE) compute-stats-kudu
 
 run:
     $(MAKE) compute-stats-kudu

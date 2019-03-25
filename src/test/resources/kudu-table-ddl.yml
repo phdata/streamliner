@@ -7,7 +7,7 @@ jdbc:
   tableTypes:
   - table
   passwordFile: hdfs:///user/tfoerster/oracle_password
-pipeline: truncate-reload
+pipeline: kudu-table-ddl
 hadoop:
   impalaShellCommand: impala-shell -i worker1.valhalla.phdata.io -d default -k --ssl --ca_cert=/opt/cloudera/security/pki/x509/truststore.pem
   stagingDatabase:

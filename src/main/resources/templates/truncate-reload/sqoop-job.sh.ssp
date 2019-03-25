@@ -20,8 +20,7 @@ sqoop import \
     --compress \\
     --compression-codec snappy \\
     -m ${table.numberOfMappers.getOrElse(1)} \\
-#if (table.splitByColumn.isDefined)
-    --splitBy ${table.splitByColumn.get} \\
+#if (table.splitByColumn.isDefined)     --splitBy ${table.splitByColumn.get} \\
 #elseif (javaColumnMap.isDefined)
     --map-column-java '${javaColumnMap}' \\
 #end

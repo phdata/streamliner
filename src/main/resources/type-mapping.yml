@@ -173,3 +173,8 @@ boolean:
   impala: boolean
   parquet: boolean
   avro: boolean
+enum:
+  kudu: string
+  impala: string
+  parquet: string
+  avro: string

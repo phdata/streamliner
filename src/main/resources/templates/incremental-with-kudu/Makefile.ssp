@@ -30,7 +30,7 @@ compute-stats-staging: compute-stats-staging.sql
     $(impala-cmd) compute-stats-staging.sql
 
 copy-archive-avro-schema: copy-archive-avro-schema.sh
-    ./run-with-logging.sh ./archive-staging-data.sh $@
+    ./run-with-logging.sh ./copy-archive-avro-schema.sh $@
 
 copy-staging-avro-schema: copy-staging-avro-schema.sh
     ./run-with-logging.sh ./copy-staging-avro-schema.sh $@
@@ -75,7 +75,7 @@ invalidate-metadata-staging: invalidate-metadata-staging.sql
     $(impala-cmd) invalidate-metadata-staging.sql
 
 sqoop-job: sqoop-job.sh
-    ./run-with-logging.sh ./sqoop-job.sh.sh $@
+    ./run-with-logging.sh ./sqoop-job.sh $@
 
 upsert-report-table: upsert-report-table.sql
     $(impala-cmd) upsert-report-table.sql
@@ -86,7 +86,7 @@ first-run:
     $(MAKE) copy-archive-avro-schema
     $(MAKE) copy-staging-avro-schema
     $(MAKE) create-archive-table
-    $(MAKE) create-reporting-table
+    $(MAKE) create-report-table
     $(MAKE) create-staging-table
     $(MAKE) upsert
 
@@ -108,10 +108,9 @@ run:
 clean:
     $(MAKE) delete-sqoop-job
     $(MAKE) drop-archive-table
-    $(MAKE) drop-reporting-table
+    $(MAKE) drop-report-table
     $(MAKE) drop-staging-table
     $(MAKE) delete-archive-hdfs
-    $(MAKE) delete-reporting-hdfs
     $(MAKE) delete-staging-hdfs
     $(MAKE) delete-generated-avro-schema
 

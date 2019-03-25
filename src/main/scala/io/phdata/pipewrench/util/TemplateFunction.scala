@@ -87,7 +87,7 @@ object TemplateFunction {
         val f = if (configuration.jdbc.driverClass.get.contains("oracle")) {
           column.sourceName + " AS " + "\"" + column.destinationName + "\""
         } else {
-          "\"" + column.sourceName + "\" AS " + column.destinationName
+          "`" + column.sourceName + "` AS " + column.destinationName
         }
         f
       }
