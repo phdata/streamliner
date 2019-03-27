@@ -19,7 +19,6 @@ clean: remove-install
 	$(MAKE) -C ../ clean
 
 itest:
-	$(MAKE) -C ../ itest
 	$(MAKE) install-here
 	./run-integration-tests.sh
 

@@ -3,9 +3,11 @@ import sbt._
 import scala.io.Source
 
 def versionFromFile: String = Source.fromFile("version").getLines().mkString("")
+def snapshot: Boolean = versionFromFile.endsWith("-SNAPSHOT")
 
 name := "pipewrench"
 version := versionFromFile
+isSnapshot := snapshot
 organization := "io.phdata.pipewrench"
 scalaVersion := "2.11.12"
 

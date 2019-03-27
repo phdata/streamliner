@@ -24,9 +24,13 @@ test:
 itest:
 	integration-tests/run-integration-tests.sh create
 	(sbt it:test && integration-tests/run-integration-tests.sh destroy) || integration-tests/run-integration-tests.sh destroy
+	$(MAKE) -C integration-tests/ itest
 
 install-here: remove-install
 	unzip target/universal/pipewrench-$$(cat version)
 
 remove-install:
 	rm -rf pipewrench-$$(cat version)
+
+publish:
+	sbt clean package publish
