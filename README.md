@@ -98,8 +98,8 @@ pipeline: kudu-table-ddl
 #####To publish a new release version of Pipewrench to Artifactory
 - Create a credentials file in your home directory under `[home]/.sbt/.credentials` containing:
 ```
-realm=phData Artifactory
-host=https://repository.phdata.io
+realm=Artifactory Realm
+host=repository.phdata.io
 user=[Artifactory username]
 password=[Artifactory password]
 ```
