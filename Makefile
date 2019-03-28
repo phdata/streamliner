@@ -32,5 +32,5 @@ install-here: remove-install
 remove-install:
 	rm -rf pipewrench-$$(cat version)
 
-publish:
-	sbt clean package publish
+publish: clean package
+	build-support/publish-zip-to-artifactory.sh

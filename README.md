@@ -84,18 +84,32 @@ pipewrench scripts --config <ingest-configuration.yml> --template-directory <tem
 
 ### Running Integration Tests
 To run a full pipeline in an isolated docker environment:
-- Install [docker](https://docs.docker.com/install/) and [docker-compose](https://docs.docker.com/compose/install/) on your local machine
-- Add or modify the template to test in `integration-tests/templates` (or run against current templates)
-- Run `make itest`
+- Install [docker](https://docs.docker.com/install/) and [docker-compose](https://docs.docker.com/compose/install/) on your local machine.
+- Add or modify the template to test in `integration-tests/templates` (or run against current templates).
+- Run `make itest`.
 
 Note: the name of the template file should match the pipeline you are trying to test. 
-Ex. `integration-tests/temlates/kudu-table-ddl.yml`
+Ex. `integration-tests/templates/kudu-table-ddl.yml`
 ```
 pipeline: kudu-table-ddl
 ```
 
 ### Publishing to Artifactory
-#####To publish a new release version of Pipewrench to Artifactory
+#####To publish pipewrench .zip to Artifactory
+- Change the current version to the new version in the `version` file.
+- Using the template `build-support/artifactory.env.template`, create `build-support/artifactory.env`.
+- In the `build-support/artifactory.env` file add the necessary values for the `ARTIFACTORY_USER` and `ARTIFACTORY_TOKEN` variables.
+  - Set `ARTIFACTORY_USER` to the user name you use to log into Artifactory.
+  - To get your `ARTIFACTORY_TOKEN`:
+    - Log into [phData's Artifactory](https://repository.phdata.io/artifactory).
+    - Click on your username on the top right corner.
+    - Enter your password and press *Unlock*.
+    - Copy the value of *Encrypted Password* and paste it as the value for `ARTIFACTORY_TOKEN`.
+- Run `make publish`.
+
+The .zip will show up in [phData's Artifactory binaries](https://repository.phdata.io/artifactory/list/binary/phdata/pipewrench/)
+
+#####To publish pipewrench .jar to Artifactory
 - Create a credentials file in your home directory under `[home]/.sbt/.credentials` containing:
 ```
 realm=Artifactory Realm
@@ -103,9 +117,9 @@ host=repository.phdata.io
 user=[Artifactory username]
 password=[Artifactory password]
 ```
-- Change the current version to the new version to the `version` file
-- Run `make publish` to publish the .jar
+- Change the current version to the new version in the `version` file.
+- Run `sbt clean package publish` to publish the .jar.
 
-The release folder will show up in [phData's Artifactory](https://repository.phdata.io/artifactory/list/libs-release-local/io/phdata/pipewrench/pipewrench_2.11/)
+The release folder will show up in [phData's Artifactory libs](https://repository.phdata.io/artifactory/list/libs-release-local/io/phdata/pipewrench/pipewrench_2.11/).
 
 
