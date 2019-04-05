@@ -50,7 +50,7 @@ trait YamlSupport extends FileUtil with AutoDerivation {
 
   protected def prettyPrintConfiguration(configuration: Configuration): String = {
     val json = configuration.asJson
-    Printer(dropNullKeys = true, mappingStyle = Printer.FlowStyle.Block)
+    Printer(preserveOrder = true, dropNullKeys = true, mappingStyle = Printer.FlowStyle.Block)
       .pretty(json)
   }
 
