@@ -68,6 +68,9 @@ invalidate-metadata-staging: invalidate-metadata-staging.sql
 sqoop-exec: sqoop-job.sh
     ./run-with-logging.sh ./sqoop-job.sh $@
 
+validate-rowcount: validate-rowcount.sh
+    ./run-with-logging.sh ./validate-rowcount.sh $@
+
 first-run:
     $(MAKE) sqoop-exec
     $(MAKE) copy-avro-schema-to-hdfs
@@ -78,6 +81,7 @@ first-run:
     $(MAKE) alter-report-table-location
     $(MAKE) compute-stats-partitioned-table
     $(MAKE) compute-stats-report-table
+    $(MAKE) validate-rowcount
 
 run:
     $(MAKE) sqoop-exec
@@ -86,6 +90,7 @@ run:
     $(MAKE) alter-report-table-location
     $(MAKE) compute-stats-partitioned-table
     $(MAKE) compute-stats-report-table
+    $(MAKE) validate-rowcount
 
 clean:
     $(MAKE) drop-partitioned-table
