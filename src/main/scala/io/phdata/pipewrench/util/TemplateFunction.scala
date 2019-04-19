@@ -26,18 +26,18 @@ object TemplateFunction {
       column: ColumnDefinition,
       typeMapping: Map[String, Map[String, String]],
       storageFormat: String): String = {
-    val cColumn = checkOracleNumberType(column)
+    val cColumn = normalizeColumnDefinition(column)
     typeMapping.get(cColumn.dataType.toLowerCase) match {
       case Some(dataTypeMap) =>
         dataTypeMap.get(storageFormat.toLowerCase) match {
           case Some(dataType) => dataType
           case None =>
             throw new RuntimeException(
-              s"No type mapping found for data type: ${column.dataType} and storage format: $storageFormat in provided type mapping")
+              s"No type mapping found for data type: '${column.dataType}' and storage format: $storageFormat in provided type mapping")
         }
       case None =>
         throw new RuntimeException(
-          s"No type mapping found for data type: ${column.dataType} in provided type mapping")
+          s"No type mapping found for data type: '${column.dataType}' in provided type mapping")
     }
   }
 
@@ -118,6 +118,18 @@ object TemplateFunction {
 
   def primaryKeys(table: TableDefinition): String =
     table.primaryKeys.map(pk => s"`$pk`").mkString(",")
+
+  /**
+   * Normalize database-specific column definition properties.
+   * @param columnDefinition ColumnDefinition to normalize
+   * @return a new ColumnDefinition if changes are needed, the original ColumnDefinition otherwise
+   */
+  private[util] def normalizeColumnDefinition(
+      columnDefinition: ColumnDefinition): ColumnDefinition = {
+    val col = columnDefinition.copy(
+      dataType = columnDefinition.dataType.toLowerCase.stripSuffix(" identity"))
+    checkOracleNumberType(col)
+  }
 
   private def checkOracleNumberType(columnDefinition: ColumnDefinition): ColumnDefinition = {
     val precision = columnDefinition.precision.getOrElse(0)
