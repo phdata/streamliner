@@ -38,29 +38,35 @@ object PipelineBuilder extends FileUtil with Default with LazyLogging {
 
     engine.escapeMarkup = false
 
-    configuration.tables.get.foreach { table =>
-      checkConfiguration(configuration, table)
-      val tableDir =
-        s"${scriptsDirectory(configuration, outputDirectory)}/${table.destinationName}"
-      createDir(tableDir)
+    configuration.tables match {
+      case Some(tables) =>
+        tables.foreach { table =>
+          checkConfiguration(configuration, table)
+          val tableDir =
+            s"${scriptsDirectory(configuration, outputDirectory)}/${table.destinationName}"
+          createDir(tableDir)
 
-      templateFiles.foreach { templateFile =>
-        logger.info(s"Rendering file $templateFile")
-        val rendered = engine.layout(
-          templateFile.getPath,
-          Map("configuration" -> configuration, "table" -> table, "typeMapping" -> typeMapping))
-        val replaced = rendered.replace("    ", "\t")
-        logger.debug(replaced)
-        val fileName = s"$tableDir/${templateFile.getName.replace(".ssp", "")}"
-        writeFile(replaced, fileName)
-        isExecutable(fileName)
-      }
-      nonTemplateFiles.foreach { nonTemplateFile =>
-        val content = readFile(nonTemplateFile.getPath)
-        val fileName = s"$tableDir/${nonTemplateFile.getName}"
-        writeFile(content, fileName)
-        isExecutable(fileName)
-      }
+          templateFiles.foreach { templateFile =>
+            logger.info(s"Rendering file $templateFile")
+            val rendered = engine.layout(
+              templateFile.getPath,
+              Map("configuration" -> configuration, "table" -> table, "typeMapping" -> typeMapping))
+            val replaced = rendered.replace("    ", "\t")
+            logger.debug(replaced)
+            val fileName = s"$tableDir/${templateFile.getName.replace(".ssp", "")}"
+            writeFile(replaced, fileName)
+            isExecutable(fileName)
+          }
+          nonTemplateFiles.foreach { nonTemplateFile =>
+            val content = readFile(nonTemplateFile.getPath)
+            val fileName = s"$tableDir/${nonTemplateFile.getName}"
+            writeFile(content, fileName)
+            isExecutable(fileName)
+          }
+        }
+      case None =>
+        throw new RuntimeException(
+          "Tables section is not found. Check the configuration(example: pipewrench-configuration.yml) file")
     }
     writeSchemaMakeFile(configuration, templateDirectory, outputDirectory)
   }
