@@ -64,13 +64,13 @@ for PIPELINE_TEMPLATE in ${DIR}/templates/*; do
 
 	docker-compose -f ${DIR}/docker-compose.yml exec -T kimpala pipewrench schema \
 	--config /mount/templates/${FILE_NAME} \
-	--database-password pipewrench
+	--database-password pipewrench -Dlogback.configurationFile=conf/logback.xml
 
 	docker-compose -f ${DIR}/docker-compose.yml exec -T kimpala pipewrench scripts \
 	--config /output/${BASENAME}/pipewrench-configuration.yml \
 	--output-path /output/${BASENAME} \
 	--template-directory /mount/pipewrench/templates \
-	--type-mapping /mount/pipewrench/conf/type-mapping.yml
+	--type-mapping /mount/pipewrench/conf/type-mapping.yml -Dlogback.configurationFile=conf/logback.xml
 
 	docker-compose -f ${DIR}/docker-compose.yml exec -T kimpala chmod 770 -R /output
 	docker-compose -f ${DIR}/docker-compose.yml exec -T kimpala make -C /output/${BASENAME}/${BASENAME} first-run-all
