@@ -66,7 +66,7 @@ object PipelineBuilder extends FileUtil with Default with LazyLogging {
         }
       case None =>
         throw new RuntimeException(
-          "Tables section is not found. Check the configuration(example: pipewrench-configuration.yml) file")
+          "Tables section is not found. Check the configuration (example: pipewrench-configuration.yml) file")
     }
     writeSchemaMakeFile(configuration, templateDirectory, outputDirectory)
   }
