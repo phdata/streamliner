@@ -25,6 +25,8 @@ import io.phdata.pipewrench.configuration.YamlSupport
 import io.phdata.pipewrench.pipeline.PipelineBuilder
 import io.phdata.pipewrench.schemacrawler.SchemaCrawlerImpl
 import io.phdata.pipewrench.util.FileUtil
+import sf.util.Utility.applyApplicationLogLevel
+import java.util.logging.Level
 
 import scala.io.StdIn
 
@@ -32,7 +34,6 @@ object App extends YamlSupport with Default with FileUtil with LazyLogging {
 
   def main(args: Array[String]): Unit = {
     val cli = new Cli(args)
-
     cli.subcommand match {
       case Some(cli.schema) =>
         val databasePassword = cli.schema.databasePassword.toOption match {
@@ -41,8 +42,18 @@ object App extends YamlSupport with Default with FileUtil with LazyLogging {
             print("Enter database password: ")
             StdIn.readLine()
         }
-        val configuration = readConfigurationFile(cli.schema.filePath())
+        val schemaLogLevel = cli.schema.schemaLogLevel.toOption match {
+          case Some("OFF") => Level.OFF
+          case Some("SEVERE" | "FATAL" | "ERROR" | "ERR") => Level.SEVERE
+          case Some("WARNING" | "WARN") => Level.WARNING
+          case Some("CONFIG" | "DEBUG") => Level.CONFIG
+          case Some("INFO") => Level.INFO
+          case Some("TRACE") => Level.FINER
+          case Some(default) => Level.ALL
+        }
+        applyApplicationLogLevel(schemaLogLevel)
 
+        val configuration = readConfigurationFile(cli.schema.filePath())
         val outputDirectory =
           configurationOutputDirectory(configuration, cli.schema.outputPath.toOption)
         createDir(outputDirectory)
