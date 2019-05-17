@@ -49,7 +49,7 @@ if [ "$#" -eq 1 ]; then
 	exit $?
 fi
 
-trap 'manage_docker destroy' EXIT
+#trap 'manage_docker destroy' EXIT
 manage_docker create
 
 set -e
@@ -57,7 +57,7 @@ echo "running integration tests"
 docker-compose -f ${DIR}/docker-compose.yml exec -T kimpala /run-all-services.sh
 docker-compose -f ${DIR}/docker-compose.yml exec -T kimpala hdfs dfs -put /mount/passwordFile /user/root/
 
-for PIPELINE_TEMPLATE in ${DIR}/templates/*; do
+for PIPELINE_TEMPLATE in ${DIR}/templates/*.yml; do
 	FILE_NAME=${PIPELINE_TEMPLATE##*/}
 	BASENAME=${FILE_NAME%.*}
 	echo "RUNNING TEMPLATE: ${FILE_NAME}"
@@ -76,3 +76,4 @@ for PIPELINE_TEMPLATE in ${DIR}/templates/*; do
 	docker-compose -f ${DIR}/docker-compose.yml exec -T kimpala make -C /output/${BASENAME}/${BASENAME} first-run-all
 	docker-compose -f ${DIR}/docker-compose.yml exec -T kimpala make -C /output/${BASENAME}/${BASENAME} clean-all
 done
+

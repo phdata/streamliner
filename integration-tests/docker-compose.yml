@@ -1,21 +1,13 @@
-version: '2'
-
+version: "2"
 services:
-  mysql:
-    image: genschsa/mysql-employees
-    ports:
-      - 3306:3306
-    hostname: mysql
+  db:
+    hostname: db
     mem_limit: 512M
-    environment:
-      MYSQL_ROOT_USER: pipewrench
-      MYSQL_ROOT_PASSWORD: pipewrench
-      MYSQL_PASSWORD: pipewrench
 
   kimpala:
     image: amfoerster/hadoop-docker
     volumes:
-      - "./:/mount"
+      - "./docker-mount/:/mount"
     hostname: hadoop
     mem_limit: 5G
     environment:

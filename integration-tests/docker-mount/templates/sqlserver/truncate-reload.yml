@@ -1,0 +1,21 @@
+name: truncate-reload # should be the same as the template file base name for integration tests
+jdbc:
+  url: jdbc:sqlserver://db:1433;databaseName=employees
+  username: pipewrench
+  schema: employees.dbo
+  passwordFile: hdfs:///user/root/passwordFile
+  tableTypes:
+    - table
+  tables:
+    - name: Employee
+      checkColumn: employeeid
+pipeline: truncate-reload
+hadoop:
+  impalaShellCommand: impala-shell -i localhost -d default
+  stagingDatabase:
+    name: default
+    path: hdfs:///user/root/db
+  reportingDatabase:
+    name: default
+    path: hdfs:///user/root/db
+environment: test

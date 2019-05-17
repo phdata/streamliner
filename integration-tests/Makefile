@@ -18,14 +18,13 @@ package:
 clean: remove-install
 	$(MAKE) -C ../ clean
 
-itest:
-	$(MAKE) install-here
+itest: install-here
 	./run-integration-tests.sh
 
 install-here: remove-install package
 	unzip ../target/universal/pipewrench-$$(cat ../version) -d pipewrench
-	mv pipewrench/pipewrench-$$(cat ../version)/* ./pipewrench
+	mv pipewrench/pipewrench-$$(cat ../version)/* ./docker-mount/pipewrench
 	rm -rf ./pipewrench/pipewrench-$$(cat ../version)
 
 remove-install:
-	rm -rf ./pipewrench
+	rm -rf ./docker-mount/pipewrench

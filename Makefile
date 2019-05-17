@@ -23,7 +23,7 @@ test:
 
 itest:
 	integration-tests/run-integration-tests.sh create
-	(sbt it:test && integration-tests/run-integration-tests.sh destroy) || integration-tests/run-integration-tests.sh destroy
+	sbt it:test
 	$(MAKE) -C integration-tests/ itest
 
 install-here: remove-install

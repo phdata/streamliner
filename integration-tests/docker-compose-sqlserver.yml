@@ -1,0 +1,10 @@
+version: '2'
+services:
+  db:
+    image: bpmcd/mssql-employees:0.2
+    ports:
+      - '55555:1433'
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Strong(!)Password
+

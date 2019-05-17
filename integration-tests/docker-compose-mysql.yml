@@ -1,0 +1,12 @@
+version: '2'
+
+services:
+  db:
+    image: genschsa/mysql-employees
+    ports:
+      - '55555:3306'
+    environment:
+      MYSQL_ROOT_USER: pipewrench
+      MYSQL_ROOT_PASSWORD: pipewrench
+      MYSQL_PASSWORD: pipewrench
+
