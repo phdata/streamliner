@@ -15,9 +15,9 @@ limitations under the License.
 --%>
 <%@ val tables: Seq[io.phdata.pipewrench.configuration.TableDefinition] %>
 <%
-    val firstRunTables = tables.map(t => s"first-run-${t.destinationName}").mkString(" ")
-    val runTables = tables.map(t => s"run-${t.destinationName}").mkString(" ")
-    val cleanTables = tables.map(t => s"clean-${t.destinationName}").mkString(" ")
+	val firstRunTables = tables.map(t => s"first-run-${t.destinationName}").mkString(" ")
+	val runTables = tables.map(t => s"run-${t.destinationName}").mkString(" ")
+	val cleanTables = tables.map(t => s"clean-${t.destinationName}").mkString(" ")
 %>
 
 first-run-all: ${firstRunTables}
@@ -28,12 +28,12 @@ clean-all: ${cleanTables}
 
 #for (table <- tables)
 first-run-${table.destinationName}:
-    $(MAKE) first-run -C ${table.destinationName}
+	$(MAKE) first-run -C ${table.destinationName}
 
 run-${table.destinationName}:
-    $(MAKE) run -C ${table.destinationName}
+	$(MAKE) run -C ${table.destinationName}
 
 clean-${table.destinationName}:
-    $(MAKE) clean -C ${table.destinationName}
+	$(MAKE) clean -C ${table.destinationName}
 
 #end
