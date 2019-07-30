@@ -68,18 +68,36 @@ object PipelineBuilder extends FileUtil with Default with LazyLogging {
         throw new RuntimeException(
           "Tables section is not found. Check the configuration (example: pipewrench-configuration.yml) file")
     }
-    writeSchemaMakeFile(configuration, templateDirectory, outputDirectory)
+    writeSchemaMakeFile(configuration, typeMapping, templateDirectory, outputDirectory)
   }
 
   private def writeSchemaMakeFile(
       configuration: Configuration,
+      typeMapping: Map[String, Map[String, String]],
       templateDirectory: String,
       outputDirectory: String): Unit = {
-    val templateFile = s"$templateDirectory/Makefile.ssp"
-    val rendered = engine.layout(templateFile, Map("tables" -> configuration.tables.get))
-    val replaced = rendered.replace("    ", "\t")
-    logger.debug(replaced)
-    writeFile(replaced, s"${scriptsDirectory(configuration, outputDirectory)}/Makefile")
+
+    //Makefile.ssp support left in for backwards compatibility
+    val makefile = s"$templateDirectory/Makefile.ssp"
+    if (fileExists(makefile)) {
+      val rendered = engine.layout(makefile, Map("tables" -> configuration.tables.get))
+      val replaced = rendered.replace("    ", "\t")
+      logger.debug(replaced)
+      writeFile(replaced, s"${scriptsDirectory(configuration, outputDirectory)}/Makefile")
+    }
+
+    val schemaFiles =
+      listFilesInDir(s"$templateDirectory").filter(file => file.getName.contains(".schema"))
+    val schemaTemplateFiles = schemaFiles.filter(f => f.getName.endsWith(".ssp"))
+    schemaTemplateFiles.foreach { templateFile =>
+      logger.info(s"Rendering file $templateFile")
+      val rendered = engine.layout(templateFile.getPath, Map("tables" -> configuration.tables.get))
+      logger.debug(s"Rendered file $rendered")
+      val fileName =
+        s"${scriptsDirectory(configuration, outputDirectory)}/${templateFile.getName.replace(".ssp", "").replace(".schema", "")}"
+      writeFile(rendered, fileName)
+      isExecutable(fileName)
+    }
   }
 
   private def isExecutable(path: String): Unit = {
