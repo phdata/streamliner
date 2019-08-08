@@ -91,7 +91,12 @@ object PipelineBuilder extends FileUtil with Default with LazyLogging {
     val schemaTemplateFiles = schemaFiles.filter(f => f.getName.endsWith(".ssp"))
     schemaTemplateFiles.foreach { templateFile =>
       logger.info(s"Rendering file $templateFile")
-      val rendered = engine.layout(templateFile.getPath, Map("tables" -> configuration.tables.get))
+      val rendered = engine.layout(
+        templateFile.getPath,
+        Map(
+          "configuration" -> configuration,
+          "tables" -> configuration.tables.get,
+          "typeMapping" -> typeMapping))
       logger.debug(s"Rendered file $rendered")
       val fileName =
         s"${scriptsDirectory(configuration, outputDirectory)}/${templateFile.getName.replace(".ssp", "").replace(".schema", "")}"
