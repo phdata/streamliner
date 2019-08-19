@@ -29,7 +29,7 @@ class Cli(args: Seq[String]) extends ScallopConf(args) {
 
     val schemaLogLevel: ScallopOption[String] =
       opt[String](
-        "schemaLogLevel",
+        "crawler-log-level",
         descr = "schema Crawler Log Level",
         required = false,
         default = Some("WARN"))
