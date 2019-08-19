@@ -7,6 +7,12 @@ Hadoop Data Pipeline Automation Tool
 Pipewrench uses [SchemaCrawler](https://www.schemacrawler.com/) to query database table metadata throught JDBC, then generates pipeline code
 from a series of templates that when executed can be used to ingest or transform data.
 
+## Installation
+
+You can find the latest version of pipewrench-scala here: https://repository.phdata.io/artifactory/list/binary/phdata/pipewrench/
+
+The artifact is a zip file containt an executable in `bin/pipewrench` and templates in `bin/templates`
+
 ## Config File
 
 Pipewrench works off the parameters in the ingest-configuration file.

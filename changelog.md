@@ -1,5 +1,14 @@
+## 2.1
+### Enhancements
+- Make configuartion & typeMapping variables available to .schema.ssp templates. 44ded41b5c91b9d89038e04f7571fb9160a5fb85
+- Adjust schema crawler logging level from the cli using `--crawler-log-level`. 9cc54bd1c01edfd7272b1505f7a315aa426d91b0
+- Add a default logback.xml file. e8d4957e8952b378e35800e2fcfe8abf07a009ad
+- Strip the 'identity' suffix from some columns. d81b10a076ebe4a60bab8fd87471b9f011cc3568
+- Add validate rowcount functionality in the truncate-reload templates. f6f4c99cc45f27775c86129642c308d3f5d89340
+- Preserve the order of tables and columns when writing config files. 8cb8b1bc9f7a29f071b1f71558eec543f76c8d6c
+
 ## 2.0
-####Added:
+### Enhancments:
 - Full integration testing of pipelines `make -C integration-tests/ itest`.
 - Enum type in type-mapping.
 - Mysql .jar in `lib/` directory.
@@ -11,7 +20,7 @@
 - Log currently rendering file.
   - If it fails we can look up the log stack and see exactly which template failed.
 
-####Changed:
+### Breaking Changes:
 - Directory structure for script and config creation.
 - Shortened `--configuration` to `--config` for the lazy. 
   - Use the subcommand `schema` to refer to all things external db schema related in place of `configuration`.
@@ -27,7 +36,7 @@
 - Refactored the version to read from file.
 
   
-####Fixes:
+### Bug Fixes:
 - OrderColumns function to create-report-table in the incremental-with-kudu template to fix ordering of columns in Kudu table ddl.
 - Removed newline created in incremental-with-kudu/create-sqoop-job.sh.ssp.
 - False targets in make file for incremental-with-kudu.
