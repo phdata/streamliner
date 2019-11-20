@@ -11,7 +11,7 @@ isSnapshot := snapshot
 organization := "io.phdata.pipewrench"
 scalaVersion := "2.11.12"
 
-val schemaCrawlerVersion = "15.03.04"
+val schemaCrawlerVersion = "16.2.5"
 
 lazy val root = (project in file("."))
   .settings(scalafmtOnCompile := true)
