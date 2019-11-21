@@ -84,7 +84,7 @@ object TemplateFunction {
   def sourceColumns(configuration: Configuration, table: TableDefinition): String =
     table.columns
       .map { column =>
-        val f = if (configuration.jdbc.driverClass.get.contains("oracle")) {
+        val f = if (configuration.jdbc.driverClass.get.contains("oracle") || configuration.jdbc.driverClass.get.contains("sqlserver")) {
           column.sourceName + " AS " + "\"" + column.destinationName + "\""
         } else {
           "`" + column.sourceName + "` AS " + column.destinationName

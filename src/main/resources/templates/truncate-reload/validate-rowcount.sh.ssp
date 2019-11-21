@@ -19,7 +19,7 @@ limitations under the License.
 
 set -euo pipefail
 
-SOURCE_ROWCOUNT=
+SOURCE_ROWCOUNT=0
 
 # Count number of rows in source
 DRIVER="${configuration.jdbc.driverClass}"
@@ -28,17 +28,17 @@ if [[ $DRIVER =~ "sqlserver" ]]; then
     --connect '${configuration.jdbc.url}' \
     --username '${configuration.jdbc.username}' \
     --password-file ${configuration.jdbc.passwordFile} \
-    --query 'select count(*) FROM ${configuration.jdbc.schema}.[${table.sourceName}]' | grep -o '[[:digit:]]*')
+    --query 'select count(*) FROM [${configuration.jdbc.schema}].[${table.sourceName}]' | grep -o '\|\s[0-9]*\s\|' | grep -Eo '[[:digit:]]*')
 else
   SOURCE_ROWCOUNT=$(sqoop-eval \
     --connect '${configuration.jdbc.url}' \
     --username '${configuration.jdbc.username}' \
     --password-file ${configuration.jdbc.passwordFile} \
-    --query 'select count(*) FROM ${configuration.jdbc.schema}.${table.sourceName}' | grep -o '[[:digit:]]*')
+    --query 'select count(*) FROM ${configuration.jdbc.schema}.${table.sourceName}' | grep -o '\|\s[0-9]*\s\|' | grep -Eo '[[:digit:]]*')
 fi
 
 # Check target table
-TARGET_ROWCOUNT=$(${configuration.hadoop.impalaShellCommand} --query "SELECT COUNT(*) FROM ${configuration.hadoop.stagingDatabase.name }.\`${table.destinationName}\`;" -B 2> /dev/null)
+TARGET_ROWCOUNT=$(${configuration.hadoop.impalaShellCommand} --query "SELECT COUNT(*) FROM ${configuration.hadoop.reportingDatabase.name }.\`${table.destinationName}\`;" -B 2> /dev/null)
 
 echo "source count: $SOURCE_ROWCOUNT"
 echo "target count: $TARGET_ROWCOUNT"
