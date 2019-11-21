@@ -28,6 +28,9 @@ import io.phdata.pipewrench.util.FileUtil
 import sf.util.Utility.applyApplicationLogLevel
 import java.util.logging.Level
 
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.fs.Path
+
 import scala.io.StdIn
 
 object App extends YamlSupport with Default with FileUtil with LazyLogging {
@@ -36,12 +39,21 @@ object App extends YamlSupport with Default with FileUtil with LazyLogging {
     val cli = new Cli(args)
     cli.subcommand match {
       case Some(cli.schema) =>
-        val databasePassword = cli.schema.databasePassword.toOption match {
-          case Some(password) => password
+        val databasePassword = cli.schema.jceksPath.toOption match {
+          case Some(path) =>
+            val alias = cli.schema.keystoreAlias()
+            val conf = new Configuration(true)
+            conf.set("hadoop.security.credential.provider.path", path)
+            conf.getPassword(alias).mkString("")
           case None =>
-            print("Enter database password: ")
-            StdIn.readLine()
+            cli.schema.databasePassword.toOption match {
+              case Some(password) => password
+              case None =>
+                print("Enter database password: ")
+                StdIn.readLine()
+            }
         }
+
         val schemaLogLevel = cli.schema.schemaLogLevel.toOption match {
           case Some("OFF") => Level.OFF
           case Some("SEVERE" | "FATAL" | "ERROR" | "ERR") => Level.SEVERE

@@ -31,6 +31,8 @@ package object configuration {
       url: String,
       username: String,
       passwordFile: String,
+      jceKeyStorePath: Option[String],
+      keystoreAlias: Option[String],
       schema: String,
       tableTypes: Seq[String],
       tables: Option[Seq[Table]],

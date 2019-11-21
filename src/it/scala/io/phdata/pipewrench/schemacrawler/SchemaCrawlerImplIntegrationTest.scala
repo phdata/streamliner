@@ -31,6 +31,8 @@ class SchemaCrawlerImplIntegrationTest extends FunSuite {
     url = "jdbc:mysql://localhost:3306/employees",
     username = "root",
     passwordFile = "",
+    jceKeyStorePath=None,
+    keystoreAlias = None,
     schema = "employees",
     tableTypes = Seq("table"),
     None,

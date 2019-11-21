@@ -19,7 +19,7 @@ package io.phdata.pipewrench.configuration
 import org.scalatest.FunSuite
 
 class YamlSupportTest extends FunSuite with YamlSupport {
-  val jdbc = Jdbc(Some("driver"), "foo", "user", "pass", "schema", Seq("views"), Some(Seq()), None)
+  val jdbc = Jdbc(Some("driver"), "foo", "user", "pass", None, None, "schema", Seq("views"), Some(Seq()), None)
 
   val hadoop = Hadoop("", Database("name", "path"), Database("name", "path"))
 

@@ -38,6 +38,19 @@ hadoop:
     path: "" # Reporting database path (these can be the same as staging database if template allows)
 ```
 
+**Note**: if the hadoop credential provider is used for password storage, replace:
+
+```
+  passwordFile: "" # HDFS location of password file
+```
+
+with
+
+```
+  jceKeyStorePath: "" # HDFS location of password file
+  keystoreAlias: "" # Alias for the keystore
+```
+
 ### Type Mapping
 
 The type mapping file is used to convert data types from source to target system.

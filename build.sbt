@@ -31,7 +31,8 @@ lazy val root = (project in file("."))
       "us.fatehi" % "schemacrawler-sqlserver" % schemaCrawlerVersion,
       "guru.nidi" % "graphviz-java" % "0.8.1",
       "org.scalatra.scalate" %% "scalate-core" % "1.9.0",
-      "org.scalatest" %% "scalatest" % "3.0.5" % "it,test"
+      "org.scalatest" %% "scalatest" % "3.0.5" % "it,test",
+      "org.apache.hadoop" % "hadoop-common" % "2.8.3"
     )
   )
 
