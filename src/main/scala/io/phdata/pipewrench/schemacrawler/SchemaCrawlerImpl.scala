@@ -88,8 +88,7 @@ object SchemaCrawlerImpl extends FileUtil {
   }
 
   private def getConnection(jdbc: Jdbc, password: String): Connection = {
-    val connectionUrl: String = jdbc.url
-    val dataSource: DatabaseConnectionSource = new DatabaseConnectionSource(connectionUrl)
+    val dataSource: DatabaseConnectionSource = new DatabaseConnectionSource(jdbc.url)
     dataSource.setUserCredentials(new SingleUseUserCredentials(jdbc.username, password))
     dataSource.get()
   }
