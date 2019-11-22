@@ -22,20 +22,14 @@ import java.sql.Connection
 import io.phdata.pipewrench.configuration.Jdbc
 import io.phdata.pipewrench.util.FileUtil
 import schemacrawler.schema.Catalog
-import schemacrawler.schemacrawler.RegularExpressionInclusionRule
-import schemacrawler.schemacrawler.SchemaCrawlerOptions
-import schemacrawler.schemacrawler.SchemaCrawlerOptionsBuilder
-import schemacrawler.schemacrawler.SchemaInfoLevelBuilder
+import schemacrawler.schemacrawler.{RegularExpressionInclusionRule, SchemaCrawlerOptions, SchemaCrawlerOptionsBuilder, SchemaInfoLevelBuilder}
+import schemacrawler.tools.databaseconnector.{DatabaseConnectionSource, SingleUseUserCredentials}
 import schemacrawler.tools.executable.SchemaCrawlerExecutable
 import schemacrawler.tools.integration.graph.GraphOutputFormat
-import schemacrawler.tools.options.OutputFormat
-import schemacrawler.tools.options.OutputOptionsBuilder
-import schemacrawler.tools.options.TextOutputFormat
-import schemacrawler.tools.databaseconnector.DatabaseConnectionSource
-import schemacrawler.tools.databaseconnector.SingleUseUserCredentials
+import schemacrawler.tools.options.{OutputFormat, OutputOptionsBuilder, TextOutputFormat}
 import schemacrawler.utility.SchemaCrawlerUtility
 
-import collection.JavaConverters._
+import scala.collection.JavaConverters._
 
 object SchemaCrawlerImpl extends FileUtil {
 
@@ -88,7 +82,7 @@ object SchemaCrawlerImpl extends FileUtil {
   }
 
   private def getConnection(jdbc: Jdbc, password: String): Connection = {
-    val dataSource: DatabaseConnectionSource = new DatabaseConnectionSource(jdbc.url)
+    val dataSource = new DatabaseConnectionSource(jdbc.url)
     dataSource.setUserCredentials(new SingleUseUserCredentials(jdbc.username, password))
     dataSource.get()
   }
