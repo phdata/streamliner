@@ -1,3 +1,22 @@
+## 2.2
+####Added:
+- Added sqlserver in source column mapping
+- Jceks implementation
+- Implementation of JCEKS Retrieval in case customers use the Hadoop credential store.
+
+####Changed:
+- Updated database name in the templates
+- Updated Schemacrawler version
+
+## 2.1
+####Added:
+- Make configuartion & typeMapping variables available to .schema.ssp templates. 
+- Adjust schema crawler logging level from the cli using `--crawler-log-level`. 
+- Add a default logback.xml file. e8d4957e8952b378e35800e2fcfe8abf07a009ad
+- Strip the 'identity' suffix from some columns. d81b10a076ebe4a60bab8fd87471b9f011cc3568
+- Add validate rowcount functionality in the truncate-reload templates. 
+- Preserve the order of tables and columns when writing config files. 
+
 ## 2.0
 ####Added:
 - Full integration testing of pipelines `make -C integration-tests/ itest`.
