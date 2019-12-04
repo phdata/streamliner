@@ -1,3 +1,21 @@
+## 2.2
+####Added:
+- Added sqlserver in source column mapping. 69bc1e4569634921daf8ceab40b44d254413d189
+- Ability to use a JCECKS keystore for Sqoop authentication. eb944d32693c42c512ff1fb1399ef6dcb18a9089
+- Upgrade the schemacrawler version to 16.2.5. 276a1adb486ef558a91c6d41bc1b8f86a012fcce
+
+####Changed:
+- Fixed a bug where a wrong database name was used in a table count template.  69bc1e4569634921daf8ceab40b44d254413d189
+
+## 2.1
+####Added:
+- Make configuartion & typeMapping variables available to .schema.ssp templates. 
+- Adjust schema crawler logging level from the cli using `--crawler-log-level`. 
+- Add a default logback.xml file. e8d4957e8952b378e35800e2fcfe8abf07a009ad
+- Strip the 'identity' suffix from some columns. d81b10a076ebe4a60bab8fd87471b9f011cc3568
+- Add validate rowcount functionality in the truncate-reload templates. 
+- Preserve the order of tables and columns when writing config files. 
+
 ## 2.0
 ####Added:
 - Full integration testing of pipelines `make -C integration-tests/ itest`.
