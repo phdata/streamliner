@@ -123,9 +123,9 @@ object ConfigurationBuilder extends LazyLogging {
     )
 
   private def checkNumberOfMappers(table: Table) = {
-    table.numberOfPartitions match {
-      case Some(numberOfPartitions) =>
-        if (numberOfPartitions > 1) {
+    table.numberOfMappers match {
+      case Some(numberOfMappers) =>
+        if (numberOfMappers > 1) {
           if (table.splitByColumn.isEmpty) {
             throw new RuntimeException(
               s"Table: $table, has number of mappers greater than 1 with no splitByColumn defined Sqoop import will fail for this table")
