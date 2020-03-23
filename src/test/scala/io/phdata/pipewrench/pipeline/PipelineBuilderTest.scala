@@ -44,4 +44,14 @@ class PipelineBuilderTest extends FunSuite with YamlSupport {
       "target/incremental-with-kudu")
   }
 
+  test("Render snowflake-dms-cdc templates") {
+    val configuration = readConfigurationFile("src/test/resources/incremental-with-kudu.yml")
+    val typeMapping = readTypeMappingFile("src/main/resources/type-mapping.yml")
+    PipelineBuilder.build(
+      configuration,
+      typeMapping,
+      "src/main/resources/templates/",
+      "target/snowflake-dms-cdc")
+  }
+
 }

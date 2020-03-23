@@ -19,12 +19,23 @@ package io.phdata.pipewrench.configuration
 import org.scalatest.FunSuite
 
 class YamlSupportTest extends FunSuite with YamlSupport {
-  val jdbc = Jdbc(Some("driver"), "foo", "user", "pass", None, None, "schema", Seq("views"), Some(Seq()), None)
 
-  val hadoop = Hadoop("", Database("name", "path"), Database("name", "path"))
+  val jdbc = Jdbc(
+    Some("driver"),
+    "foo",
+    "user",
+    "pass",
+    None,
+    None,
+    "schema",
+    Seq("views"),
+    Some(Seq()),
+    None)
+
+  val hadoop = Hadoop("", Database("name", Some("path")), Database("name", Some("path")))
 
   val configuration =
-    Configuration(name = "foo", environment = "dev", pipeline = "p1", jdbc, hadoop)
+    Configuration(name = "foo", environment = "dev", pipeline = "p1", jdbc, Some(hadoop))
 
   val typeMapping = Map(
     "bigint" -> Map(
