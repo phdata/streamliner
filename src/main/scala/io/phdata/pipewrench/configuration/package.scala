@@ -45,9 +45,13 @@ package object configuration {
       reportingDatabase: Database)
 
   case class Snowflake(
-      snowSqlCommand: String,
-      stagingDatabase: Database,
-      reportingDatabase: Database)
+                       snowSqlCommand: String,
+                       storagePath: String,
+                       storageIntegration: String,
+                       warehouse: String,
+                       taskSchedule: String,
+                       stagingDatabase: Database,
+                       reportingDatabase: Database)
 
   case class Database(name: String,
                       path: Option[String] = None,
