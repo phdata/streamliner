@@ -14,5 +14,4 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --%>
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
-
 DROP SCHEMA IF EXISTS "${configuration.snowflake.get.reportingDatabase.name}"."${configuration.snowflake.get.reportingDatabase.schema.get}";

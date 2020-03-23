@@ -15,5 +15,4 @@ limitations under the License.
 --%>
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
-
 DROP TABLE IF EXISTS "${configuration.snowflake.get.reportingDatabase.name}"."${configuration.snowflake.get.reportingDatabase.schema.get}"."${table.destinationName}";

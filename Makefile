@@ -13,7 +13,7 @@
 # limitations under the License.
 
 package:
-	sbt universal:packageBin
+	sbt clean universal:packageBin
 
 clean: remove-install
 	sbt clean

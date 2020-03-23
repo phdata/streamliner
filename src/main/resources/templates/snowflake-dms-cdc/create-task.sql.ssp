@@ -15,12 +15,10 @@ limitations under the License.
 --%>
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
-
-<% val primaryKeyStmt = table.primaryKeys.map(k => s"t.\"$k\" = s.\"$k\"").mkString(" AND ")%>
+<% val primaryKeyStmt = table.primaryKeys.map(k => s"t.$k = s.$k").mkString(" AND ")%>
 <% val columnStr = table.columns.map(_.destinationName).mkString(", ") %>
-<% val columnSourceStr = table.columns.map(column => s"s.\"${column.destinationName}\"").mkString(", ")%>
-<% val updateColumnStr = table.columns.map(column => s"\"${column.destinationName}\" = s.\"${column.destinationName}\"").mkString(", ")%>
-
+<% val columnSourceStr = table.columns.map(column => s"s.${column.destinationName}").mkString(", ")%>
+<% val updateColumnStr = table.columns.map(column => s"${column.destinationName} = s.${column.destinationName}").mkString(", ")%>
 CREATE TASK IF NOT EXISTS "${configuration.snowflake.get.stagingDatabase.name}"."${configuration.snowflake.get.stagingDatabase.schema.get}"."${table.destinationName}_TASK"
     WAREHOUSE = "${configuration.snowflake.get.warehouse}"
     SCHEDULE = '${configuration.snowflake.get.taskSchedule}'

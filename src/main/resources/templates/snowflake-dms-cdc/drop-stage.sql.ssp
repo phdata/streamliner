@@ -14,5 +14,4 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --%>
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
-
 DROP STAGE IF EXISTS "${configuration.snowflake.get.stagingDatabase.name}"."${configuration.snowflake.get.stagingDatabase.schema.get}"."${configuration.name}_STAGE";

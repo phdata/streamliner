@@ -15,10 +15,8 @@ limitations under the License.
 --%>
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
-
-<% val destColumnStr = table.columns.map(column => s"\"${column.destinationName}\"").mkString(", ")%>
-<% val sourceColumnStr = table.columns.map(column => s"$1:${column.sourceName}::${column.dataType}").mkString(", ")%>
-
+<% val destColumnStr = table.columns.map(column => s"${column.destinationName}").mkString(", ")%>
+<% val sourceColumnStr = table.columns.map(column => s"$$1:${column.sourceName}::${column.dataType}").mkString(", ")%>
 CREATE PIPE IF NOT EXISTS "${configuration.snowflake.get.stagingDatabase.name}"."${configuration.snowflake.get.stagingDatabase.schema.get}"."${table.destinationName}_PIPE"
 AUTO_INGEST = true
 AS

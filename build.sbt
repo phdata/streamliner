@@ -69,6 +69,13 @@ mappings in Universal ++= {
     }
 }
 
+mappings in Universal ++= {
+  ((sourceDirectory in Compile).value / "resources" / "templates" / "snowflake-dms-cdc" * "*").get
+    .map { f =>
+      f -> s"templates/snowflake-dms-cdc/${f.name}"
+    }
+}
+
 enablePlugins(JavaServerAppPackaging, UniversalDeployPlugin, RpmArtifactoryDeployPlugin)
 
 mainClass in Compile := Some("io.phdata.pipewrench.App")

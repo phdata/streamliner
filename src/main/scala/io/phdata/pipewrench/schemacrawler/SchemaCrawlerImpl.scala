@@ -22,11 +22,17 @@ import java.sql.Connection
 import io.phdata.pipewrench.configuration.Jdbc
 import io.phdata.pipewrench.util.FileUtil
 import schemacrawler.schema.Catalog
-import schemacrawler.schemacrawler.{RegularExpressionInclusionRule, SchemaCrawlerOptions, SchemaCrawlerOptionsBuilder, SchemaInfoLevelBuilder}
-import schemacrawler.tools.databaseconnector.{DatabaseConnectionSource, SingleUseUserCredentials}
+import schemacrawler.schemacrawler.RegularExpressionInclusionRule
+import schemacrawler.schemacrawler.SchemaCrawlerOptions
+import schemacrawler.schemacrawler.SchemaCrawlerOptionsBuilder
+import schemacrawler.schemacrawler.SchemaInfoLevelBuilder
+import schemacrawler.tools.databaseconnector.DatabaseConnectionSource
+import schemacrawler.tools.databaseconnector.SingleUseUserCredentials
 import schemacrawler.tools.executable.SchemaCrawlerExecutable
 import schemacrawler.tools.integration.graph.GraphOutputFormat
-import schemacrawler.tools.options.{OutputFormat, OutputOptionsBuilder, TextOutputFormat}
+import schemacrawler.tools.options.OutputFormat
+import schemacrawler.tools.options.OutputOptionsBuilder
+import schemacrawler.tools.options.TextOutputFormat
 import schemacrawler.utility.SchemaCrawlerUtility
 
 import scala.collection.JavaConverters._
