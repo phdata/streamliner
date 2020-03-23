@@ -15,7 +15,7 @@ limitations under the License.
 --%>
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
-impala-cmd=${configuration.hadoop.impalaShellCommand} -f
+impala-cmd=${configuration.hadoop.get.impalaShellCommand} -f
 
 alter-report-table-location: alter-report-table-location.sh
     ./run-with-logging.sh ./alter-report-table-location.sh $@

@@ -18,7 +18,7 @@ limitations under the License.
 --%>
 set -euo pipefail
 
-DIRECTORY="${configuration.hadoop.stagingDatabase.path}/arch_${table.destinationName}/.meta"
+DIRECTORY="${configuration.hadoop.get.stagingDatabase.path.get}/arch_${table.destinationName}/.meta"
 
 if $(hdfs dfs -test -d $DIRECTORY); then
     echo "Schema file already exists in $DIRECTORY"

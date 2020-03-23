@@ -38,7 +38,7 @@ else
 fi
 
 # Check target table
-TARGET_ROWCOUNT=$(${configuration.hadoop.impalaShellCommand} --query "SELECT COUNT(*) FROM ${configuration.hadoop.reportingDatabase.name }.\`${table.destinationName}\`;" -B 2> /dev/null)
+TARGET_ROWCOUNT=$(${configuration.hadoop.get.impalaShellCommand} --query "SELECT COUNT(*) FROM ${configuration.hadoop.get.reportingDatabase.name }.\`${table.destinationName}\`;" -B 2> /dev/null)
 
 echo "source count: $SOURCE_ROWCOUNT"
 echo "target count: $TARGET_ROWCOUNT"

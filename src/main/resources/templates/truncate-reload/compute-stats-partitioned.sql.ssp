@@ -15,4 +15,4 @@ limitations under the License.
 --%>
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
-COMPUTE INCREMENTAL STATS `${configuration.hadoop.stagingDatabase.name}`.`part_${table.destinationName}`;
+COMPUTE INCREMENTAL STATS `${configuration.hadoop.get.stagingDatabase.name}`.`part_${table.destinationName}`;

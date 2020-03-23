@@ -15,7 +15,7 @@ limitations under the License.
 --%>
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
-impala-cmd=${configuration.hadoop.impalaShellCommand} -f
+impala-cmd=${configuration.hadoop.get.impalaShellCommand} -f
 
 archive-staging-data: archive-staging-data.sh
     ./run-with-logging.sh ./archive-staging-data.sh $@

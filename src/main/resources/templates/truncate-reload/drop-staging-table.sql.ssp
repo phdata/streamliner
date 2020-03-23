@@ -15,4 +15,4 @@ limitations under the License.
 --%>
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
-DROP TABLE IF EXISTS `${configuration.hadoop.stagingDatabase.name}`.`stg_${table.destinationName}` PURGE;
+DROP TABLE IF EXISTS `${configuration.hadoop.get.stagingDatabase.name}`.`stg_${table.destinationName}` PURGE;

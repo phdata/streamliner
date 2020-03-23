@@ -23,7 +23,8 @@ package object configuration {
       environment: String,
       pipeline: String,
       jdbc: Jdbc,
-      hadoop: Hadoop,
+      hadoop: Option[Hadoop] = None,
+      snowflake: Option[Snowflake] = None,
       tables: Option[Seq[TableDefinition]] = None)
 
   case class Jdbc(
@@ -43,7 +44,14 @@ package object configuration {
       stagingDatabase: Database,
       reportingDatabase: Database)
 
-  case class Database(name: String, path: String)
+  case class Snowflake(
+      snowSqlCommand: String,
+      stagingDatabase: Database,
+      reportingDatabase: Database)
+
+  case class Database(name: String,
+                      path: Option[String] = None,
+                      schema: Option[String] = None)
 
   case class Table(
       name: String,

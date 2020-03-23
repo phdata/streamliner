@@ -18,7 +18,7 @@ limitations under the License.
 --%>
 set -euo pipefail
 
-DIRECTORY="${configuration.hadoop.stagingDatabase.path}/stg_${table.destinationName}"
+DIRECTORY="${configuration.hadoop.get.stagingDatabase.path.get}/stg_${table.destinationName}"
 
 if $(hdfs dfs -test -d $DIRECTORY); then
     hdfs dfs -rm -r -f $DIRECTORY

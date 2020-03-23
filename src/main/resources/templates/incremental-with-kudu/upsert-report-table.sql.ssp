@@ -18,7 +18,7 @@ limitations under the License.
 <%@ val typeMapping: Map[String, Map[String, String]]%>
 <% val columns = io.phdata.pipewrench.util.TemplateFunction.columnOrCast(configuration, table, typeMapping, "AVRO", "KUDU") %>
 set sync_ddl=1;
-REFRESH `${configuration.hadoop.stagingDatabase.name}`.`stg_${table.destinationName}`;
-UPSERT INTO `${configuration.hadoop.reportingDatabase.name}`.`${table.destinationName}` SELECT
+REFRESH `${configuration.hadoop.get.stagingDatabase.name}`.`stg_${table.destinationName}`;
+UPSERT INTO `${configuration.hadoop.get.reportingDatabase.name}`.`${table.destinationName}` SELECT
 ${columns}
-FROM `${configuration.hadoop.stagingDatabase.name}`.`stg_${table.destinationName}` ORDER BY `${table.checkColumn.get}` ASC;
+FROM `${configuration.hadoop.get.stagingDatabase.name}`.`stg_${table.destinationName}` ORDER BY `${table.checkColumn.get}` ASC;

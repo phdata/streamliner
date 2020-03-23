@@ -15,7 +15,7 @@ limitations under the License.
 --%>
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
-impala-cmd=${configuration.hadoop.impalaShellCommand} -f
+impala-cmd=${configuration.hadoop.get.impalaShellCommand} -f
 
 compute-stats-kudu: compute-stats-kudu.sql
     $(impala-cmd) compute-stats-kudu.sql

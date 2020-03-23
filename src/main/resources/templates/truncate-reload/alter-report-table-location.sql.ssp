@@ -16,4 +16,4 @@ limitations under the License.
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
 <% val partition = "${var:ingest_partition}"%>
-ALTER TABLE `${configuration.hadoop.reportingDatabase.name}`.`${table.destinationName}` SET LOCATION '${configuration.hadoop.stagingDatabase.path}/part_${table.destinationName}/ingest_partition=${partition}/';
+ALTER TABLE `${configuration.hadoop.get.reportingDatabase.name}`.`${table.destinationName}` SET LOCATION '${configuration.hadoop.get.stagingDatabase.path.get}/part_${table.destinationName}/ingest_partition=${partition}/';

@@ -13,8 +13,8 @@ sqoop import \
     --password-file '${configuration.jdbc.passwordFile}' \\
     --driver '${configuration.jdbc.driverClass.get}' \\
     --delete-target-dir \\
-    --target-dir '${configuration.hadoop.stagingDatabase.path}/stg_${table.destinationName}/' \\
-    --temporary-rootdir '${configuration.hadoop.stagingDatabase.path}/stg_${table.destinationName}/' \\
+    --target-dir '${configuration.hadoop.get.stagingDatabase.path.get}/stg_${table.destinationName}/' \\
+    --temporary-rootdir '${configuration.hadoop.get.stagingDatabase.path.get}/stg_${table.destinationName}/' \\
     --as-avrodatafile \\
     --fetch-size 10000 \\
     --compress \\

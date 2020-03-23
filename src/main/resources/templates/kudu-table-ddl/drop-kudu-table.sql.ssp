@@ -15,4 +15,4 @@ limitations under the License.
 --%>
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
-DROP TABLE IF EXISTS `${configuration.hadoop.reportingDatabase.name}`.`${table.sourceName}`;
+DROP TABLE IF EXISTS `${configuration.hadoop.get.reportingDatabase.name}`.`${table.sourceName}`;

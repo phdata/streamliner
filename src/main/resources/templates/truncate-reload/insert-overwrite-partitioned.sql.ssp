@@ -18,7 +18,7 @@ limitations under the License.
 <%@ val typeMapping: Map[String, Map[String, String]]%>
 <% val columns = io.phdata.pipewrench.util.TemplateFunction.columnOrCast(configuration, table, typeMapping, "AVRO", "PARQUET") %>
 <% val partition = "${var:ingest_partition}"%>
-INSERT OVERWRITE TABLE `${configuration.hadoop.stagingDatabase.name}`.`part_${table.destinationName}` PARTITION (ingest_partition=${partition})
+INSERT OVERWRITE TABLE `${configuration.hadoop.get.stagingDatabase.name}`.`part_${table.destinationName}` PARTITION (ingest_partition=${partition})
 SELECT
 ${columns}
-FROM `${configuration.hadoop.stagingDatabase.name}`.`stg_${table.destinationName}`;
+FROM `${configuration.hadoop.get.stagingDatabase.name}`.`stg_${table.destinationName}`;

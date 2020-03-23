@@ -27,8 +27,8 @@ sqoop job -D 'sqoop.metastore.client.record.password=true'  -D 'mapreduce.job.na
     --connect '${configuration.jdbc.url}' \\
     --username '${configuration.jdbc.username}' \\
     --password-file '${configuration.jdbc.passwordFile}' \\
-    --target-dir '${configuration.hadoop.stagingDatabase.path}/stg_${table.destinationName}/' \\
-    --temporary-rootdir '${configuration.hadoop.stagingDatabase.path}/stg_${table.destinationName}/' \\
+    --target-dir '${configuration.hadoop.get.stagingDatabase.path.get}/stg_${table.destinationName}/' \\
+    --temporary-rootdir '${configuration.hadoop.get.stagingDatabase.path.get}/stg_${table.destinationName}/' \\
 	--incremental append \\
     --append \\
 #if (table.splitByColumn.isDefined) 	--splitBy ${table.splitByColumn.get} \\

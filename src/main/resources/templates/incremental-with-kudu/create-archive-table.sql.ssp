@@ -17,7 +17,7 @@ limitations under the License.
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
 <%@ val typeMapping: Map[String, Map[String, String]]%>
 set sync_ddl=1;
-CREATE TABLE IF NOT EXISTS `${configuration.hadoop.stagingDatabase.name}`.`arch_${table.destinationName}` (
+CREATE TABLE IF NOT EXISTS `${configuration.hadoop.get.stagingDatabase.name}`.`arch_${table.destinationName}` (
 <%
     val columnDefinitions = table.columns.map {
     column =>
@@ -35,7 +35,7 @@ ${columnDefinitions}
 PARTITIONED BY (ingest_date STRING)
 COMMENT '${table.comment.getOrElse("")}'
 STORED AS AVRO
-LOCATION '${configuration.hadoop.stagingDatabase.path}/arch_${table.destinationName}'
+LOCATION '${configuration.hadoop.get.stagingDatabase.path.get}/arch_${table.destinationName}'
 TBLPROPERTIES(
-'avro.schema.url' = '${configuration.hadoop.stagingDatabase.path}/arch_${table.destinationName}/.meta/arch_${table.destinationName}.avsc'
+'avro.schema.url' = '${configuration.hadoop.get.stagingDatabase.path.get}/arch_${table.destinationName}/.meta/arch_${table.destinationName}.avsc'
 )
