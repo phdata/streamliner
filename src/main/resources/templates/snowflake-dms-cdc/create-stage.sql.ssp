@@ -14,6 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --%>
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
-CREATE STAGE IF NOT EXISTS "${configuration.snowflake.get.stagingDatabase.name}"."${configuration.snowflake.get.stagingDatabase.schema.get}"."${configuration.name}_STAGE"
+CREATE STAGE IF NOT EXISTS ${configuration.snowflake.get.stagingDatabase.name}.${configuration.snowflake.get.stagingDatabase.schema.get}.${configuration.name}_stage
     URL = '${configuration.snowflake.get.storagePath}'
-    STORAGE_INTEGRATION = "${configuration.snowflake.get.storageIntegration}";
+    STORAGE_INTEGRATION = ${configuration.snowflake.get.storageIntegration};

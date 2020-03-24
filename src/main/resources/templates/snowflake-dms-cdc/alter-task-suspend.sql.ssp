@@ -15,4 +15,4 @@ limitations under the License.
 --%>
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
-ALTER TASK "${configuration.snowflake.get.stagingDatabase.name}"."${configuration.snowflake.get.stagingDatabase.schema.get}"."${table.destinationName}_TASK" SUSPEND;
+ALTER TASK ${configuration.snowflake.get.stagingDatabase.name}.${configuration.snowflake.get.stagingDatabase.schema.get}.${table.destinationName}_TASK SUSPEND;

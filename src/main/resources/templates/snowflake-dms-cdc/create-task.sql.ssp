@@ -19,13 +19,13 @@ limitations under the License.
 <% val columnStr = table.columns.map(_.destinationName).mkString(", ") %>
 <% val columnSourceStr = table.columns.map(column => s"s.${column.destinationName}").mkString(", ")%>
 <% val updateColumnStr = table.columns.map(column => s"${column.destinationName} = s.${column.destinationName}").mkString(", ")%>
-CREATE TASK IF NOT EXISTS "${configuration.snowflake.get.stagingDatabase.name}"."${configuration.snowflake.get.stagingDatabase.schema.get}"."${table.destinationName}_TASK"
-    WAREHOUSE = "${configuration.snowflake.get.warehouse}"
+CREATE TASK IF NOT EXISTS ${configuration.snowflake.get.stagingDatabase.name}.${configuration.snowflake.get.stagingDatabase.schema.get}.${table.destinationName}_task
+    WAREHOUSE = ${configuration.snowflake.get.warehouse}
     SCHEDULE = '${configuration.snowflake.get.taskSchedule}'
-    WHEN SYSTEM$STREAM_HAS_DATA('${table.destinationName}_STREAM')
+    WHEN SYSTEM$STREAM_HAS_DATA('${table.destinationName}_stream')
     AS
-        MERGE INTO "${configuration.snowflake.get.reportingDatabase.name}"."${configuration.snowflake.get.reportingDatabase.schema.get}"."${table.destinationName}" t
-            USING "${configuration.snowflake.get.stagingDatabase.name}"."${configuration.snowflake.get.stagingDatabase.schema}"."${table.destinationName}_STREAM" s ON ${primaryKeyStmt}
-            WHEN NOT MATCHED AND s.OPERATION = 'I' THEN INSERT (${columnStr}) VALUES (${columnSourceStr})
-            WHEN MATCHED AND s.OPERATION = 'U' THEN UPDATE SET ${updateColumnStr}
-            WHEN MATCHED AND s.OPERATION = 'D' THEN DELETE;
+        MERGE INTO ${configuration.snowflake.get.reportingDatabase.name}.${configuration.snowflake.get.reportingDatabase.schema.get}.${table.destinationName} t
+            USING ${configuration.snowflake.get.stagingDatabase.name}.${configuration.snowflake.get.stagingDatabase.schema}.${table.destinationName}_stream s ON ${primaryKeyStmt}
+            WHEN NOT MATCHED AND s.dms_operation = 'I' THEN INSERT (${columnStr}, dms_operation, dms_ts) VALUES (${columnSourceStr}, s.dms_operation, s.dms_ts)
+            WHEN MATCHED AND s.dms_operation = 'U' THEN UPDATE SET ${updateColumnStr}, dms_operation = s.dms_operation, dms_ts = s.dms_ts
+            WHEN MATCHED AND s.dms_operation = 'D' THEN DELETE;

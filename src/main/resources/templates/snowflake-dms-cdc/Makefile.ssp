@@ -20,8 +20,11 @@ snowsql-cmd=${configuration.snowflake.get.snowSqlCommand} -f
 alter-task-resume: alter-task-resume.sql
     $(snowsql-cmd) alter-task-resume.sql
 
-alter-task-resume: alter-task-suspend.sql
+alter-task-suspend: alter-task-suspend.sql
     $(snowsql-cmd) alter-task-suspend.sql
+
+copy-into-stg: copy-into-stg.sql
+    $(snowsql-cmd) copy-into-stg.sql
 
 create-report-schema: create-report-schema.sql
     $(snowsql-cmd) create-report-schema.sql
@@ -78,8 +81,10 @@ first-run:
     $(MAKE) create-reporting-table
     $(MAKE) create-stage
     $(MAKE) create-stream
+    $(MAKE) copy-into-stg
     $(MAKE) create-snowpipe
     $(MAKE) create-task
+    $(MAKE) alter-task-resume
 
 run:
     $(MAKE) alter-task-resume
