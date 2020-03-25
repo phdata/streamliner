@@ -26,6 +26,6 @@ CREATE TASK IF NOT EXISTS ${configuration.snowflake.get.stagingDatabase.name}.${
     AS
         MERGE INTO ${configuration.snowflake.get.reportingDatabase.name}.${configuration.snowflake.get.reportingDatabase.schema.get}.${table.destinationName} t
             USING ${configuration.snowflake.get.stagingDatabase.name}.${configuration.snowflake.get.stagingDatabase.schema}.${table.destinationName}_stream s ON ${primaryKeyStmt}
-            WHEN NOT MATCHED AND s.dms_operation = 'I' OR s.dms_operation IS NULL THEN INSERT (${columnStr}, dms_operation, dms_ts) VALUES (${columnSourceStr}, s.dms_operation, s.dms_ts)
+            WHEN NOT MATCHED THEN INSERT (${columnStr}, dms_operation, dms_ts) VALUES (${columnSourceStr}, s.dms_operation, s.dms_ts)
             WHEN MATCHED AND s.dms_operation = 'U' THEN UPDATE SET ${updateColumnStr}, dms_operation = s.dms_operation, dms_ts = s.dms_ts
             WHEN MATCHED AND s.dms_operation = 'D' THEN DELETE;
