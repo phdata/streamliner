@@ -18,7 +18,6 @@ package io.phdata.pipewrench
 
 import java.io.FileNotFoundException
 
-import com.typesafe.scalalogging.LazyLogging
 import io.phdata.pipewrench.configuration.ConfigurationBuilder
 import io.phdata.pipewrench.configuration.Default
 import io.phdata.pipewrench.configuration.YamlSupport
@@ -30,10 +29,13 @@ import java.util.logging.Level
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
+import org.slf4j.LoggerFactory
 
 import scala.io.StdIn
 
-object App extends YamlSupport with Default with FileUtil with LazyLogging {
+object App extends YamlSupport with Default with FileUtil {
+
+  private val logger = LoggerFactory.getLogger(App.getClass)
 
   def main(args: Array[String]): Unit = {
     val cli = new Cli(args)

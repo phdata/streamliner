@@ -21,11 +21,14 @@ import java.io.FileWriter
 import java.nio.file.Files
 import java.nio.file.Paths
 
-import com.typesafe.scalalogging.LazyLogging
+import org.apache.hadoop.fs.FileUtil
+import org.slf4j.LoggerFactory
 
 import scala.io.Source
 
-trait FileUtil extends LazyLogging {
+trait FileUtil {
+
+  private val logger = LoggerFactory.getLogger("FileUtil")
 
   def readFile(path: String): String = {
     logger.debug(s"Reading file: $path")

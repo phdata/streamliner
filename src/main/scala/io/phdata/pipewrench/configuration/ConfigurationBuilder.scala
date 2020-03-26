@@ -16,15 +16,17 @@
 
 package io.phdata.pipewrench.configuration
 
-import com.typesafe.scalalogging.LazyLogging
 import io.phdata.pipewrench.schemacrawler.SchemaCrawlerImpl
 import io.phdata.pipewrench.util.TemplateFunction
+import org.slf4j.LoggerFactory
 import schemacrawler.schema.{Column => SchemaCrawlerColumn}
 import schemacrawler.schema.{Table => SchemaCrawlerTable}
 
 import collection.JavaConverters._
 
-object ConfigurationBuilder extends LazyLogging {
+object ConfigurationBuilder {
+
+  private lazy val logger = LoggerFactory.getLogger(ConfigurationBuilder.getClass)
 
   def build(configuration: Configuration, password: String): Configuration = {
     val catalog = SchemaCrawlerImpl.getCatalog(configuration.jdbc, password)

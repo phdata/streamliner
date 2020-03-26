@@ -18,13 +18,14 @@ package io.phdata.pipewrench.pipeline
 
 import java.io.File
 
-import com.typesafe.scalalogging.LazyLogging
 import io.phdata.pipewrench.configuration._
 import io.phdata.pipewrench.util.FileUtil
 import org.fusesource.scalate.TemplateEngine
+import org.slf4j.LoggerFactory
 
-object PipelineBuilder extends FileUtil with Default with LazyLogging {
+object PipelineBuilder extends FileUtil with Default {
 
+  private lazy val logger = LoggerFactory.getLogger(PipelineBuilder.getClass)
   private lazy val engine: TemplateEngine = new TemplateEngine
 
   def build(

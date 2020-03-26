@@ -19,8 +19,8 @@ lazy val root = (project in file("."))
   .settings(
     Defaults.itSettings,
     libraryDependencies ++= Seq(
-      "ch.qos.logback" % "logback-classic" % "1.2.3",
-      "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2",
+      "org.slf4j" % "slf4j-api" % "1.7.30",
+      "org.slf4j" % "slf4j-log4j12" % "1.7.30",
       "org.rogach" %% "scallop" % "3.1.1",
       "io.circe" %% "circe-yaml" % "0.8.0",
       "io.circe" %% "circe-generic" % "0.8.0",
