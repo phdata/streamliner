@@ -77,8 +77,8 @@ drop-task: drop-task.sql
 first-run:
     $(MAKE) create-staging-schema
     $(MAKE) create-staging-table
-    $(MAKE) create-reporting-schema
-    $(MAKE) create-reporting-table
+    $(MAKE) create-report-schema
+    $(MAKE) create-report-table
     $(MAKE) create-stage
     $(MAKE) create-stream
     $(MAKE) copy-into-stg
@@ -96,5 +96,5 @@ clean:
     $(MAKE) alter-task-suspend
     $(MAKE) drop-task
     $(MAKE) drop-stream
-    $(MAKE) drop-reporting-table
+    $(MAKE) drop-report-table
     $(MAKE) drop-staging-table
