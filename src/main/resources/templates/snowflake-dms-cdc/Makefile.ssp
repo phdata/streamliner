@@ -23,8 +23,11 @@ alter-task-resume: alter-task-resume.sql
 alter-task-suspend: alter-task-suspend.sql
     $(snowsql-cmd) alter-task-suspend.sql
 
-copy-into-stg: copy-into-stg.sql
-    $(snowsql-cmd) copy-into-stg.sql
+copy-bulk-load-into-stg: copy-bulk-load-into-stg.sql
+    $(snowsql-cmd) copy-bulk-load-into-stg.sql
+
+copy-incr-load-into-stg: copy-incr-load-into-stg.sql
+    $(snowsql-cmd) copy-incr-load-into-stg.sql
 
 create-report-schema: create-report-schema.sql
     $(snowsql-cmd) create-report-schema.sql
@@ -60,7 +63,7 @@ drop-snowpipe: drop-snowpipe.sql
     $(snowsql-cmd) drop-snowpipe.sql
 
 drop-stage: drop-stage.sql
-    $(snowsql-cmd) drop-.sql
+    $(snowsql-cmd) drop-stage.sql
 
 drop-staging-schema: drop-staging-schema.sql
     $(snowsql-cmd) drop-staging-schema.sql
@@ -81,13 +84,13 @@ first-run:
     $(MAKE) create-report-table
     $(MAKE) create-stage
     $(MAKE) create-stream
-    $(MAKE) copy-into-stg
-    $(MAKE) create-snowpipe
+    $(MAKE) copy-bulk-load-into-stg
     $(MAKE) create-task
     $(MAKE) alter-task-resume
 
 run:
-    $(MAKE) alter-task-resume
+    $(MAKE) copy-incr-load-into-stg
+    $(MAKE) create-snowpipe
 
 stop:
     $(MAKE) alter-task-suspend
@@ -95,6 +98,8 @@ stop:
 clean:
     $(MAKE) alter-task-suspend
     $(MAKE) drop-task
+    $(MAKE) drop-snowpipe
     $(MAKE) drop-stream
+    $(MAKE) drop-stage
     $(MAKE) drop-report-table
     $(MAKE) drop-staging-table

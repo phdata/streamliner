@@ -16,7 +16,10 @@ limitations under the License.
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
 <% val primaryKeyStmt = table.primaryKeys.map(k => s"t.$k = s.$k").mkString(" AND ")%>
+<% val iprimaryKeyStmt = table.primaryKeys.map(k => s"i.$k = si.$k").mkString(" AND ")%>
+<% val primaryKeyStr = table.primaryKeys.map(k => s"$k").mkString(",")%>
 <% val columnStr = table.columns.map(_.destinationName).mkString(", ") %>
+<% val incolumnStr = table.columns.map(c => s"si.${c.destinationName}").mkString(", ") %>
 <% val columnSourceStr = table.columns.map(column => s"s.${column.destinationName}").mkString(", ")%>
 <% val updateColumnStr = table.columns.map(column => s"${column.destinationName} = s.${column.destinationName}").mkString(", ")%>
 CREATE TASK IF NOT EXISTS ${configuration.snowflake.get.stagingDatabase.name}.${configuration.snowflake.get.stagingDatabase.schema.get}.${table.destinationName}_task
@@ -24,8 +27,14 @@ CREATE TASK IF NOT EXISTS ${configuration.snowflake.get.stagingDatabase.name}.${
     SCHEDULE = '${configuration.snowflake.get.taskSchedule}'
     WHEN SYSTEM$STREAM_HAS_DATA('${table.destinationName}_stream')
     AS
-        MERGE INTO ${configuration.snowflake.get.reportingDatabase.name}.${configuration.snowflake.get.reportingDatabase.schema.get}.${table.destinationName} t
-            USING ${configuration.snowflake.get.stagingDatabase.name}.${configuration.snowflake.get.stagingDatabase.schema}.${table.destinationName}_stream s ON ${primaryKeyStmt}
-            WHEN NOT MATCHED THEN INSERT (${columnStr}, dms_operation, dms_ts) VALUES (${columnSourceStr}, s.dms_operation, s.dms_ts)
-            WHEN MATCHED AND s.dms_operation = 'U' THEN UPDATE SET ${updateColumnStr}, dms_operation = s.dms_operation, dms_ts = s.dms_ts
-            WHEN MATCHED AND s.dms_operation = 'D' THEN DELETE;
+    MERGE INTO ${configuration.snowflake.get.reportingDatabase.name}.${configuration.snowflake.get.reportingDatabase.schema.get}.${table.destinationName} t
+        USING ( SELECT ${incolumnStr}, si.dms_operation, i.max_dms_ts
+                FROM ${configuration.snowflake.get.stagingDatabase.name}.${configuration.snowflake.get.stagingDatabase.schema}.${table.destinationName}_stream si
+                INNER JOIN ( SELECT ${primaryKeyStr}, MAX(dms_ts) max_dms_ts
+                             FROM ${configuration.snowflake.get.stagingDatabase.name}.${configuration.snowflake.get.stagingDatabase.schema}.${table.destinationName}_stream
+                             GROUP BY ${primaryKeyStr} ) i
+                ON ${iprimaryKeyStmt} AND i.max_dms_ts = si.dms_ts ) s
+    ON ${primaryKeyStmt}
+        WHEN MATCHED AND s.dms_operation = 'U' THEN UPDATE SET ${updateColumnStr}, dms_operation = s.dms_operation, dms_ts = s.max_dms_ts
+        WHEN MATCHED AND s.dms_operation = 'D' THEN DELETE
+        WHEN NOT MATCHED AND s.dms_operation != 'D' OR s.dms_operation IS NULL THEN INSERT (${columnStr}, dms_operation, dms_ts) VALUES (${columnSourceStr}, s.dms_operation, s.max_dms_ts);

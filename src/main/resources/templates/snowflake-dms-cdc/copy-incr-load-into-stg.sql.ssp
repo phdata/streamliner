@@ -22,10 +22,7 @@ USE DATABASE ${configuration.snowflake.get.stagingDatabase.name};
 
 USE SCHEMA ${configuration.snowflake.get.stagingDatabase.schema.get};
 
-CREATE PIPE IF NOT EXISTS ${table.destinationName}_pipe
-    AUTO_INGEST = true
-    AS
-        COPY INTO ${table.destinationName}_stg (${destColumnStr}, dms_operation, dms_ts)
-            FROM ( SELECT ${sourceColumnStr}, $1:Op::STRING, $1:ts::TIMESTAMP_LTZ
-                   FROM @${configuration.name}_stage/${table.destinationName})
-        FILE_FORMAT = ( TYPE = PARQUET);
+COPY INTO departments_stg (dept_no, dept_name, dms_operation, dms_ts)
+FROM ( SELECT $1:dept_no::string, $1:dept_name::string, $1:Op::STRING, $1:ts::TIMESTAMP_LTZ
+    FROM @MYSQL_DMS_EXAMPLE_stage/departments)
+FILE_FORMAT = ( TYPE = PARQUET);
