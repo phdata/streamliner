@@ -19,21 +19,21 @@ Pipewrench works off the parameters in the ingest-configuration file.
 
 
 ```
-name: "" # Unique name for data ingestion
+name: ""        # Unique name for data ingestion
 environment: "" # Environment identifier
-pipeline: "" # Pipeline name must match a directory in the the provided template folder (ie incremental-with-kudu, kudu-table-ddl, truncate-reload)
+pipeline: ""    # Pipeline name must match a directory in the the provided template folder (ie incremental-with-kudu, kudu-table-ddl, truncate-reload)
 jdbc:
-  url: "" # JDBC Connection url
-  username: "" # JDBC Username
+  url: ""       # JDBC Connection url
+  username: ""  # JDBC Username
   passwordFile: "" # HDFS location of password file
-  schema: "" # JDBC Schema / database name
-  tableTypes: # Controls the types of tables included in the configuration output
+  schema: ""    # JDBC Schema / database name
+  tableTypes:   # Controls the types of tables included in the configuration output
     - table
     - view
-# OPTIONAL: table whitelisting
-#  tables:
-#    - name: table1
-#    - name: table2
+ OPTIONAL: table whitelisting
+  tables:
+    - name: table1
+    - name: table2
 hadoop:
   impalaShellCommand: "" # Impala shell command copied from CM
   stagingDatabase:
@@ -57,7 +57,7 @@ with
   keystoreAlias: "" # Alias for the keystore
 ```
 
-### Type Mapping
+## Type Mapping
 
 The type mapping file is used to convert data types from source to target system.
 
@@ -101,7 +101,7 @@ Generating scripts:
 pipewrench scripts --config <ingest-configuration.yml> --template-directory <template-directory> --type-mapping <type-mapping.yml>
 ```
 
-### Running Integration Tests
+## Running Integration Tests
 To run a full pipeline in an isolated docker environment:
 - Install [docker](https://docs.docker.com/install/) and [docker-compose](https://docs.docker.com/compose/install/) on your local machine.
 - Add or modify the template to test in `integration-tests/templates` (or run against current templates).
@@ -113,8 +113,8 @@ Ex. `integration-tests/templates/kudu-table-ddl.yml`
 pipeline: kudu-table-ddl
 ```
 
-### Publishing to Artifactory
-#####To publish pipewrench .zip to Artifactory
+## Publishing to Artifactory
+### To publish pipewrench .zip to Artifactory
 - Change the current version to the new version in the `version` file.
 - Using the template `build-support/artifactory.env.template`, create `build-support/artifactory.env`.
 - In the `build-support/artifactory.env` file add the necessary values for the `ARTIFACTORY_USER` and `ARTIFACTORY_TOKEN` variables.
@@ -128,7 +128,7 @@ pipeline: kudu-table-ddl
 
 The .zip will show up in [phData's Artifactory binaries](https://repository.phdata.io/artifactory/list/binary/phdata/pipewrench/)
 
-#####To publish pipewrench .jar to Artifactory
+### To publish pipewrench .jar to Artifactory
 - Create a credentials file in your home directory under `[home]/.sbt/.credentials` containing:
 ```
 realm=Artifactory Realm
