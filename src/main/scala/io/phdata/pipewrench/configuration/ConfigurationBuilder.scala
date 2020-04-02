@@ -16,6 +16,7 @@
 
 package io.phdata.pipewrench.configuration
 
+import io.phdata.pipewrench.App.writeConfiguration
 import io.phdata.pipewrench.schemacrawler.SchemaCrawlerImpl
 import io.phdata.pipewrench.util.TemplateFunction
 import org.slf4j.LoggerFactory
@@ -24,9 +25,13 @@ import schemacrawler.schema.{Table => SchemaCrawlerTable}
 
 import collection.JavaConverters._
 
-object ConfigurationBuilder {
+object ConfigurationBuilder extends YamlSupport {
 
   private lazy val logger = LoggerFactory.getLogger(ConfigurationBuilder.getClass)
+
+  def build(configurationFile: String, password: String): Configuration = {
+    build(readConfigurationFile(configurationFile), password)
+  }
 
   def build(configuration: Configuration, password: String): Configuration = {
     val catalog = SchemaCrawlerImpl.getCatalog(configuration.jdbc, password)
@@ -63,6 +68,16 @@ object ConfigurationBuilder {
 
     checkConfiguration(enhancedConfiguration)
     enhancedConfiguration
+  }
+
+  def write(configuration: Configuration, outputDirectory: Option[String] = None): Unit = {
+    writeConfiguration(configuration, outputDirectory)
+  }
+
+  def writeDocs(configuration: Configuration, databasePassword: String, outputDirectory: Option[String] = None): Unit = {
+    val path = outputDirectory.fold(s"output/${configuration.name}/docs")(p => s"$p/docs")
+    SchemaCrawlerImpl.getErdOutput(configuration.jdbc, databasePassword, path)
+    SchemaCrawlerImpl.getHtmlOutput(configuration.jdbc, databasePassword, path)
   }
 
   private def checkConfiguration(configuration: Configuration): Unit = {

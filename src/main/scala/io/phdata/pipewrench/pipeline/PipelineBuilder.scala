@@ -23,28 +23,39 @@ import io.phdata.pipewrench.util.FileUtil
 import org.fusesource.scalate.TemplateEngine
 import org.slf4j.LoggerFactory
 
-object PipelineBuilder extends FileUtil with Default {
+object PipelineBuilder extends FileUtil with YamlSupport with Default {
 
   private lazy val logger = LoggerFactory.getLogger(PipelineBuilder.getClass)
   private lazy val engine: TemplateEngine = new TemplateEngine
 
-  def build(
-      configuration: Configuration,
-      typeMapping: Map[String, Map[String, String]],
-      templateDirectory: String,
-      outputDirectory: String): Unit = {
-    val files = listFilesInDir(s"$templateDirectory/${configuration.pipeline}")
-    val templateFiles = files.filter(f => f.getName.endsWith(".ssp"))
-    val nonTemplateFiles = files.filterNot(f => f.getName.endsWith(".ssp"))
+  def build(configurationFile: String,
+            typeMappingFile: String,
+            templateDirectory: String,
+            outputDirectory: Option[String]): Unit = {
+
+    val configuration = readConfigurationFile(configurationFile)
+    val typeMapping = readTypeMappingFile(typeMappingFile)
+    build(configuration, typeMapping, templateDirectory, outputDirectory)
+  }
+
+  def build(configuration: Configuration,
+            typeMapping: Map[String, Map[String, String]],
+            templateDirectory: String,
+            outputDirectory: Option[String]): Unit = {
 
     engine.escapeMarkup = false
 
     configuration.tables match {
       case Some(tables) =>
+
+        val files = listFilesInDir(s"$templateDirectory/${configuration.pipeline}")
+        val templateFiles = files.filter(f => f.getName.endsWith(".ssp"))
+        val nonTemplateFiles = files.filterNot(f => f.getName.endsWith(".ssp"))
+
         tables.foreach { table =>
           checkConfiguration(configuration, table)
           val tableDir =
-            s"${scriptsDirectory(configuration, outputDirectory)}/${table.destinationName}"
+            s"${outputDirectory.getOrElse(s"output/${configuration.name}")}/scripts/${table.destinationName}"
           createDir(tableDir)
 
           templateFiles.foreach { templateFile =>
@@ -58,6 +69,7 @@ object PipelineBuilder extends FileUtil with Default {
             writeFile(replaced, fileName)
             isExecutable(fileName)
           }
+
           nonTemplateFiles.foreach { nonTemplateFile =>
             val content = readFile(nonTemplateFile.getPath)
             val fileName = s"$tableDir/${nonTemplateFile.getName}"
@@ -69,7 +81,7 @@ object PipelineBuilder extends FileUtil with Default {
         throw new RuntimeException(
           "Tables section is not found. Check the configuration (example: pipewrench-configuration.yml) file")
     }
-    writeSchemaMakeFile(configuration, typeMapping, templateDirectory, outputDirectory)
+    writeSchemaMakeFile(configuration, typeMapping, templateDirectory, s"${outputDirectory.getOrElse(s"output/${configuration.name}")}/scripts")
   }
 
   private def writeSchemaMakeFile(
@@ -84,7 +96,7 @@ object PipelineBuilder extends FileUtil with Default {
       val rendered = engine.layout(makefile, Map("tables" -> configuration.tables.get))
       val replaced = rendered.replace("    ", "\t")
       logger.debug(replaced)
-      writeFile(replaced, s"${scriptsDirectory(configuration, outputDirectory)}/Makefile")
+      writeFile(replaced, s"$outputDirectory/Makefile")
     }
 
     val schemaFiles =
@@ -100,7 +112,7 @@ object PipelineBuilder extends FileUtil with Default {
           "typeMapping" -> typeMapping))
       logger.debug(s"Rendered file $rendered")
       val fileName =
-        s"${scriptsDirectory(configuration, outputDirectory)}/${templateFile.getName.replace(".ssp", "").replace(".schema", "")}"
+        s"$outputDirectory/${templateFile.getName.replace(".ssp", "").replace(".schema", "")}"
       writeFile(rendered, fileName)
       isExecutable(fileName)
     }

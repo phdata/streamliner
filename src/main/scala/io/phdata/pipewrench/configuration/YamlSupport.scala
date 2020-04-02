@@ -15,48 +15,58 @@
  */
 
 package io.phdata.pipewrench.configuration
+import java.io.FileNotFoundException
+
 import io.circe.generic.AutoDerivation
 import io.circe.yaml.Printer
 import io.circe.yaml.parser
 import io.phdata.pipewrench.util.FileUtil
 import io.circe.syntax._
 
-trait YamlSupport extends FileUtil with AutoDerivation {
+trait YamlSupport extends FileUtil with Default with AutoDerivation {
 
   type TypeMapping = Map[String, Map[String, String]]
 
-  def readConfigurationFile(path: String): Configuration = parseConfiguration(readFile(path))
+  def readConfigurationFile(path: String): Configuration = {
+    if (!fileExists(path)) {
+      throw new FileNotFoundException(s"Configuration file not found: '$path'.")
+    }
 
-  protected def parseConfiguration(yaml: String): Configuration = parser.parse(yaml) match {
-    case Right(v) =>
-      v.as[Configuration] match {
-        case Right(c) => c
-        case Left(err) => throw err
-
-      }
-    case Left(err) => throw err
+    parser.parse(readFile(path)) match {
+      case Right(v) =>
+        v.as[Configuration] match {
+          case Right(c) => c
+          case Left(err) => throw err
+        }
+      case Left(err) => throw err
+    }
   }
 
-  def readTypeMappingFile(path: String): TypeMapping = parseTypeMapping(readFile(path))
+  def readTypeMappingFile(path: String): TypeMapping = {
+    if (!fileExists(path)) {
+      throw new FileNotFoundException(s"Type mapping file not found: '$path'.")
+    }
 
-  protected def parseTypeMapping(yaml: String) = parser.parse(yaml) match {
-    case Right(v) =>
-      v.as[TypeMapping] match {
-        case Right(c) => c
-        case Left(err) => throw err
-      }
-    case Left(err) => throw err
+    parser.parse(readFile(path)) match {
+      case Right(v) =>
+        v.as[TypeMapping] match {
+          case Right(c) => c
+          case Left(err) => throw err
+        }
+      case Left(err) => throw err
+    }
   }
 
-  protected def prettyPrintConfiguration(configuration: Configuration): String = {
-    val json = configuration.asJson
-    Printer(preserveOrder = true, dropNullKeys = true, mappingStyle = Printer.FlowStyle.Block)
-      .pretty(json)
-  }
+  def writeConfiguration(configuration: Configuration, path: Option[String]): Unit = {
+    val outputDir = path.fold(s"output/${configuration.name}/conf")(output => s"$output/conf")
+    createDir(outputDir)
 
-  def writeYamlFile(configuration: Configuration, path: String): Unit = {
-    val printed = prettyPrintConfiguration(configuration)
-    writeFile(printed, path)
-  }
+    val printed = Printer(
+      preserveOrder = true,
+      dropNullKeys = true,
+      mappingStyle = Printer.FlowStyle.Block
+    ).pretty(configuration.asJson)
 
+    writeFile(printed, s"$outputDir/pipewrench-configuration.yml")
+  }
 }

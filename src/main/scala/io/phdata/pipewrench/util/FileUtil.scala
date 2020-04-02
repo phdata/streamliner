@@ -16,12 +16,10 @@
 
 package io.phdata.pipewrench.util
 
-import java.io.File
-import java.io.FileWriter
+import java.io.{File, FileNotFoundException, FileWriter}
 import java.nio.file.Files
 import java.nio.file.Paths
 
-import org.apache.hadoop.fs.FileUtil
 import org.slf4j.LoggerFactory
 
 import scala.io.Source
@@ -53,7 +51,7 @@ trait FileUtil {
     if (d.exists && d.isDirectory) {
       d.listFiles.filter(_.isFile).toList
     } else {
-      List[File]()
+      throw new FileNotFoundException(s"Directory path: $path does not exist")
     }
   }
 
@@ -63,10 +61,6 @@ trait FileUtil {
       logger.debug(s"Creating directory: $path")
       f.mkdirs()
     }
-  }
-
-  def directoryExists(path: String) = {
-    fileExists(path)
   }
 
   def fileExists(path: String) = {

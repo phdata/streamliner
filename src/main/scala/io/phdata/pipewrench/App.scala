@@ -24,8 +24,6 @@ import io.phdata.pipewrench.configuration.YamlSupport
 import io.phdata.pipewrench.pipeline.PipelineBuilder
 import io.phdata.pipewrench.schemacrawler.SchemaCrawlerImpl
 import io.phdata.pipewrench.util.FileUtil
-import sf.util.Utility.applyApplicationLogLevel
-import java.util.logging.Level
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.log4j.LogManager
@@ -43,54 +41,25 @@ object App extends YamlSupport with Default with FileUtil {
     val cli = new Cli(args)
     cli.subcommand match {
       case Some(cli.schema) =>
-        val databasePassword = cli.schema.jceksPath.toOption match {
-          case Some(path) =>
-            val alias = cli.schema.keystoreAlias()
-            val conf = new Configuration(true)
-            conf.set("hadoop.security.credential.provider.path", path)
-            conf.getPassword(alias).mkString("")
-          case None =>
-            cli.schema.databasePassword.toOption match {
-              case Some(password) => password
-              case None =>
-                print("Enter database password: ")
-                StdIn.readLine()
-            }
-        }
+        val databasePassword = getPassword(
+          cli.schema.databasePassword.toOption,
+          cli.schema.jceksPath.toOption,
+          cli.schema.keystoreAlias.toOption)
 
-        val configuration = readConfigurationFile(cli.schema.filePath())
-        val outputDirectory =
-          configurationOutputDirectory(configuration, cli.schema.outputPath.toOption)
-        createDir(outputDirectory)
-        val enhancedConfiguration = ConfigurationBuilder.build(configuration, databasePassword)
-        writeYamlFile(enhancedConfiguration, s"$outputDirectory/pipewrench-configuration.yml")
+        val configuration = ConfigurationBuilder.build(cli.schema.filePath(), databasePassword)
+        ConfigurationBuilder.write(configuration, cli.schema.outputPath.toOption)
+
         if (cli.schema.createDocs()) {
-          SchemaCrawlerImpl
-            .getErdOutput(enhancedConfiguration.jdbc, databasePassword, outputDirectory)
-          SchemaCrawlerImpl
-            .getHtmlOutput(enhancedConfiguration.jdbc, databasePassword, outputDirectory)
+          ConfigurationBuilder.writeDocs(configuration, databasePassword, cli.schema.outputPath.toOption)
         }
 
       case Some(cli.produceScripts) =>
-        val configuration = readConfigurationFile(cli.produceScripts.filePath())
-        val typeMappingFile = cli.produceScripts.typeMappingFile()
-        val templateDir = cli.produceScripts.templateDirectory()
 
-        if (!fileExists(typeMappingFile)) {
-          throw new FileNotFoundException(s"Type mapping file not found: '$typeMappingFile'.")
-        }
-
-        if (!directoryExists(templateDir)) {
-          throw new FileNotFoundException(s"Template directory not found '$templateDir'")
-        }
-
-        val typeMapping = readTypeMappingFile(typeMappingFile)
-        createDir(cli.produceScripts.outputPath.getOrElse(OUTPUT_DIRECTORY))
         PipelineBuilder.build(
-          configuration,
-          typeMapping,
-          templateDir,
-          cli.produceScripts.outputPath.getOrElse(OUTPUT_DIRECTORY)
+          cli.produceScripts.filePath(),
+          cli.produceScripts.typeMappingFile(),
+          cli.produceScripts.templateDirectory(),
+          cli.produceScripts.outputPath.toOption
         )
 
       case None =>
@@ -98,4 +67,22 @@ object App extends YamlSupport with Default with FileUtil {
 
     }
   }
+
+  private def getPassword(cliPassword: Option[String], jceksPath: Option[String], keyStoreAlias: Option[String]): String = {
+    jceksPath match {
+      case Some(path) =>
+        val alias = keyStoreAlias.get
+        val conf = new Configuration(true)
+        conf.set("hadoop.security.credential.provider.path", path)
+        conf.getPassword(alias).mkString("")
+      case None =>
+        cliPassword match {
+          case Some(password) => password
+          case None =>
+            print("Enter database password: ")
+            StdIn.readLine()
+        }
+    }
+  }
+
 }

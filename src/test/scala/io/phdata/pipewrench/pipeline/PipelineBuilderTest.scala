@@ -21,37 +21,37 @@ import org.scalatest.FunSuite
 
 class PipelineBuilderTest extends FunSuite with YamlSupport {
   test("Render truncate-reload templates") {
-    val configuration = readConfigurationFile("src/test/resources/truncate-reload.yml")
-    val typeMapping = readTypeMappingFile("src/main/resources/type-mapping.yml")
     PipelineBuilder
-      .build(configuration, typeMapping, "src/main/resources/templates/", "target/truncate-reload")
+      .build(
+        "src/test/resources/truncate-reload.yml",
+        "src/main/resources/type-mapping.yml",
+        "src/main/resources/templates/",
+        Some("target/truncate-reload"))
   }
 
   test("Render kudu-table-ddl templates") {
-    val configuration = readConfigurationFile("src/test/resources/kudu-table-ddl.yml")
-    val typeMapping = readTypeMappingFile("src/main/resources/type-mapping.yml")
     PipelineBuilder
-      .build(configuration, typeMapping, "src/main/resources/templates/", "target/kudu-table-ddl")
+      .build(
+        "src/test/resources/kudu-table-ddl.yml",
+        "src/main/resources/type-mapping.yml",
+        "src/main/resources/templates/",
+        Some("target/kudu-table-ddl"))
   }
 
   test("Render incremental-with-kudu templates") {
-    val configuration = readConfigurationFile("src/test/resources/incremental-with-kudu.yml")
-    val typeMapping = readTypeMappingFile("src/main/resources/type-mapping.yml")
     PipelineBuilder.build(
-      configuration,
-      typeMapping,
+      "src/test/resources/incremental-with-kudu.yml",
+      "src/main/resources/type-mapping.yml",
       "src/main/resources/templates/",
-      "target/incremental-with-kudu")
+      Some("target/incremental-with-kudu"))
   }
 
   test("Render snowflake-dms-cdc templates") {
-    val configuration = readConfigurationFile("src/test/resources/incremental-with-kudu.yml")
-    val typeMapping = readTypeMappingFile("src/main/resources/type-mapping.yml")
     PipelineBuilder.build(
-      configuration,
-      typeMapping,
+      "src/test/resources/incremental-with-kudu.yml",
+      "src/main/resources/type-mapping.yml",
       "src/main/resources/templates/",
-      "target/snowflake-dms-cdc")
+      Some("target/snowflake-dms-cdc"))
   }
 
 }
