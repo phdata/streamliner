@@ -23,7 +23,7 @@ import io.phdata.pipewrench.util.FileUtil
 import org.fusesource.scalate.TemplateEngine
 import org.slf4j.LoggerFactory
 
-object PipelineBuilder extends FileUtil with YamlSupport with Default {
+object PipelineBuilder extends FileUtil with YamlSupport {
 
   private lazy val logger = LoggerFactory.getLogger(PipelineBuilder.getClass)
   private lazy val engine: TemplateEngine = new TemplateEngine
@@ -31,17 +31,17 @@ object PipelineBuilder extends FileUtil with YamlSupport with Default {
   def build(configurationFile: String,
             typeMappingFile: String,
             templateDirectory: String,
-            outputDirectory: Option[String]): Unit = {
+            outputDirectory: Option[String] = None): Unit = {
 
     val configuration = readConfigurationFile(configurationFile)
     val typeMapping = readTypeMappingFile(typeMappingFile)
-    build(configuration, typeMapping, templateDirectory, outputDirectory)
+    build(configuration, typeMapping, templateDirectory, outputDirectory.getOrElse(s"output/${configuration.name}/scripts"))
   }
 
   def build(configuration: Configuration,
             typeMapping: Map[String, Map[String, String]],
             templateDirectory: String,
-            outputDirectory: Option[String]): Unit = {
+            outputDirectory: String): Unit = {
 
     engine.escapeMarkup = false
 
@@ -54,8 +54,7 @@ object PipelineBuilder extends FileUtil with YamlSupport with Default {
 
         tables.foreach { table =>
           checkConfiguration(configuration, table)
-          val tableDir =
-            s"${outputDirectory.getOrElse(s"output/${configuration.name}")}/scripts/${table.destinationName}"
+          val tableDir = s"$outputDirectory/${table.destinationName}"
           createDir(tableDir)
 
           templateFiles.foreach { templateFile =>
@@ -81,7 +80,7 @@ object PipelineBuilder extends FileUtil with YamlSupport with Default {
         throw new RuntimeException(
           "Tables section is not found. Check the configuration (example: pipewrench-configuration.yml) file")
     }
-    writeSchemaMakeFile(configuration, typeMapping, templateDirectory, s"${outputDirectory.getOrElse(s"output/${configuration.name}")}/scripts")
+    writeSchemaMakeFile(configuration, typeMapping, templateDirectory, outputDirectory)
   }
 
   private def writeSchemaMakeFile(
@@ -120,7 +119,7 @@ object PipelineBuilder extends FileUtil with YamlSupport with Default {
 
   private def isExecutable(path: String): Unit = {
     val file = new File(path)
-    logger.debug(s"File executable flag ${file.canExecute()}: '$path'")
+    logger.debug(s"File executable flag ${file.canExecute}: '$path'")
     if (file.canExecute) {
       setExecutable(path)
     }

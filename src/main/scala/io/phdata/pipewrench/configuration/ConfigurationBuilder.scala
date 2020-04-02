@@ -16,7 +16,6 @@
 
 package io.phdata.pipewrench.configuration
 
-import io.phdata.pipewrench.App.writeConfiguration
 import io.phdata.pipewrench.schemacrawler.SchemaCrawlerImpl
 import io.phdata.pipewrench.util.TemplateFunction
 import org.slf4j.LoggerFactory

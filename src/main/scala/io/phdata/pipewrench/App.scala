@@ -16,26 +16,17 @@
 
 package io.phdata.pipewrench
 
-import java.io.FileNotFoundException
-
 import io.phdata.pipewrench.configuration.ConfigurationBuilder
-import io.phdata.pipewrench.configuration.Default
-import io.phdata.pipewrench.configuration.YamlSupport
 import io.phdata.pipewrench.pipeline.PipelineBuilder
-import io.phdata.pipewrench.schemacrawler.SchemaCrawlerImpl
-import io.phdata.pipewrench.util.FileUtil
 
 import org.apache.hadoop.conf.Configuration
-import org.apache.log4j.LogManager
 import org.slf4j.LoggerFactory
 
 import scala.io.StdIn
 
-object App extends YamlSupport with Default with FileUtil {
+object App {
 
   private val logger = LoggerFactory.getLogger(App.getClass)
-
-  private val logManager = LogManager.getRootLogger;
 
   def main(args: Array[String]): Unit = {
     val cli = new Cli(args)

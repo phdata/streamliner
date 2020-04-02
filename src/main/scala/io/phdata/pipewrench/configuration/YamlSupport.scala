@@ -23,7 +23,7 @@ import io.circe.yaml.parser
 import io.phdata.pipewrench.util.FileUtil
 import io.circe.syntax._
 
-trait YamlSupport extends FileUtil with Default with AutoDerivation {
+trait YamlSupport extends FileUtil with AutoDerivation {
 
   type TypeMapping = Map[String, Map[String, String]]
 
