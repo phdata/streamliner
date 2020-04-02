@@ -18,9 +18,11 @@ package io.phdata.pipewrench.schemacrawler
 
 import java.nio.file.Paths
 import java.sql.Connection
+import java.util.logging.Level
 
 import io.phdata.pipewrench.configuration.Jdbc
 import io.phdata.pipewrench.util.FileUtil
+import org.apache.log4j.LogManager
 import schemacrawler.schema.Catalog
 import schemacrawler.schemacrawler.RegularExpressionInclusionRule
 import schemacrawler.schemacrawler.SchemaCrawlerOptions
@@ -34,6 +36,7 @@ import schemacrawler.tools.options.OutputFormat
 import schemacrawler.tools.options.OutputOptionsBuilder
 import schemacrawler.tools.options.TextOutputFormat
 import schemacrawler.utility.SchemaCrawlerUtility
+import sf.util.Utility.applyApplicationLogLevel
 
 import scala.collection.JavaConverters._
 
@@ -72,7 +75,23 @@ object SchemaCrawlerImpl extends FileUtil {
     executable.execute()
   }
 
+  private def setLogLevel(): Unit = {
+    val logManager = LogManager.getRootLogger()
+    val level = logManager.getLevel.toString match {
+      case "OFF" => Level.OFF
+      case "ERROR" | "FATAL" | "SEVERE" => Level.SEVERE
+      case "WARN" | "WARNING" => Level.WARNING
+      case "CONFIG" | "DEBUG" => Level.CONFIG
+      case "INFO" => Level.INFO
+      case "TRACE" => Level.FINER
+      case _ => Level.ALL
+
+    }
+    applyApplicationLogLevel(level)
+  }
+
   private def getOptions(jdbc: Jdbc): SchemaCrawlerOptions = {
+    setLogLevel()
     val options = SchemaCrawlerOptionsBuilder
       .builder()
       .withSchemaInfoLevel(SchemaInfoLevelBuilder.standard())

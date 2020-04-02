@@ -27,13 +27,6 @@ class Cli(args: Seq[String]) extends ScallopConf(args) {
     val filePath: ScallopOption[String] =
       opt[String]("config", descr = "Path to ingest configuration", required = true)
 
-    val schemaLogLevel: ScallopOption[String] =
-      opt[String](
-        "schemaLogLevel",
-        descr = "schema Crawler Log Level",
-        required = false,
-        default = Some("WARN"))
-
     val outputPath: ScallopOption[String] = opt[String](
       "output-path",
       descr = "Directory path where Pipewrench configuration should be written to",

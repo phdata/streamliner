@@ -28,7 +28,7 @@ import sf.util.Utility.applyApplicationLogLevel
 import java.util.logging.Level
 
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.Path
+import org.apache.log4j.LogManager
 import org.slf4j.LoggerFactory
 
 import scala.io.StdIn
@@ -36,6 +36,8 @@ import scala.io.StdIn
 object App extends YamlSupport with Default with FileUtil {
 
   private val logger = LoggerFactory.getLogger(App.getClass)
+
+  private val logManager = LogManager.getRootLogger;
 
   def main(args: Array[String]): Unit = {
     val cli = new Cli(args)
@@ -55,17 +57,6 @@ object App extends YamlSupport with Default with FileUtil {
                 StdIn.readLine()
             }
         }
-
-        val schemaLogLevel = cli.schema.schemaLogLevel.toOption match {
-          case Some("OFF") => Level.OFF
-          case Some("SEVERE" | "FATAL" | "ERROR" | "ERR") => Level.SEVERE
-          case Some("WARNING" | "WARN") => Level.WARNING
-          case Some("CONFIG" | "DEBUG") => Level.CONFIG
-          case Some("INFO") => Level.INFO
-          case Some("TRACE") => Level.FINER
-          case Some(default) => Level.ALL
-        }
-        applyApplicationLogLevel(schemaLogLevel)
 
         val configuration = readConfigurationFile(cli.schema.filePath())
         val outputDirectory =
