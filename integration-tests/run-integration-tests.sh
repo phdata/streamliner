@@ -67,7 +67,7 @@ for PIPELINE_TEMPLATE in ${DIR}/templates/*; do
 	--database-password pipewrench -Dlogback.configurationFile=conf/logback.xml
 
 	docker-compose -f ${DIR}/docker-compose.yml exec -T kimpala pipewrench scripts \
-	--config /output/${BASENAME}/pipewrench-configuration.yml \
+	--config /output/${BASENAME}/test/conf/pipewrench-configuration.yml \
 	--output-path /output/${BASENAME} \
 	--template-directory /mount/pipewrench/templates \
 	--type-mapping /mount/pipewrench/conf/type-mapping.yml -Dlogback.configurationFile=conf/logback.xml

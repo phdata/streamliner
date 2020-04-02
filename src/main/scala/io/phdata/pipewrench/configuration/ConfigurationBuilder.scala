@@ -70,11 +70,12 @@ object ConfigurationBuilder extends YamlSupport {
   }
 
   def write(configuration: Configuration, outputDirectory: Option[String] = None): Unit = {
-    writeConfiguration(configuration, outputDirectory)
+    val dir = outputDirectory.fold(s"output/${configuration.name}/${configuration.environment}/conf")(output => s"$output/conf")
+    writeConfiguration(configuration, dir)
   }
 
   def writeDocs(configuration: Configuration, databasePassword: String, outputDirectory: Option[String] = None): Unit = {
-    val path = outputDirectory.fold(s"output/${configuration.name}/docs")(p => s"$p/docs")
+    val path = outputDirectory.fold(s"output/${configuration.name}/${configuration.environment}/docs")(p => s"$p/docs")
     SchemaCrawlerImpl.getErdOutput(configuration.jdbc, databasePassword, path)
     SchemaCrawlerImpl.getHtmlOutput(configuration.jdbc, databasePassword, path)
   }

@@ -35,7 +35,12 @@ object PipelineBuilder extends FileUtil with YamlSupport {
 
     val configuration = readConfigurationFile(configurationFile)
     val typeMapping = readTypeMappingFile(typeMappingFile)
-    build(configuration, typeMapping, templateDirectory, outputDirectory.getOrElse(s"output/${configuration.name}/scripts"))
+    build(
+      configuration,
+      typeMapping,
+      templateDirectory,
+      outputDirectory.getOrElse(s"output/${configuration.name}/${configuration.environment}/scripts")
+    )
   }
 
   def build(configuration: Configuration,

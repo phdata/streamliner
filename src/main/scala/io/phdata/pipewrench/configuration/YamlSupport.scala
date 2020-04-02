@@ -57,9 +57,8 @@ trait YamlSupport extends FileUtil with AutoDerivation {
     }
   }
 
-  def writeConfiguration(configuration: Configuration, path: Option[String]): Unit = {
-    val outputDir = path.fold(s"output/${configuration.name}/conf")(output => s"$output/conf")
-    createDir(outputDir)
+  def writeConfiguration(configuration: Configuration, path: String): Unit = {
+    createDir(path)
 
     val printed = Printer(
       preserveOrder = true,
@@ -67,6 +66,6 @@ trait YamlSupport extends FileUtil with AutoDerivation {
       mappingStyle = Printer.FlowStyle.Block
     ).pretty(configuration.asJson)
 
-    writeFile(printed, s"$outputDir/pipewrench-configuration.yml")
+    writeFile(printed, s"$path/pipewrench-configuration.yml")
   }
 }
