@@ -28,10 +28,11 @@ object PipelineBuilder extends FileUtil with YamlSupport {
   private lazy val logger = LoggerFactory.getLogger(PipelineBuilder.getClass)
   private lazy val engine: TemplateEngine = new TemplateEngine
 
-  def build(configurationFile: String,
-            typeMappingFile: String,
-            templateDirectory: String,
-            outputDirectory: Option[String] = None): Unit = {
+  def build(
+      configurationFile: String,
+      typeMappingFile: String,
+      templateDirectory: String,
+      outputDirectory: Option[String] = None): Unit = {
 
     val configuration = readConfigurationFile(configurationFile)
     val typeMapping = readTypeMappingFile(typeMappingFile)
@@ -39,20 +40,21 @@ object PipelineBuilder extends FileUtil with YamlSupport {
       configuration,
       typeMapping,
       templateDirectory,
-      outputDirectory.getOrElse(s"output/${configuration.name}/${configuration.environment}/scripts")
+      outputDirectory.getOrElse(
+        s"output/${configuration.name}/${configuration.environment}/scripts")
     )
   }
 
-  def build(configuration: Configuration,
-            typeMapping: Map[String, Map[String, String]],
-            templateDirectory: String,
-            outputDirectory: String): Unit = {
+  def build(
+      configuration: Configuration,
+      typeMapping: Map[String, Map[String, String]],
+      templateDirectory: String,
+      outputDirectory: String): Unit = {
 
     engine.escapeMarkup = false
 
     configuration.tables match {
       case Some(tables) =>
-
         val files = listFilesInDir(s"$templateDirectory/${configuration.pipeline}")
         val templateFiles = files.filter(f => f.getName.endsWith(".ssp"))
         val nonTemplateFiles = files.filterNot(f => f.getName.endsWith(".ssp"))

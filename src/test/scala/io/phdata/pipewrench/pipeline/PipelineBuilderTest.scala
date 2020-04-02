@@ -43,7 +43,8 @@ class PipelineBuilderTest extends FunSuite with YamlSupport {
       "src/test/resources/incremental-with-kudu.yml",
       "src/main/resources/type-mapping.yml",
       "src/main/resources/templates/",
-      Some("target/incremental-with-kudu"))
+      Some("target/incremental-with-kudu")
+    )
   }
 
   test("Render snowflake-dms-cdc templates") {

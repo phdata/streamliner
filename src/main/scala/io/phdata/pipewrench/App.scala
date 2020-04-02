@@ -41,11 +41,11 @@ object App {
         ConfigurationBuilder.write(configuration, cli.schema.outputPath.toOption)
 
         if (cli.schema.createDocs()) {
-          ConfigurationBuilder.writeDocs(configuration, databasePassword, cli.schema.outputPath.toOption)
+          ConfigurationBuilder
+            .writeDocs(configuration, databasePassword, cli.schema.outputPath.toOption)
         }
 
       case Some(cli.produceScripts) =>
-
         PipelineBuilder.build(
           cli.produceScripts.filePath(),
           cli.produceScripts.typeMappingFile(),
@@ -59,7 +59,10 @@ object App {
     }
   }
 
-  private def getPassword(cliPassword: Option[String], jceksPath: Option[String], keyStoreAlias: Option[String]): String = {
+  private def getPassword(
+      cliPassword: Option[String],
+      jceksPath: Option[String],
+      keyStoreAlias: Option[String]): String = {
     jceksPath match {
       case Some(path) =>
         val alias = keyStoreAlias.get

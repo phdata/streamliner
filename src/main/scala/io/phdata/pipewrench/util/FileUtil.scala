@@ -16,7 +16,9 @@
 
 package io.phdata.pipewrench.util
 
-import java.io.{File, FileNotFoundException, FileWriter}
+import java.io.File
+import java.io.FileNotFoundException
+import java.io.FileWriter
 import java.nio.file.Files
 import java.nio.file.Paths
 
