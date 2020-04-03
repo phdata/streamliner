@@ -40,11 +40,11 @@ object ConfigurationBuilder extends LazyLogging {
                 case Some(userDefinedTables) =>
                   userDefinedTables.find(t => t.name.equals(parsedTable.getName)) match {
                     case Some(userDefinedTable) =>
-                      enhanceTableDefinition(mapTableDefinition(parsedTable), userDefinedTable)
-                    case None => mapTableDefinition(parsedTable)
+                      enhanceTableDefinition(mapTableDefinition(parsedTable, configuration.jdbc.metadata), userDefinedTable)
+                    case None => mapTableDefinition(parsedTable, configuration.jdbc.metadata)
                   }
                 case None =>
-                  mapTableDefinition(parsedTable)
+                  mapTableDefinition(parsedTable, configuration.jdbc.metadata)
               }
             }
             .toSeq
@@ -88,13 +88,16 @@ object ConfigurationBuilder extends LazyLogging {
     }
   }
 
-  private def mapTableDefinition(table: SchemaCrawlerTable): TableDefinition = {
+  private def mapTableDefinition(
+      table: SchemaCrawlerTable,
+      metadataOpt: Option[Map[String, String]] = None): TableDefinition = {
     TableDefinition(
       sourceName = table.getName,
       destinationName = TemplateFunction.cleanse(table.getName),
       comment = Option(table.getRemarks),
       primaryKeys = table.getColumns.asScala.filter(c => c.isPartOfPrimaryKey).map(_.getName),
-      columns = table.getColumns.asScala.map(mapColumnDefinition)
+      columns = table.getColumns.asScala.map(mapColumnDefinition),
+      metadata = metadataOpt
     )
   }
 
@@ -103,12 +106,21 @@ object ConfigurationBuilder extends LazyLogging {
       userDefined: Table): TableDefinition = {
     checkNumberOfMappers(userDefined)
 
+    val enhancedMetadata = table.metadata match {
+      case Some(metadata) =>
+        userDefined.metadata match {
+          case Some(userMetadata) => Some(metadata ++ userMetadata)
+          case None => None
+        }
+      case None => userDefined.metadata
+    }
+
     table.copy(
       checkColumn = userDefined.checkColumn,
       numberOfMappers = userDefined.numberOfMappers,
       splitByColumn = userDefined.splitByColumn,
       numberOfPartitions = userDefined.numberOfPartitions,
-      metadata = userDefined.metadata
+      metadata = enhancedMetadata
     )
   }
 

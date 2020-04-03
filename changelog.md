@@ -1,3 +1,8 @@
+## 2.3
+####Fixed:
+- Updated checkNumberOfMappers function to check numberOfMappers in configuration vs numberOfPartitions
+- Fixed metadata enhancement to include global metadata
+
 # 2.2
 ### Added:
 - Added sqlserver in source column mapping. 69bc1e4569634921daf8ceab40b44d254413d189
