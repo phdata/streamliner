@@ -1,5 +1,5 @@
 ## 2.3
-####Fixed:
+#### Fixed:
 - Updated checkNumberOfMappers function to check numberOfMappers in configuration vs numberOfPartitions
 - Fixed metadata enhancement to include global metadata
 
