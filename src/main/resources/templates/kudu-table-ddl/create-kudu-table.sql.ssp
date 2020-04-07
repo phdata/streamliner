@@ -13,16 +13,20 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --%>
-<%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
-<%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
+#import(io.phdata.streamliner.configuration.Hadoop)
+<%@ val configuration: io.phdata.streamliner.configuration.Configuration %>
+<%@ val table: io.phdata.streamliner.configuration.TableDefinition %>
 <%@ val typeMapping: Map[String, Map[String, String]]%>
-<%@ val primaryKeyColumns: Seq[io.phdata.pipewrench.configuration.ColumnDefinition] = table.columns.filter(column => table.primaryKeys.contains(column.sourceName))%>
-<%@ val nonPrimaryKeyColumns: Seq[io.phdata.pipewrench.configuration.ColumnDefinition] = table.columns.filterNot(column => table.primaryKeys.contains(column.sourceName))%>
+#{
+    val destination = configuration.destination.asInstanceOf[Hadoop]
+    val primaryKeyColumns: Seq[io.phdata.streamliner.configuration.ColumnDefinition] = table.columns.filter(column => table.primaryKeys.contains(column.sourceName))
+    val nonPrimaryKeyColumns: Seq[io.phdata.streamliner.configuration.ColumnDefinition] = table.columns.filterNot(column => table.primaryKeys.contains(column.sourceName))
+}#
 set sync_ddl=1;
-CREATE TABLE IF NOT EXISTS `${configuration.hadoop.reportingDatabase.name}`.`${table.destinationName}` (
-<% val orderedColumns = io.phdata.pipewrench.util.TemplateFunction.orderColumns(table) %>
+CREATE TABLE IF NOT EXISTS `${destination.reportingDatabase.name}`.`${table.destinationName}` (
+<% val orderedColumns = io.phdata.streamliner.util.TemplateFunction.orderColumns(table) %>
 #for (column <- orderedColumns)
-    <% val mappedDataType = io.phdata.pipewrench.util.TemplateFunction.mapDataType(column, typeMapping, "KUDU")%>
+    <% val mappedDataType = io.phdata.streamliner.util.TemplateFunction.mapDataType(column, typeMapping, "KUDU")%>
     `${column.destinationName}` ${mappedDataType} COMMENT '${column.comment.getOrElse("")}',
 #end
 PRIMARY KEY (${primaryKeyColumns.map(_.destinationName).mkString(", ")})

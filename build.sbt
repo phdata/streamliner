@@ -5,13 +5,15 @@ import scala.io.Source
 def versionFromFile: String = Source.fromFile("version").getLines().mkString("")
 def snapshot: Boolean = versionFromFile.endsWith("-SNAPSHOT")
 
-name := "pipewrench"
+name := "streamliner"
 version := versionFromFile
 isSnapshot := snapshot
-organization := "io.phdata.pipewrench"
+organization := "io.phdata.streamliner"
 scalaVersion := "2.11.12"
 
 val schemaCrawlerVersion = "16.2.5"
+
+val excludeSlf4jBinding = ExclusionRule(organization = "org.slf4j")
 
 lazy val root = (project in file("."))
   .settings(scalafmtOnCompile := true)
@@ -19,20 +21,20 @@ lazy val root = (project in file("."))
   .settings(
     Defaults.itSettings,
     libraryDependencies ++= Seq(
-      "ch.qos.logback" % "logback-classic" % "1.2.3",
-      "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2",
+      "org.slf4j" % "slf4j-api" % "1.7.30",
+      "org.slf4j" % "slf4j-log4j12" % "1.7.30",
       "org.rogach" %% "scallop" % "3.1.1",
       "io.circe" %% "circe-yaml" % "0.8.0",
       "io.circe" %% "circe-generic" % "0.8.0",
-      "us.fatehi" % "schemacrawler-mysql" % schemaCrawlerVersion,
-      "us.fatehi" % "schemacrawler-postgresql" % schemaCrawlerVersion,
-      "us.fatehi" % "schemacrawler-oracle" % schemaCrawlerVersion,
-      "us.fatehi" % "schemacrawler-db2" % schemaCrawlerVersion,
-      "us.fatehi" % "schemacrawler-sqlserver" % schemaCrawlerVersion,
+      "us.fatehi" % "schemacrawler-mysql" % schemaCrawlerVersion excludeAll(excludeSlf4jBinding),
+      "us.fatehi" % "schemacrawler-postgresql" % schemaCrawlerVersion excludeAll(excludeSlf4jBinding),
+      "us.fatehi" % "schemacrawler-oracle" % schemaCrawlerVersion excludeAll(excludeSlf4jBinding),
+      "us.fatehi" % "schemacrawler-db2" % schemaCrawlerVersion excludeAll(excludeSlf4jBinding),
+      "us.fatehi" % "schemacrawler-sqlserver" % schemaCrawlerVersion excludeAll(excludeSlf4jBinding),
       "guru.nidi" % "graphviz-java" % "0.8.1",
       "org.scalatra.scalate" %% "scalate-core" % "1.9.0",
       "org.scalatest" %% "scalatest" % "3.0.5" % "it,test",
-      "org.apache.hadoop" % "hadoop-common" % "2.8.3"
+//      "org.apache.hadoop" % "hadoop-common" % "2.8.3"
     )
   )
 
@@ -69,9 +71,16 @@ mappings in Universal ++= {
     }
 }
 
+mappings in Universal ++= {
+  ((sourceDirectory in Compile).value / "resources" / "templates" / "snowflake-dms-cdc" * "*").get
+    .map { f =>
+      f -> s"templates/snowflake-dms-cdc/${f.name}"
+    }
+}
+
 enablePlugins(JavaServerAppPackaging, UniversalDeployPlugin, RpmArtifactoryDeployPlugin)
 
-mainClass in Compile := Some("io.phdata.pipewrench.App")
+mainClass in Compile := Some("io.phdata.streamliner.App")
 
 credentials += Credentials(Path.userHome / ".sbt" / ".credentials")
 

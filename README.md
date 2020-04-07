@@ -1,21 +1,21 @@
-# Pipewrench
+# Streamliner
 
-Hadoop Data Pipeline Automation Tool
+Data Pipeline Automation Tool
 
 ## How it works
 
-Pipewrench uses [SchemaCrawler](https://www.schemacrawler.com/) to query database table metadata throught JDBC, then generates pipeline code
+streamliner uses [SchemaCrawler](https://www.schemacrawler.com/) to query database table metadata throught JDBC, then generates pipeline code
 from a series of templates that when executed can be used to ingest or transform data.
 
 ## Installation
 
-You can find the latest version of pipewrench-scala here: https://repository.phdata.io/artifactory/list/binary/phdata/pipewrench/
+You can find the latest version of streamliner-scala here: https://repository.phdata.io/artifactory/list/binary/phdata/streamliner/
 
-The artifact is a zip file containt an executable in `bin/pipewrench` and templates in `bin/templates`
+The artifact is a zip file containt an executable in `bin/streamliner` and templates in `bin/templates`
 
 ## Config File
 
-Pipewrench works off the parameters in the ingest-configuration file.
+streamliner works off the parameters in the ingest-configuration file.
 
 
 ```
@@ -86,19 +86,19 @@ Generating ingest configuration from a database (`ingest-configuration.yml`):
 ### Configuration
 Without Generating Docs
 ```bash
-pipewrench schema --config <ingest-configuration.yml> --database-password <database password>
+streamliner schema --config <ingest-configuration.yml> --database-password <database password>
 ```
 
 With Generating Docs
 ```bash
-pipewrench schema --config <ingest-configuration.yml> --database-password <database password> --create-docs
+streamliner schema --config <ingest-configuration.yml> --database-password <database password> --create-docs
 ```
 
 ### Scripts
 Generating scripts:
 
 ```bash
-pipewrench scripts --config <ingest-configuration.yml> --template-directory <template-directory> --type-mapping <type-mapping.yml>
+streamliner scripts --config <ingest-configuration.yml> --template-directory <template-directory> --type-mapping <type-mapping.yml>
 ```
 
 ## Running Integration Tests
@@ -114,7 +114,7 @@ pipeline: kudu-table-ddl
 ```
 
 ## Publishing to Artifactory
-### To publish pipewrench .zip to Artifactory
+### To publish streamliner .zip to Artifactory
 - Change the current version to the new version in the `version` file.
 - Using the template `build-support/artifactory.env.template`, create `build-support/artifactory.env`.
 - In the `build-support/artifactory.env` file add the necessary values for the `ARTIFACTORY_USER` and `ARTIFACTORY_TOKEN` variables.
@@ -126,9 +126,9 @@ pipeline: kudu-table-ddl
     - Copy the value of *Encrypted Password* and paste it as the value for `ARTIFACTORY_TOKEN`.
 - Run `make publish`.
 
-The .zip will show up in [phData's Artifactory binaries](https://repository.phdata.io/artifactory/list/binary/phdata/pipewrench/)
+The .zip will show up in [phData's Artifactory binaries](https://repository.phdata.io/artifactory/list/binary/phdata/streamliner/)
 
-### To publish pipewrench .jar to Artifactory
+### To publish streamliner .jar to Artifactory
 - Create a credentials file in your home directory under `[home]/.sbt/.credentials` containing:
 ```
 realm=Artifactory Realm
@@ -139,6 +139,6 @@ password=[Artifactory password]
 - Change the current version to the new version in the `version` file.
 - Run `sbt clean package publish` to publish the .jar.
 
-The release folder will show up in [phData's Artifactory libs](https://repository.phdata.io/artifactory/list/libs-release-local/io/phdata/pipewrench/pipewrench_2.11/).
+The release folder will show up in [phData's Artifactory libs](https://repository.phdata.io/artifactory/list/libs-release-local/io/phdata/streamliner/streamliner_2.11/).
 
 

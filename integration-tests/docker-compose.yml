@@ -8,9 +8,9 @@ services:
     hostname: mysql
     mem_limit: 512M
     environment:
-      MYSQL_ROOT_USER: pipewrench
-      MYSQL_ROOT_PASSWORD: pipewrench
-      MYSQL_PASSWORD: pipewrench
+      MYSQL_ROOT_USER: streamliner
+      MYSQL_ROOT_PASSWORD: streamliner
+      MYSQL_PASSWORD: streamliner
 
   kimpala:
     image: amfoerster/hadoop-docker
@@ -19,7 +19,7 @@ services:
     hostname: hadoop
     mem_limit: 5G
     environment:
-      - PATH=${PATH}:/mount/pipewrench/bin
+      - PATH=${PATH}:/mount/streamliner/bin
     ports:
       - 7051:7051
       - 7050:7050

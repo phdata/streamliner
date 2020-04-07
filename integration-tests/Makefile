@@ -23,9 +23,9 @@ itest:
 	./run-integration-tests.sh
 
 install-here: remove-install package
-	unzip ../target/universal/pipewrench-$$(cat ../version) -d pipewrench
-	mv pipewrench/pipewrench-$$(cat ../version)/* ./pipewrench
-	rm -rf ./pipewrench/pipewrench-$$(cat ../version)
+	unzip ../target/universal/streamliner-$$(cat ../version) -d streamliner
+	mv streamliner/streamliner-$$(cat ../version)/* ./streamliner
+	rm -rf ./streamliner/streamliner-$$(cat ../version)
 
 remove-install:
-	rm -rf ./pipewrench
+	rm -rf ./streamliner

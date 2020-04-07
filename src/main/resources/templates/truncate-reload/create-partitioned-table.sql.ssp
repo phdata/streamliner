@@ -13,15 +13,19 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --%>
-<%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
-<%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
+#import(io.phdata.streamliner.configuration.Hadoop)
+<%@ val configuration: io.phdata.streamliner.configuration.Configuration %>
+<%@ val table: io.phdata.streamliner.configuration.TableDefinition %>
 <%@ val typeMapping: Map[String, Map[String, String]]%>
+#{
+    val destination = configuration.destination.asInstanceOf[Hadoop]
+}#
 set sync_ddl=1;
-CREATE TABLE IF NOT EXISTS `${configuration.hadoop.stagingDatabase.name}`.`part_${table.destinationName}` (
+CREATE TABLE IF NOT EXISTS `${destination.stagingDatabase.name}`.`part_${table.destinationName}` (
 <%
     val columnDefinitions = table.columns.map {
         column =>
-            val mappedDataType = io.phdata.pipewrench.util.TemplateFunction.mapDataType(column, typeMapping, "PARQUET")
+            val mappedDataType = io.phdata.streamliner.util.TemplateFunction.mapDataType(column, typeMapping, "PARQUET")
             val dataType = if (mappedDataType.equalsIgnoreCase("decimal")) {
                 s"DECIMAL(${column.precision.get}, ${column.scale.get})"
             } else {
@@ -35,4 +39,4 @@ ${columnDefinitions}
 PARTITIONED BY (ingest_partition int)
 COMMENT '${table.comment.getOrElse("")}'
 STORED AS PARQUET
-LOCATION '${configuration.hadoop.stagingDatabase.path}/part_${table.destinationName}'
+LOCATION '${destination.stagingDatabase.path}/part_${table.destinationName}'

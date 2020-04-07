@@ -14,31 +14,38 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --%>
-<%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
-<%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
+#!/usr/bin/env bash
+#import(io.phdata.streamliner.configuration.Hadoop)
+#import(io.phdata.streamliner.configuration.Jdbc)
+<%@ val configuration: io.phdata.streamliner.configuration.Configuration %>
+<%@ val table: io.phdata.streamliner.configuration.TableDefinition %>
+#{
+    val source = configuration.source.asInstanceOf[Jdbc]
+    val destination = configuration.destination.asInstanceOf[Hadoop]
+}#
 
 set -euo pipefail
 
 SOURCE_ROWCOUNT=0
 
 # Count number of rows in source
-DRIVER="${configuration.jdbc.driverClass}"
+DRIVER="${source.driverClass}"
 if [[ $DRIVER =~ "sqlserver" ]]; then
   SOURCE_ROWCOUNT=$(sqoop-eval \
-    --connect '${configuration.jdbc.url}' \
-    --username '${configuration.jdbc.username}' \
-    --password-file ${configuration.jdbc.passwordFile} \
-    --query 'select count(*) FROM [${configuration.jdbc.schema}].[${table.sourceName}]' | grep -o '\|\s[0-9]*\s\|' | grep -Eo '[[:digit:]]*')
+    --connect '${source.url}' \
+    --username '${source.username}' \
+    --password-file ${source.passwordFile} \
+    --query 'select count(*) FROM [${source.schema}].[${table.sourceName}]' | grep -o '\|\s[0-9]*\s\|' | grep -Eo '[[:digit:]]*')
 else
   SOURCE_ROWCOUNT=$(sqoop-eval \
-    --connect '${configuration.jdbc.url}' \
-    --username '${configuration.jdbc.username}' \
-    --password-file ${configuration.jdbc.passwordFile} \
-    --query 'select count(*) FROM ${configuration.jdbc.schema}.${table.sourceName}' | grep -o '\|\s[0-9]*\s\|' | grep -Eo '[[:digit:]]*')
+    --connect '${source.url}' \
+    --username '${source.username}' \
+    --password-file ${source.passwordFile} \
+    --query 'select count(*) FROM ${source.schema}.${table.sourceName}' | grep -o '\|\s[0-9]*\s\|' | grep -Eo '[[:digit:]]*')
 fi
 
 # Check target table
-TARGET_ROWCOUNT=$(${configuration.hadoop.impalaShellCommand} --query "SELECT COUNT(*) FROM ${configuration.hadoop.reportingDatabase.name }.\`${table.destinationName}\`;" -B 2> /dev/null)
+TARGET_ROWCOUNT=$(${destination.impalaShellCommand} --query "SELECT COUNT(*) FROM ${destination.reportingDatabase.name }.\`${table.destinationName}\`;" -B 2> /dev/null)
 
 echo "source count: $SOURCE_ROWCOUNT"
 echo "target count: $TARGET_ROWCOUNT"

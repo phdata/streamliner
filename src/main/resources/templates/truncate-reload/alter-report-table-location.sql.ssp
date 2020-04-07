@@ -13,7 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --%>
-<%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
-<%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
-<% val partition = "${var:ingest_partition}"%>
-ALTER TABLE `${configuration.hadoop.reportingDatabase.name}`.`${table.destinationName}` SET LOCATION '${configuration.hadoop.stagingDatabase.path}/part_${table.destinationName}/ingest_partition=${partition}/';
+#import(io.phdata.streamliner.configuration.Hadoop)
+<%@ val configuration: io.phdata.streamliner.configuration.Configuration %>
+<%@ val table: io.phdata.streamliner.configuration.TableDefinition %>
+#{
+    val destination = configuration.destination.asInstanceOf[Hadoop]
+    val partition = "${var:ingest_partition}"
+}#
+ALTER TABLE `${destination.reportingDatabase.name}`.`${table.destinationName}` SET LOCATION '${destination.stagingDatabase.path}/part_${table.destinationName}/ingest_partition=${partition}/';

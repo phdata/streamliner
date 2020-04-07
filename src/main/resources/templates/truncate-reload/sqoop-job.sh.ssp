@@ -1,20 +1,41 @@
-<%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
-<%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
-<% val tableColumns = io.phdata.pipewrench.util.TemplateFunction.sourceColumns(configuration, table)%>
-<% val javaColumnMap = io.phdata.pipewrench.util.TemplateFunction.sqoopMapJavaColumn(table)%>
+<%--
+Copyright 2018 phData Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+--%>
 #!/usr/bin/env bash
+#import(io.phdata.streamliner.configuration.Hadoop)
+#import(io.phdata.streamliner.configuration.Jdbc)
+<%@ val configuration: io.phdata.streamliner.configuration.Configuration %>
+<%@ val table: io.phdata.streamliner.configuration.TableDefinition %>
+#{
+    val source = configuration.source.asInstanceOf[Jdbc]
+    val destination = configuration.destination.asInstanceOf[Hadoop]
+    val tableColumns = io.phdata.streamliner.util.TemplateFunction.sourceColumns(configuration, table)
+    val javaColumnMap = io.phdata.streamliner.util.TemplateFunction.sqoopMapJavaColumn(table)
+}#
 
 set -euo pipefail
 
 sqoop import \
     -D 'mapred.job.name="Sqoop Job - name: ${configuration.name} environment: ${configuration.environment} table: ${table.sourceName}"' \\
-    --connect '${configuration.jdbc.url}' \\
-    --username '${configuration.jdbc.username}' \\
-    --password-file '${configuration.jdbc.passwordFile}' \\
-    --driver '${configuration.jdbc.driverClass.get}' \\
+    --connect '${source.url}' \\
+    --username '${source.username}' \\
+    --password-file '${source.passwordFile}' \\
+    --driver '${source.driverClass.get}' \\
     --delete-target-dir \\
-    --target-dir '${configuration.hadoop.stagingDatabase.path}/stg_${table.destinationName}/' \\
-    --temporary-rootdir '${configuration.hadoop.stagingDatabase.path}/stg_${table.destinationName}/' \\
+    --target-dir '${destination.stagingDatabase.path}/stg_${table.destinationName}/' \\
+    --temporary-rootdir '${destination.stagingDatabase.path}/stg_${table.destinationName}/' \\
     --as-avrodatafile \\
     --fetch-size 10000 \\
     --compress \\
@@ -26,5 +47,5 @@ sqoop import \
 #end
     --query 'SELECT
 ${tableColumns}
-FROM ${configuration.jdbc.schema}.${table.sourceName}
+FROM ${source.schema}.${table.sourceName}
 WHERE $CONDITIONS'
