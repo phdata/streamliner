@@ -47,11 +47,13 @@ object ConfigurationBuilder extends YamlSupport {
                 case Some(userDefinedTables) =>
                   userDefinedTables.find(t => t.name.equals(parsedTable.getName)) match {
                     case Some(userDefinedTable) =>
-                      enhanceTableDefinition(mapTableDefinition(parsedTable, configuration.jdbc.metadata), userDefinedTable)
-                    case None => mapTableDefinition(parsedTable, configuration.jdbc.metadata)
+                      enhanceTableDefinition(
+                        mapTableDefinition(parsedTable, jdbc.metadata),
+                        userDefinedTable)
+                    case None => mapTableDefinition(parsedTable, jdbc.metadata)
                   }
                 case None =>
-                  mapTableDefinition(parsedTable, configuration.jdbc.metadata)
+                  mapTableDefinition(parsedTable, jdbc.metadata)
               }
             }
             .toSeq
