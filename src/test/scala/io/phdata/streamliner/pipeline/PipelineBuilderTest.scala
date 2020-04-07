@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package io.phdata.pipewrench.pipeline
+package io.phdata.streamliner.pipeline
 
-import io.phdata.pipewrench.configuration.YamlSupport
+import io.phdata.streamliner.configuration.YamlSupport
 import org.scalatest.FunSuite
 
 class PipelineBuilderTest extends FunSuite with YamlSupport {

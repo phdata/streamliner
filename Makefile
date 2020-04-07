@@ -27,10 +27,10 @@ itest:
 	$(MAKE) -C integration-tests/ itest
 
 install-here: remove-install
-	unzip target/universal/pipewrench-$$(cat version)
+	unzip target/universal/streamliner-$$(cat version)
 
 remove-install:
-	rm -rf pipewrench-$$(cat version)
+	rm -rf streamliner-$$(cat version)
 
 publish: clean package
 	build-support/publish-zip-to-artifactory.sh

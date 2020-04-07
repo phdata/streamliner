@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package io.phdata.pipewrench.schemacrawler
+package io.phdata.streamliner.schemacrawler
 
 import java.nio.file.Paths
 import java.sql.Connection
 import java.util.logging.Level
 
-import io.phdata.pipewrench.configuration.Jdbc
-import io.phdata.pipewrench.util.FileUtil
+import io.phdata.streamliner.configuration.Jdbc
+import io.phdata.streamliner.util.FileUtil
 import org.apache.log4j.LogManager
 import schemacrawler.schema.Catalog
 import schemacrawler.schemacrawler.RegularExpressionInclusionRule

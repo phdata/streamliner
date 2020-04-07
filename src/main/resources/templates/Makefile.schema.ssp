@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --%>
-<%@ val tables: Seq[io.phdata.pipewrench.configuration.TableDefinition] %>
+<%@ val tables: Seq[io.phdata.streamliner.configuration.TableDefinition] %>
 <%
 	val firstRunTables = tables.map(t => s"first-run-${t.destinationName}").mkString(" ")
 	val runTables = tables.map(t => s"run-${t.destinationName}").mkString(" ")

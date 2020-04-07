@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.phdata.pipewrench
+package io.phdata.streamliner
 
 import io.circe._
 import io.circe.generic.auto._

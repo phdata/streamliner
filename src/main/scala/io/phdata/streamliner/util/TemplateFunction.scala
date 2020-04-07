@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package io.phdata.pipewrench.util
+package io.phdata.streamliner.util
 
-import io.phdata.pipewrench.configuration.ColumnDefinition
-import io.phdata.pipewrench.configuration.Configuration
-import io.phdata.pipewrench.configuration.Jdbc
-import io.phdata.pipewrench.configuration.TableDefinition
+import io.phdata.streamliner.configuration.ColumnDefinition
+import io.phdata.streamliner.configuration.Configuration
+import io.phdata.streamliner.configuration.Jdbc
+import io.phdata.streamliner.configuration.TableDefinition
 
 object TemplateFunction {
 

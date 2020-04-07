@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package io.phdata.pipewrench
+package io.phdata.streamliner
 
-import io.phdata.pipewrench.configuration.ConfigurationBuilder
-import io.phdata.pipewrench.pipeline.PipelineBuilder
+import io.phdata.streamliner.configuration.ConfigurationBuilder
+import io.phdata.streamliner.pipeline.PipelineBuilder
 import org.apache.log4j.Logger
 //import org.slf4j.LoggerFactory
 

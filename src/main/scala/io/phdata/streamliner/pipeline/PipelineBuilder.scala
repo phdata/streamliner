@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package io.phdata.pipewrench.pipeline
+package io.phdata.streamliner.pipeline
 
 import java.io.File
 
-import io.phdata.pipewrench.configuration._
-import io.phdata.pipewrench.util.FileUtil
+import io.phdata.streamliner.configuration._
+import io.phdata.streamliner.util.FileUtil
 import org.apache.log4j.Logger
 import org.fusesource.scalate.TemplateEngine
 

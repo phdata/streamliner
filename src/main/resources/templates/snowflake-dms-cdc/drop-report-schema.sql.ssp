@@ -13,8 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --%>
-#import(io.phdata.pipewrench.configuration.Snowflake)
-<%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
+#import(io.phdata.streamliner.configuration.Snowflake)
+<%@ val configuration: io.phdata.pstreamlinerconfiguration.Configuration %>
 #{
     val destination = configuration.destination.asInstanceOf[Snowflake]
 }#

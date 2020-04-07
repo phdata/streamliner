@@ -5,10 +5,10 @@ import scala.io.Source
 def versionFromFile: String = Source.fromFile("version").getLines().mkString("")
 def snapshot: Boolean = versionFromFile.endsWith("-SNAPSHOT")
 
-name := "pipewrench"
+name := "streamliner"
 version := versionFromFile
 isSnapshot := snapshot
-organization := "io.phdata.pipewrench"
+organization := "io.phdata.streamliner"
 scalaVersion := "2.11.12"
 
 val schemaCrawlerVersion = "16.2.5"
@@ -80,7 +80,7 @@ mappings in Universal ++= {
 
 enablePlugins(JavaServerAppPackaging, UniversalDeployPlugin, RpmArtifactoryDeployPlugin)
 
-mainClass in Compile := Some("io.phdata.pipewrench.App")
+mainClass in Compile := Some("io.phdata.streamliner.App")
 
 credentials += Credentials(Path.userHome / ".sbt" / ".credentials")
 

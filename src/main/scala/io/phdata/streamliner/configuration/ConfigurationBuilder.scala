@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package io.phdata.pipewrench.configuration
+package io.phdata.streamliner.configuration
 
-import io.phdata.pipewrench.schemacrawler.SchemaCrawlerImpl
-import io.phdata.pipewrench.util.TemplateFunction
+import io.phdata.streamliner.schemacrawler.SchemaCrawlerImpl
+import io.phdata.streamliner.util.TemplateFunction
 import org.apache.log4j.Logger
 import schemacrawler.schema.{Column => SchemaCrawlerColumn}
 import schemacrawler.schema.{Table => SchemaCrawlerTable}

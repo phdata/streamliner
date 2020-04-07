@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package io.phdata.pipewrench.configuration
+package io.phdata.streamliner.configuration
 import java.io.FileNotFoundException
 
 import io.circe.generic.AutoDerivation
 import io.circe.yaml.Printer
 import io.circe.yaml.parser
-import io.phdata.pipewrench.util.FileUtil
+import io.phdata.streamliner.util.FileUtil
 import io.circe.syntax._
 
 trait YamlSupport extends FileUtil with AutoDerivation {

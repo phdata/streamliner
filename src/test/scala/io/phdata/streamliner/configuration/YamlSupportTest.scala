@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.phdata.pipewrench.configuration
+package io.phdata.streamliner.configuration
 
 import org.scalatest.FunSuite
 

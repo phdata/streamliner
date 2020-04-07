@@ -1,6 +1,6 @@
-package io.phdata.pipewrench.util
+package io.phdata.streamliner.util
 
-import io.phdata.pipewrench.configuration.ColumnDefinition
+import io.phdata.streamliner.configuration.ColumnDefinition
 import org.scalatest.FunSuite
 
 class TemplateFunctionTest extends FunSuite {

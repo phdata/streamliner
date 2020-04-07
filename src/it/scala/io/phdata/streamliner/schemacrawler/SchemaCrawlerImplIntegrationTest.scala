@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package io.phdata.pipewrench.schemacrawler
+package io.phdata.streamliner.schemacrawler
 
 import java.io.File
 
-import io.phdata.pipewrench.configuration.Jdbc
+import io.phdata.streamliner.configuration.Jdbc
 import org.scalatest.FunSuite
 
 /**

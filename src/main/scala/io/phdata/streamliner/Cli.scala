@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.phdata.pipewrench
+package io.phdata.streamliner
 
 import org.rogach.scallop.ScallopConf
 import org.rogach.scallop.ScallopOption

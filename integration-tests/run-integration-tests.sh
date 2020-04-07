@@ -24,7 +24,7 @@ function manage_docker () {
 		echo 'waiting for mysql container to be available...'
 		i=0
 		while [ ${i} -lt 10 ];do
-			docker-compose -f ${DIR}/docker-compose.yml exec -T mysql mysql -h localhost -P 3306 -u root -ppipewrench -e 'show databases;' &> /dev/null
+			docker-compose -f ${DIR}/docker-compose.yml exec -T mysql mysql -h localhost -P 3306 -u root -pstreamliner -e 'show databases;' &> /dev/null
 			if [[ "$?" -eq "0" ]];then
 				echo 'service ready'
 				break;
@@ -62,14 +62,14 @@ for PIPELINE_TEMPLATE in ${DIR}/templates/*; do
 	BASENAME=${FILE_NAME%.*}
 	echo "RUNNING TEMPLATE: ${FILE_NAME}"
 
-	docker-compose -f ${DIR}/docker-compose.yml exec -T kimpala pipewrench schema \
+	docker-compose -f ${DIR}/docker-compose.yml exec -T kimpala streamliner schema \
 	--config /mount/templates/${FILE_NAME} \
-	--database-password pipewrench -Dlogback.configurationFile=conf/logback.xml
+	--database-password streamliner -Dlogback.configurationFile=conf/logback.xml
 
-	docker-compose -f ${DIR}/docker-compose.yml exec -T kimpala pipewrench scripts \
-	--config /output/${BASENAME}/test/conf/pipewrench-configuration.yml \
-	--template-directory /mount/pipewrench/templates \
-	--type-mapping /mount/pipewrench/conf/type-mapping.yml -Dlogback.configurationFile=conf/logback.xml
+	docker-compose -f ${DIR}/docker-compose.yml exec -T kimpala streamliner scripts \
+	--config /output/${BASENAME}/test/conf/streamliner-configuration.yml \
+	--template-directory /mount/streamliner/templates \
+	--type-mapping /mount/streamliner/conf/type-mapping.yml -Dlogback.configurationFile=conf/logback.xml
 
 	docker-compose -f ${DIR}/docker-compose.yml exec -T kimpala chmod 770 -R /output
 	docker-compose -f ${DIR}/docker-compose.yml exec -T kimpala make -C /output/${BASENAME}/test/scripts first-run-all

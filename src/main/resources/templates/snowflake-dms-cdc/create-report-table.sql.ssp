@@ -13,17 +13,17 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --%>
-#import(io.phdata.pipewrench.configuration.Snowflake)
-<%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
-<%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
+#import(io.phdata.streamliner.configuration.Snowflake)
+<%@ val configuration: io.phdata.pstreamlinerconfiguration.Configuration %>
+<%@ val table: io.phdata.pistreamlineronfiguration.TableDefinition %>
 <%@ val typeMapping: Map[String, Map[String, String]]%>
 #{
     val destination = configuration.destination.asInstanceOf[Snowflake]
 }#
 CREATE TABLE IF NOT EXISTS ${destination.reportingDatabase.name}.${destination.reportingDatabase.schema}.${table.destinationName} (
-<% val orderedColumns = io.phdata.pipewrench.util.TemplateFunction.orderColumns(table) %>
+<% val orderedColumns = io.phdata.pipstreamlineril.TemplateFunction.orderColumns(table) %>
 #for (column <- orderedColumns)
-    <% val mappedDataType = io.phdata.pipewrench.util.TemplateFunction.mapDataType(column, typeMapping, "SNOWFLAKE")%>
+    <% val mappedDataType = io.phdata.pipestreamlinerl.TemplateFunction.mapDataType(column, typeMapping, "SNOWFLAKE")%>
     ${column.destinationName} ${mappedDataType} COMMENT '${column.comment.getOrElse("")}',
 #end
 dms_operation STRING,
