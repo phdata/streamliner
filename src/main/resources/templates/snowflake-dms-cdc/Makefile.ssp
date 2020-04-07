@@ -13,9 +13,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --%>
+#import(io.phdata.pipewrench.configuration.Snowflake)
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
-snowsql-cmd=${configuration.snowflake.get.snowSqlCommand} -f
+#{
+    val destination = configuration.destination.asInstanceOf[Snowflake]
+}#
+snowsql-cmd=${destination.snowSqlCommand} -f
 
 alter-task-resume: alter-task-resume.sql
     $(snowsql-cmd) alter-task-resume.sql

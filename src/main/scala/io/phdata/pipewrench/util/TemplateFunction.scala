@@ -18,6 +18,7 @@ package io.phdata.pipewrench.util
 
 import io.phdata.pipewrench.configuration.ColumnDefinition
 import io.phdata.pipewrench.configuration.Configuration
+import io.phdata.pipewrench.configuration.Jdbc
 import io.phdata.pipewrench.configuration.TableDefinition
 
 object TemplateFunction {
@@ -81,12 +82,12 @@ object TemplateFunction {
     }
   }
 
-  def sourceColumns(configuration: Configuration, table: TableDefinition): String =
+  def sourceColumns(configuration: Configuration, table: TableDefinition): String = {
+    val jdbc = configuration.source.asInstanceOf[Jdbc]
     table.columns
       .map { column =>
         val f =
-          if (configuration.jdbc.driverClass.get
-              .contains("oracle") || configuration.jdbc.driverClass.get.contains("sqlserver")) {
+          if (jdbc.driverClass.get.contains("oracle") || jdbc.driverClass.get.contains("sqlserver")) {
             column.sourceName + " AS " + "\"" + column.destinationName + "\""
           } else {
             "`" + column.sourceName + "` AS " + column.destinationName
@@ -94,6 +95,7 @@ object TemplateFunction {
         f
       }
       .mkString(",\n")
+  }
 
   def columnOrCast(
       configuration: Configuration,

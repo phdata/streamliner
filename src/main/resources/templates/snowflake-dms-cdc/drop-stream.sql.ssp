@@ -13,6 +13,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --%>
+#import(io.phdata.pipewrench.configuration.Snowflake)
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
-DROP STREAM IF EXISTS ${configuration.snowflake.get.stagingDatabase.name}.${configuration.snowflake.get.stagingDatabase.schema.get}.${table.destinationName}_STREAM;
+#{
+    val destination = configuration.destination.asInstanceOf[Snowflake]
+}#
+DROP STREAM IF EXISTS ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName}_STREAM;

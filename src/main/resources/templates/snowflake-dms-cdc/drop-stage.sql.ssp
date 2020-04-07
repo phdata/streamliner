@@ -13,5 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --%>
+#import(io.phdata.pipewrench.configuration.Snowflake)
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
-DROP STAGE IF EXISTS ${configuration.snowflake.get.stagingDatabase.name}.${configuration.snowflake.get.stagingDatabase.schema.get}.${configuration.name}_stage;
+#{
+    val destination = configuration.destination.asInstanceOf[Snowflake]
+}#
+DROP STAGE IF EXISTS ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${configuration.name}_stage;

@@ -13,16 +13,20 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --%>
+#import(io.phdata.pipewrench.configuration.Snowflake)
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
 <%@ val typeMapping: Map[String, Map[String, String]]%>
-<% val destColumnStr = table.columns.map(column => s"${column.destinationName}").mkString(", ")%>
-<% val sourceColumnStr = table.columns.map(column => s"$$1:${column.sourceName}::${io.phdata.pipewrench.util.TemplateFunction.mapDataType(column, typeMapping, "SNOWFLAKE")}").mkString(", ")%>
-USE DATABASE ${configuration.snowflake.get.stagingDatabase.name};
+#{
+    val destination = configuration.destination.asInstanceOf[Snowflake]
+    val destColumnStr = table.columns.map(column => s"${column.destinationName}").mkString(", ")
+    val sourceColumnStr = table.columns.map(column => s"$$1:${column.sourceName}::${io.phdata.pipewrench.util.TemplateFunction.mapDataType(column, typeMapping, "SNOWFLAKE")}").mkString(", ")
+}#
+USE DATABASE ${destination.stagingDatabase.name};
 
-USE SCHEMA ${configuration.snowflake.get.stagingDatabase.schema.get};
+USE SCHEMA ${destination.stagingDatabase.schema};
 
-COPY INTO departments_stg (dept_no, dept_name, dms_operation, dms_ts)
-FROM ( SELECT $1:dept_no::string, $1:dept_name::string, $1:Op::STRING, $1:ts::TIMESTAMP_LTZ
+COPY INTO departments_stg (${destColumnStr}, dms_operation, dms_ts)
+FROM ( SELECT ${sourceColumnStr}, $1:Op::STRING, $1:ts::TIMESTAMP_LTZ
     FROM @MYSQL_DMS_EXAMPLE_stage/departments)
 FILE_FORMAT = ( TYPE = PARQUET);

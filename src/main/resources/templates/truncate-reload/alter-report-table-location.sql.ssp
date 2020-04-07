@@ -13,7 +13,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --%>
+#import(io.phdata.pipewrench.configuration.Hadoop)
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
-<% val partition = "${var:ingest_partition}"%>
-ALTER TABLE `${configuration.hadoop.get.reportingDatabase.name}`.`${table.destinationName}` SET LOCATION '${configuration.hadoop.get.stagingDatabase.path.get}/part_${table.destinationName}/ingest_partition=${partition}/';
+#{
+    val destination = configuration.destination.asInstanceOf[Hadoop]
+    val partition = "${var:ingest_partition}"
+}#
+ALTER TABLE `${destination.reportingDatabase.name}`.`${table.destinationName}` SET LOCATION '${destination.stagingDatabase.path}/part_${table.destinationName}/ingest_partition=${partition}/';

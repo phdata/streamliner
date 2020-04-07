@@ -13,6 +13,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --%>
+#import(io.phdata.pipewrench.configuration.Hadoop)
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
-INVALIDATE METADATA `${configuration.hadoop.get.stagingDatabase.name}`.`stg_${table.destinationName}`;
+#{
+    val destination = configuration.destination.asInstanceOf[Hadoop]
+}#
+INVALIDATE METADATA `${destination.stagingDatabase.name}`.`stg_${table.destinationName}`;

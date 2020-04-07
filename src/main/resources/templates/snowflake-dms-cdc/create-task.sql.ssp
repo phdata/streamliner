@@ -13,25 +13,29 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --%>
+#import(io.phdata.pipewrench.configuration.Snowflake)
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
-<% val primaryKeyStmt = table.primaryKeys.map(k => s"t.$k = s.$k").mkString(" AND ")%>
-<% val iprimaryKeyStmt = table.primaryKeys.map(k => s"i.$k = si.$k").mkString(" AND ")%>
-<% val primaryKeyStr = table.primaryKeys.map(k => s"$k").mkString(",")%>
-<% val columnStr = table.columns.map(_.destinationName).mkString(", ") %>
-<% val incolumnStr = table.columns.map(c => s"si.${c.destinationName}").mkString(", ") %>
-<% val columnSourceStr = table.columns.map(column => s"s.${column.destinationName}").mkString(", ")%>
-<% val updateColumnStr = table.columns.map(column => s"${column.destinationName} = s.${column.destinationName}").mkString(", ")%>
-CREATE TASK IF NOT EXISTS ${configuration.snowflake.get.stagingDatabase.name}.${configuration.snowflake.get.stagingDatabase.schema.get}.${table.destinationName}_task
-    WAREHOUSE = ${configuration.snowflake.get.warehouse}
-    SCHEDULE = '${configuration.snowflake.get.taskSchedule}'
+#{
+    val destination = configuration.destination.asInstanceOf[Snowflake]
+    val primaryKeyStmt = table.primaryKeys.map(k => s"t.$k = s.$k").mkString(" AND ")
+    val iprimaryKeyStmt = table.primaryKeys.map(k => s"i.$k = si.$k").mkString(" AND ")
+    val primaryKeyStr = table.primaryKeys.map(k => s"$k").mkString(",")
+    val columnStr = table.columns.map(_.destinationName).mkString(", ")
+    val incolumnStr = table.columns.map(c => s"si.${c.destinationName}").mkString(", ")
+    val columnSourceStr = table.columns.map(column => s"s.${column.destinationName}").mkString(", ")
+    val updateColumnStr = table.columns.map(column => s"${column.destinationName} = s.${column.destinationName}").mkString(", ")
+}#
+CREATE TASK IF NOT EXISTS ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName}_task
+    WAREHOUSE = ${destination.warehouse}
+    SCHEDULE = '${destination.taskSchedule}'
     WHEN SYSTEM$STREAM_HAS_DATA('${table.destinationName}_stream')
     AS
-    MERGE INTO ${configuration.snowflake.get.reportingDatabase.name}.${configuration.snowflake.get.reportingDatabase.schema.get}.${table.destinationName} t
+    MERGE INTO ${destination.reportingDatabase.name}.${destination.reportingDatabase.schema}.${table.destinationName} t
         USING ( SELECT ${incolumnStr}, si.dms_operation, i.max_dms_ts
-                FROM ${configuration.snowflake.get.stagingDatabase.name}.${configuration.snowflake.get.stagingDatabase.schema}.${table.destinationName}_stream si
+                FROM ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName}_stream si
                 INNER JOIN ( SELECT ${primaryKeyStr}, MAX(dms_ts) max_dms_ts
-                             FROM ${configuration.snowflake.get.stagingDatabase.name}.${configuration.snowflake.get.stagingDatabase.schema}.${table.destinationName}_stream
+                             FROM ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName}_stream
                              GROUP BY ${primaryKeyStr} ) i
                 ON ${iprimaryKeyStmt} AND i.max_dms_ts = si.dms_ts ) s
     ON ${primaryKeyStmt}

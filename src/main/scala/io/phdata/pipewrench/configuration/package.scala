@@ -16,16 +16,29 @@
 
 package io.phdata.pipewrench
 
+import io.circe._
+import io.circe.generic.auto._
+import io.circe.syntax._
+
 package object configuration {
 
   case class Configuration(
       name: String,
       environment: String,
       pipeline: String,
-      jdbc: Jdbc,
-      hadoop: Option[Hadoop] = None,
-      snowflake: Option[Snowflake] = None,
+      source: Source,
+      destination: Destination,
       tables: Option[Seq[TableDefinition]] = None)
+
+  sealed trait Source
+
+  object Source {
+    implicit val decodeSource: Decoder[Source] = Decoder[Jdbc].map[Source](identity)
+
+    implicit val encodeSource: Encoder[Source] = Encoder.instance {
+      case jdbc @ Jdbc(_, _, _, _, _, _, _, _, _, _) => jdbc.asJson
+    }
+  }
 
   case class Jdbc(
       driverClass: Option[String],
@@ -38,11 +51,27 @@ package object configuration {
       tableTypes: Seq[String],
       tables: Option[Seq[Table]],
       metadata: Option[Map[String, String]])
+      extends Source
+
+  sealed trait Destination
+
+  object Destination {
+    implicit val decodeDestination: Decoder[Destination] =
+      Decoder[Hadoop]
+        .map[Destination](identity)
+        .or(Decoder[Snowflake].map[Destination](identity))
+
+    implicit val encodeData: Encoder[Destination] = Encoder.instance {
+      case hadoop @ Hadoop(_, _, _) => hadoop.asJson
+      case snowflake @ Snowflake(_, _, _, _, _, _, _) => snowflake.asJson
+    }
+  }
 
   case class Hadoop(
       impalaShellCommand: String,
-      stagingDatabase: Database,
-      reportingDatabase: Database)
+      stagingDatabase: HadoopDatabase,
+      reportingDatabase: HadoopDatabase)
+      extends Destination
 
   case class Snowflake(
       snowSqlCommand: String,
@@ -50,10 +79,12 @@ package object configuration {
       storageIntegration: String,
       warehouse: String,
       taskSchedule: String,
-      stagingDatabase: Database,
-      reportingDatabase: Database)
+      stagingDatabase: SnowflakeDatabase,
+      reportingDatabase: SnowflakeDatabase)
+      extends Destination
 
-  case class Database(name: String, path: Option[String] = None, schema: Option[String] = None)
+  case class HadoopDatabase(name: String, path: String)
+  case class SnowflakeDatabase(name: String, schema: String)
 
   case class Table(
       name: String,

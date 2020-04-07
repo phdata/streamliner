@@ -13,11 +13,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --%>
+#import(io.phdata.pipewrench.configuration.Hadoop)
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
 <%@ val typeMapping: Map[String, Map[String, String]]%>
+#{
+    val destination = configuration.destination.asInstanceOf[Hadoop]
+}#
 set sync_ddl=1;
-CREATE TABLE IF NOT EXISTS `${configuration.hadoop.get.stagingDatabase.name}`.`stg_${table.destinationName}` (
+CREATE TABLE IF NOT EXISTS `${destination.stagingDatabase.name}`.`stg_${table.destinationName}` (
 <%
     val columnDefinitions = table.columns.map {
         column =>
@@ -34,7 +38,7 @@ ${columnDefinitions}
 )
 COMMENT '${table.comment.getOrElse("")}'
 STORED AS AVRO
-LOCATION '${configuration.hadoop.get.stagingDatabase.path.get}/stg_${table.destinationName}'
+LOCATION '${destination.stagingDatabase.path}/stg_${table.destinationName}'
 TBLPROPERTIES(
-'avro.schema.url' = '${configuration.hadoop.get.stagingDatabase.path.get}/stg_${table.destinationName}/.meta/stg_${table.destinationName}.avsc'
+'avro.schema.url' = '${destination.stagingDatabase.path}/stg_${table.destinationName}/.meta/stg_${table.destinationName}.avsc'
 )

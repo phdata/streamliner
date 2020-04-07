@@ -13,12 +13,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --%>
+#import(io.phdata.pipewrench.configuration.Hadoop)
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
 <%@ val typeMapping: Map[String, Map[String, String]]%>
-<% val columns = io.phdata.pipewrench.util.TemplateFunction.columnOrCast(configuration, table, typeMapping, "AVRO", "PARQUET") %>
-<% val partition = "${var:ingest_partition}"%>
-INSERT OVERWRITE TABLE `${configuration.hadoop.get.stagingDatabase.name}`.`part_${table.destinationName}` PARTITION (ingest_partition=${partition})
+#{
+    val destination = configuration.destination.asInstanceOf[Hadoop]
+    val columns = io.phdata.pipewrench.util.TemplateFunction.columnOrCast(configuration, table, typeMapping, "AVRO", "PARQUET")
+    val partition = "${var:ingest_partition}"
+}#
+INSERT OVERWRITE TABLE `${destination.stagingDatabase.name}`.`part_${table.destinationName}` PARTITION (ingest_partition=${partition})
 SELECT
 ${columns}
-FROM `${configuration.hadoop.get.stagingDatabase.name}`.`stg_${table.destinationName}`;
+FROM `${destination.stagingDatabase.name}`.`stg_${table.destinationName}`;

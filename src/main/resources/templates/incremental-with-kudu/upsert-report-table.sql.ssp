@@ -13,12 +13,16 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --%>
+#import(io.phdata.pipewrench.configuration.Hadoop)
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
 <%@ val typeMapping: Map[String, Map[String, String]]%>
-<% val columns = io.phdata.pipewrench.util.TemplateFunction.columnOrCast(configuration, table, typeMapping, "AVRO", "KUDU") %>
+#{
+    val destination = configuration.destination.asInstanceOf[Hadoop]
+    val columns = io.phdata.pipewrench.util.TemplateFunction.columnOrCast(configuration, table, typeMapping, "AVRO", "KUDU")
+}#
 set sync_ddl=1;
-REFRESH `${configuration.hadoop.get.stagingDatabase.name}`.`stg_${table.destinationName}`;
-UPSERT INTO `${configuration.hadoop.get.reportingDatabase.name}`.`${table.destinationName}` SELECT
+REFRESH `${destination.stagingDatabase.name}`.`stg_${table.destinationName}`;
+UPSERT INTO `${destination.reportingDatabase.name}`.`${table.destinationName}` SELECT
 ${columns}
-FROM `${configuration.hadoop.get.stagingDatabase.name}`.`stg_${table.destinationName}` ORDER BY `${table.checkColumn.get}` ASC;
+FROM `${destination.stagingDatabase.name}`.`stg_${table.destinationName}` ORDER BY `${table.checkColumn.get}` ASC;

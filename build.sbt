@@ -13,6 +13,8 @@ scalaVersion := "2.11.12"
 
 val schemaCrawlerVersion = "16.2.5"
 
+val excludeSlf4jBinding = ExclusionRule(organization = "org.slf4j")
+
 lazy val root = (project in file("."))
   .settings(scalafmtOnCompile := true)
   .configs(IntegrationTest)
@@ -24,15 +26,15 @@ lazy val root = (project in file("."))
       "org.rogach" %% "scallop" % "3.1.1",
       "io.circe" %% "circe-yaml" % "0.8.0",
       "io.circe" %% "circe-generic" % "0.8.0",
-      "us.fatehi" % "schemacrawler-mysql" % schemaCrawlerVersion,
-      "us.fatehi" % "schemacrawler-postgresql" % schemaCrawlerVersion,
-      "us.fatehi" % "schemacrawler-oracle" % schemaCrawlerVersion,
-      "us.fatehi" % "schemacrawler-db2" % schemaCrawlerVersion,
-      "us.fatehi" % "schemacrawler-sqlserver" % schemaCrawlerVersion,
+      "us.fatehi" % "schemacrawler-mysql" % schemaCrawlerVersion excludeAll(excludeSlf4jBinding),
+      "us.fatehi" % "schemacrawler-postgresql" % schemaCrawlerVersion excludeAll(excludeSlf4jBinding),
+      "us.fatehi" % "schemacrawler-oracle" % schemaCrawlerVersion excludeAll(excludeSlf4jBinding),
+      "us.fatehi" % "schemacrawler-db2" % schemaCrawlerVersion excludeAll(excludeSlf4jBinding),
+      "us.fatehi" % "schemacrawler-sqlserver" % schemaCrawlerVersion excludeAll(excludeSlf4jBinding),
       "guru.nidi" % "graphviz-java" % "0.8.1",
       "org.scalatra.scalate" %% "scalate-core" % "1.9.0",
       "org.scalatest" %% "scalatest" % "3.0.5" % "it,test",
-      "org.apache.hadoop" % "hadoop-common" % "2.8.3"
+//      "org.apache.hadoop" % "hadoop-common" % "2.8.3"
     )
   )
 

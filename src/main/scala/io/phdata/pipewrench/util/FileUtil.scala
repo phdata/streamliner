@@ -22,13 +22,13 @@ import java.io.FileWriter
 import java.nio.file.Files
 import java.nio.file.Paths
 
-import org.slf4j.LoggerFactory
+import org.apache.log4j.Logger
 
 import scala.io.Source
 
 trait FileUtil {
 
-  private val logger = LoggerFactory.getLogger("FileUtil")
+  private val logger = Logger.getLogger("FileUtil")
 
   def readFile(path: String): String = {
     logger.debug(s"Reading file: $path")

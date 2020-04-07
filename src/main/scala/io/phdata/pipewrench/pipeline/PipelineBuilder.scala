@@ -20,12 +20,12 @@ import java.io.File
 
 import io.phdata.pipewrench.configuration._
 import io.phdata.pipewrench.util.FileUtil
+import org.apache.log4j.Logger
 import org.fusesource.scalate.TemplateEngine
-import org.slf4j.LoggerFactory
 
 object PipelineBuilder extends FileUtil with YamlSupport {
 
-  private lazy val logger = LoggerFactory.getLogger(PipelineBuilder.getClass)
+  private lazy val logger = Logger.getLogger(PipelineBuilder.getClass)
   private lazy val engine: TemplateEngine = new TemplateEngine
 
   def build(
@@ -51,7 +51,7 @@ object PipelineBuilder extends FileUtil with YamlSupport {
       templateDirectory: String,
       outputDirectory: String): Unit = {
 
-    engine.escapeMarkup = false
+    engine.escapeMarkup = true
 
     configuration.tables match {
       case Some(tables) =>

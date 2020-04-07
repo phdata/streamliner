@@ -13,6 +13,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --%>
+#import(io.phdata.pipewrench.configuration.Snowflake)
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
-ALTER TASK ${configuration.snowflake.get.stagingDatabase.name}.${configuration.snowflake.get.stagingDatabase.schema.get}.${table.destinationName}_TASK SUSPEND;
+#{
+    val destination = configuration.destination.asInstanceOf[Snowflake]
+}#
+ALTER TASK ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName}_TASK SUSPEND;

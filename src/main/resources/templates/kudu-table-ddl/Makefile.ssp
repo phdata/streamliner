@@ -13,9 +13,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --%>
+#import(io.phdata.pipewrench.configuration.Hadoop)
 <%@ val configuration: io.phdata.pipewrench.configuration.Configuration %>
 <%@ val table: io.phdata.pipewrench.configuration.TableDefinition %>
-impala-cmd=${configuration.hadoop.get.impalaShellCommand} -f
+#{
+    val destination = configuration.destination.asInstanceOf[Hadoop]
+}#
+impala-cmd=${destination.impalaShellCommand} -f
 
 compute-stats-kudu: compute-stats-kudu.sql
     $(impala-cmd) compute-stats-kudu.sql

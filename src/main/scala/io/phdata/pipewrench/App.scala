@@ -18,15 +18,16 @@ package io.phdata.pipewrench
 
 import io.phdata.pipewrench.configuration.ConfigurationBuilder
 import io.phdata.pipewrench.pipeline.PipelineBuilder
+import org.apache.log4j.Logger
+//import org.slf4j.LoggerFactory
 
-import org.apache.hadoop.conf.Configuration
-import org.slf4j.LoggerFactory
+//import org.apache.hadoop.conf.Configuration
 
 import scala.io.StdIn
 
 object App {
 
-  private val logger = LoggerFactory.getLogger(App.getClass)
+  private val logger = Logger.getLogger(App.getClass)
 
   def main(args: Array[String]): Unit = {
     val cli = new Cli(args)
@@ -64,11 +65,11 @@ object App {
       jceksPath: Option[String],
       keyStoreAlias: Option[String]): String = {
     jceksPath match {
-      case Some(path) =>
-        val alias = keyStoreAlias.get
-        val conf = new Configuration(true)
-        conf.set("hadoop.security.credential.provider.path", path)
-        conf.getPassword(alias).mkString("")
+      case Some(path) => ""
+//        val alias = keyStoreAlias.get
+//        val conf = new Configuration(true)
+//        conf.set("hadoop.security.credential.provider.path", path)
+//        conf.getPassword(alias).mkString("")
       case None =>
         cliPassword match {
           case Some(password) => password

@@ -18,7 +18,7 @@ package io.phdata.pipewrench.configuration
 
 import io.phdata.pipewrench.schemacrawler.SchemaCrawlerImpl
 import io.phdata.pipewrench.util.TemplateFunction
-import org.slf4j.LoggerFactory
+import org.apache.log4j.Logger
 import schemacrawler.schema.{Column => SchemaCrawlerColumn}
 import schemacrawler.schema.{Table => SchemaCrawlerTable}
 
@@ -26,23 +26,24 @@ import collection.JavaConverters._
 
 object ConfigurationBuilder extends YamlSupport {
 
-  private lazy val logger = LoggerFactory.getLogger(ConfigurationBuilder.getClass)
+  private lazy val logger = Logger.getLogger(ConfigurationBuilder.getClass)
 
   def build(configurationFile: String, password: String): Configuration = {
     build(readConfigurationFile(configurationFile), password)
   }
 
   def build(configuration: Configuration, password: String): Configuration = {
-    val catalog = SchemaCrawlerImpl.getCatalog(configuration.jdbc, password)
+    val jdbc = configuration.source.asInstanceOf[Jdbc]
+    val catalog = SchemaCrawlerImpl.getCatalog(jdbc, password)
 
     val tables =
-      catalog.getSchemas.asScala.find(s => s.getFullName.equals(configuration.jdbc.schema)) match {
+      catalog.getSchemas.asScala.find(s => s.getFullName.equals(jdbc.schema)) match {
         case Some(schema) =>
           catalog
             .getTables(schema)
             .asScala
             .map { parsedTable =>
-              configuration.jdbc.tables match {
+              jdbc.tables match {
                 case Some(userDefinedTables) =>
                   userDefinedTables.find(t => t.name.equals(parsedTable.getName)) match {
                     case Some(userDefinedTable) =>
@@ -55,13 +56,11 @@ object ConfigurationBuilder extends YamlSupport {
             }
             .toSeq
         case None =>
-          throw new RuntimeException(
-            s"Schema: ${configuration.jdbc.schema}, does not exist in source system")
+          throw new RuntimeException(s"Schema: ${jdbc.schema}, does not exist in source system")
       }
 
     val enhancedConfiguration = configuration.copy(
-      jdbc =
-        configuration.jdbc.copy(driverClass = Some(catalog.getJdbcDriverInfo.getDriverClassName)),
+      source = jdbc.copy(driverClass = Some(catalog.getJdbcDriverInfo.getDriverClassName)),
       tables = Some(tables)
     )
 
@@ -82,8 +81,9 @@ object ConfigurationBuilder extends YamlSupport {
     val path =
       outputDirectory.fold(s"output/${configuration.name}/${configuration.environment}/docs")(p =>
         s"$p/docs")
-    SchemaCrawlerImpl.getErdOutput(configuration.jdbc, databasePassword, path)
-    SchemaCrawlerImpl.getHtmlOutput(configuration.jdbc, databasePassword, path)
+    val jdbc = configuration.source.asInstanceOf[Jdbc]
+    SchemaCrawlerImpl.getErdOutput(jdbc, databasePassword, path)
+    SchemaCrawlerImpl.getHtmlOutput(jdbc, databasePassword, path)
   }
 
   private def checkConfiguration(configuration: Configuration): Unit = {
