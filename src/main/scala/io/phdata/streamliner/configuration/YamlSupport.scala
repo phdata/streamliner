@@ -66,6 +66,6 @@ trait YamlSupport extends FileUtil with AutoDerivation {
       mappingStyle = Printer.FlowStyle.Block
     ).pretty(configuration.asJson)
 
-    writeFile(printed, s"$path/pipewrench-configuration.yml")
+    writeFile(printed, s"$path/streamliner-configuration.yml")
   }
 }
