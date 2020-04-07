@@ -1,7 +1,7 @@
 name: "" # Unique name for data ingestion
 environment: "" # Environment identifier
 pipeline: "" # Pipeline name must match a directory in the the provided template folder (ie incremental-with-kudu, kudu-table-ddl, truncate-reload)
-jdbc:
+source:
   url: "" # JDBC Connection url
   username: "" # JDBC Username
   passwordFile: "" # HDFS location of password file
@@ -13,7 +13,7 @@ jdbc:
 #  tables:
 #    - name: table1
 #    - name: table2
-hadoop:
+destination:
   impalaShellCommand: "" # Impala shell command copied from CM
   stagingDatabase:
     name: "" # Staging database

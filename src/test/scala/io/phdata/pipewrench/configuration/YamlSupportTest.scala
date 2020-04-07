@@ -20,10 +20,10 @@ import org.scalatest.FunSuite
 
 class YamlSupportTest extends FunSuite with YamlSupport {
 
-
   test("Parse configuration") {
 
-    assertResult("dev")(readConfigurationFile("src/test/resources/incremental-with-kudu.yml").environment)
+    assertResult("dev")(
+      readConfigurationFile("src/test/resources/incremental-with-kudu.yml").environment)
   }
 
   test("Parse type mapping") {

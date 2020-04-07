@@ -93,7 +93,8 @@ object ConfigurationBuilder extends YamlSupport {
       if (configuration.pipeline.equalsIgnoreCase("INCREMENTAL-WITH-KUDU")) {
         checkPrimaryKeys(table)
         checkCheckColumn(table)
-      } else if (configuration.pipeline.equalsIgnoreCase("KUDU-TABLE-DLL")) {
+      } else if (configuration.pipeline.equalsIgnoreCase("KUDU-TABLE-DLL") || configuration.pipeline
+          .equalsIgnoreCase("SNOWFLAKE-DMS-CDC")) {
         checkPrimaryKeys(table)
       }
     }
@@ -101,8 +102,7 @@ object ConfigurationBuilder extends YamlSupport {
 
   private def checkPrimaryKeys(table: TableDefinition): Unit = {
     if (table.primaryKeys.isEmpty) {
-      logger.warn(
-        s"No primary keys are defined for table: ${table.sourceName}, kudu table creation will fail for this table unless the primary keys are added manually")
+      logger.warn(s"No primary keys are defined for table: ${table.sourceName}")
     }
   }
 
