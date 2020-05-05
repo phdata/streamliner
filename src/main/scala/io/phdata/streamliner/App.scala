@@ -33,50 +33,22 @@ object App {
     val cli = new Cli(args)
     cli.subcommand match {
       case Some(cli.schema) =>
-        val databasePassword = getPassword(
-          cli.schema.databasePassword.toOption,
-          cli.schema.jceksPath.toOption,
-          cli.schema.keystoreAlias.toOption)
-
-        val configuration = ConfigurationBuilder.build(cli.schema.filePath(), databasePassword)
-        ConfigurationBuilder.write(configuration, cli.schema.outputPath.toOption)
-
-        if (cli.schema.createDocs()) {
-          ConfigurationBuilder
-            .writeDocs(configuration, databasePassword, cli.schema.outputPath.toOption)
-        }
+        ConfigurationBuilder.build(
+          configurationFile = cli.schema.filePath(),
+          outputDirectory = cli.schema.outputPath.toOption,
+          passwordOpt = cli.schema.databasePassword.toOption,
+          createDocs = cli.schema.createDocs.getOrElse(false))
 
       case Some(cli.produceScripts) =>
         PipelineBuilder.build(
           cli.produceScripts.filePath(),
           cli.produceScripts.typeMappingFile(),
           cli.produceScripts.templateDirectory(),
-          cli.produceScripts.outputPath.toOption
-        )
+          cli.produceScripts.outputPath.toOption)
 
       case None =>
         logger.error("Please provide a valid sub command options are `schema` and `scripts`")
 
-    }
-  }
-
-  private def getPassword(
-      cliPassword: Option[String],
-      jceksPath: Option[String],
-      keyStoreAlias: Option[String]): String = {
-    jceksPath match {
-      case Some(path) => ""
-//        val alias = keyStoreAlias.get
-//        val conf = new Configuration(true)
-//        conf.set("hadoop.security.credential.provider.path", path)
-//        conf.getPassword(alias).mkString("")
-      case None =>
-        cliPassword match {
-          case Some(password) => password
-          case None =>
-            print("Enter database password: ")
-            StdIn.readLine()
-        }
     }
   }
 

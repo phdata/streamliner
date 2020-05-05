@@ -38,18 +38,6 @@ class Cli(args: Seq[String]) extends ScallopConf(args) {
       required = false
     )
 
-    val jceksPath: ScallopOption[String] = opt[String](
-      "jceks-path",
-      descr = "Path to the JCEKS Keystore",
-      required = false
-    )
-
-    val keystoreAlias: ScallopOption[String] = opt[String](
-      "keystore-alias",
-      descr = "Alias to the keystore",
-      required = false
-    )
-
     val createDocs: ScallopOption[Boolean] = opt[Boolean](
       "create-docs",
       descr = "Flag to indicate whether the HTML and ERD documentation should be produced",

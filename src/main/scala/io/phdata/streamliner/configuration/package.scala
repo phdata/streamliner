@@ -33,12 +33,17 @@ package object configuration {
   sealed trait Source
 
   object Source {
-    implicit val decodeSource: Decoder[Source] = Decoder[Jdbc].map[Source](identity)
+    implicit val decodeSource: Decoder[Source] =
+      Decoder[GlueCatalog].map[Source](identity)
+      .or(Decoder[Jdbc].map[Source](identity))
 
     implicit val encodeSource: Encoder[Source] = Encoder.instance {
+      case glue @ GlueCatalog(_, _) => glue.asJson
       case jdbc @ Jdbc(_, _, _, _, _, _, _, _, _, _) => jdbc.asJson
     }
   }
+
+  case class GlueCatalog(region: String, database: String) extends Source
 
   case class Jdbc(
       driverClass: Option[String],
@@ -104,6 +109,7 @@ package object configuration {
       numberOfMappers: Option[Int] = None,
       splitByColumn: Option[String] = None,
       numberOfPartitions: Option[Int] = None,
+      storage: Option[StorageDefinition] = None,
       columns: Seq[ColumnDefinition])
 
   case class ColumnDefinition(
@@ -113,4 +119,9 @@ package object configuration {
       comment: Option[String] = None,
       precision: Option[Int] = None,
       scale: Option[Int] = None)
+
+  case class StorageDefinition(
+      location: String,
+      fileType: String,
+                              )
 }

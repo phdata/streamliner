@@ -42,22 +42,14 @@ import scala.collection.JavaConverters._
 
 object SchemaCrawlerImpl extends FileUtil {
 
-  def getCatalog(jdbc: Jdbc, password: String): Catalog = {
-    val options = getOptions(jdbc)
-    SchemaCrawlerUtility.getCatalog(getConnection(jdbc, password), options)
-  }
+  def getCatalog(jdbc: Jdbc, password: String): Catalog =
+    SchemaCrawlerUtility.getCatalog(getConnection(jdbc, password), getOptions(jdbc))
 
-  def getHtmlOutput(jdbc: Jdbc, password: String, outputPath: String): Unit = {
-    val path = s"$outputPath/docs"
-    val fileName = "schema.html"
-    execute(jdbc, password, TextOutputFormat.html, path, fileName)
-  }
+  def getHtmlOutput(jdbc: Jdbc, password: String, path: String): Unit =
+    execute(jdbc, password, TextOutputFormat.html, path, "schema.html")
 
-  def getErdOutput(jdbc: Jdbc, password: String, outputPath: String): Unit = {
-    val path = s"$outputPath/docs"
-    val fileName = "schema.png"
-    execute(jdbc, password, GraphOutputFormat.png, path, fileName)
-  }
+  def getErdOutput(jdbc: Jdbc, password: String, path: String): Unit =
+    execute(jdbc, password, GraphOutputFormat.png, path, "schema.png")
 
   def execute(
       jdbc: Jdbc,
