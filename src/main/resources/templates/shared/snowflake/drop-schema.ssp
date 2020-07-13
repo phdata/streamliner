@@ -13,9 +13,5 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --%>
-#import(io.phdata.streamliner.configuration.Snowflake)
-<%@ val configuration: io.phdata.streamliner.configuration.Configuration %>
-#{
-    val destination = configuration.destination.asInstanceOf[Snowflake]
-}#
-DROP SCHEMA IF EXISTS ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema};
+<%@ val database: io.phdata.streamliner.configuration.SnowflakeDatabase %>
+DROP SCHEMA IF EXISTS ${database.name}.${database.schema};

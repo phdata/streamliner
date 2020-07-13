@@ -28,7 +28,7 @@ limitations under the License.
 }#
 CREATE TASK IF NOT EXISTS ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName}_task
     WAREHOUSE = ${destination.warehouse}
-    SCHEDULE = '${destination.taskSchedule}'
+    SCHEDULE = '${destination.taskSchedule.getOrElse("5 minutes")}'
     WHEN SYSTEM$STREAM_HAS_DATA('${table.destinationName}_stream')
     AS
     MERGE INTO ${destination.reportingDatabase.name}.${destination.reportingDatabase.schema}.${table.destinationName} t

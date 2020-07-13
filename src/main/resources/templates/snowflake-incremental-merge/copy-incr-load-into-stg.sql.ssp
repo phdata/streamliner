@@ -26,10 +26,7 @@ USE DATABASE ${destination.stagingDatabase.name};
 
 USE SCHEMA ${destination.stagingDatabase.schema};
 
-CREATE PIPE IF NOT EXISTS ${table.destinationName}_pipe
-    AUTO_INGEST = true
-    AS
-        COPY INTO ${table.destinationName}_stg (${destColumnStr}, dms_operation, dms_ts)
-            FROM ( SELECT ${sourceColumnStr}, $1:Op::STRING, $1:ts::TIMESTAMP_LTZ
-                   FROM @${configuration.name}_stage/${table.destinationName})
-        FILE_FORMAT = ( TYPE = PARQUET);
+COPY INTO ${table.destinationName}_stg (${destColumnStr}, dms_operation, dms_ts)
+FROM ( SELECT ${sourceColumnStr}, $1:Op::STRING, $1:ts::TIMESTAMP_LTZ
+    FROM @${configuration.name}_stage/${table.sourceName})
+FILE_FORMAT = ( TYPE = PARQUET);

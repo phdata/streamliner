@@ -18,4 +18,4 @@ limitations under the License.
 #{
     val destination = configuration.destination.asInstanceOf[Snowflake]
 }#
-DROP SCHEMA IF EXISTS ${destination.reportingDatabase.name}.${destination.reportingDatabase.schema};
+<% render("../shared/snowflake/create-schema.ssp", Map("database" -> destination.stagingDatabase)) %>

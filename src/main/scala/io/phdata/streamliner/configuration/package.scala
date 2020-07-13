@@ -34,8 +34,9 @@ package object configuration {
 
   object Source {
     implicit val decodeSource: Decoder[Source] =
-      Decoder[GlueCatalog].map[Source](identity)
-      .or(Decoder[Jdbc].map[Source](identity))
+      Decoder[GlueCatalog]
+        .map[Source](identity)
+        .or(Decoder[Jdbc].map[Source](identity))
 
     implicit val encodeSource: Encoder[Source] = Encoder.instance {
       case glue @ GlueCatalog(_, _) => glue.asJson
@@ -66,7 +67,7 @@ package object configuration {
         .map[Destination](identity)
         .or(Decoder[Snowflake].map[Destination](identity))
 
-    implicit val encodeData: Encoder[Destination] = Encoder.instance {
+    implicit val encodeDestination: Encoder[Destination] = Encoder.instance {
       case hadoop @ Hadoop(_, _, _) => hadoop.asJson
       case snowflake @ Snowflake(_, _, _, _, _, _, _) => snowflake.asJson
     }
@@ -83,7 +84,7 @@ package object configuration {
       storagePath: String,
       storageIntegration: String,
       warehouse: String,
-      taskSchedule: String,
+      taskSchedule: Option[String],
       stagingDatabase: SnowflakeDatabase,
       reportingDatabase: SnowflakeDatabase)
       extends Destination
@@ -112,6 +113,40 @@ package object configuration {
       storage: Option[StorageDefinition] = None,
       columns: Seq[ColumnDefinition])
 
+//  sealed trait TableDefinition
+//
+//  object TableDefinition {
+//    implicit val decodeHadoopTable: Decoder[TableDefinition] =
+//      Decoder[HadoopTable]
+//        .map[TableDefinition](identity)
+//        .or(Decoder[SnowflakeTable].map[TableDefinition](identity))
+//
+//    implicit val encodeData: Encoder[TableDefinition] = Encoder.instance {
+//      case hadoop @ HadoopTable(_, _, _, _, _, _, _, _, _, _) => hadoop.asJson
+//      case snowflake @ SnowflakeTable(_, _, _, _, _, _, _) => snowflake.asJson
+//    }
+//  }
+//
+//  case class HadoopTable(sourceName: String,
+//                         destinationName: String,
+//                         checkColumn: Option[String] = None,
+//                         comment: Option[String],
+//                         primaryKeys: Seq[String],
+//                         metadata: Option[Map[String, String]] = None,
+//                         numberOfMappers: Option[Int] = None,
+//                         splitByColumn: Option[String] = None,
+//                         numberOfPartitions: Option[Int] = None,
+//                         //storage: Option[StorageDefinition] = None,
+//                         columns: Seq[ColumnDefinition]) extends TableDefinition
+//
+//  case class SnowflakeTable(sourceName: String,
+//                            destinationName: String,
+//                            comment: Option[String] = None,
+//                            primaryKeys: Seq[String],
+//                            metadata: Option[Map[String, String]] = None,
+//                            storageDefinition: Option[StorageDefinition] = None,
+//                            columns: Seq[ColumnDefinition]) extends TableDefinition
+
   case class ColumnDefinition(
       sourceName: String,
       destinationName: String,
@@ -120,8 +155,5 @@ package object configuration {
       precision: Option[Int] = None,
       scale: Option[Int] = None)
 
-  case class StorageDefinition(
-      location: String,
-      fileType: String,
-                              )
+  case class StorageDefinition(location: String, fileType: String)
 }

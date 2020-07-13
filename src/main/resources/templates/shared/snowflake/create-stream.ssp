@@ -14,9 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --%>
 #import(io.phdata.streamliner.configuration.Snowflake)
-<%@ val configuration: io.phdata.streamliner.configuration.Configuration %>
-<%@ val table: io.phdata.streamliner.configuration.TableDefinition %>
-#{
-    val destination = configuration.destination.asInstanceOf[Snowflake]
-}#
-DROP TASK IF EXISTS ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName}_task;
+<%@ val database: io.phdata.streamliner.configuration.SnowflakeDatabase %>
+<%@ val table: String %>
+CREATE STREAM IF NOT EXISTS ${database.name}.${database.schema}.${table}_stream
+ON TABLE ${database.name}.${database.schema}.${table}
+APPEND_ONLY = true;

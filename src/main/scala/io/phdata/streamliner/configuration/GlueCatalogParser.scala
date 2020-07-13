@@ -1,7 +1,11 @@
 package io.phdata.streamliner.configuration
 
-import com.amazonaws.services.glue.model.{Column, GetTablesRequest, Table => AWSTable, Column => AWSColumn}
-import com.amazonaws.services.glue.{AWSGlue, AWSGlueClientBuilder}
+import com.amazonaws.services.glue.model.GetTablesRequest
+import com.amazonaws.services.glue.model.{Column => AWSColumn}
+import com.amazonaws.services.glue.model.{Table => AWSTable}
+import com.amazonaws.services.glue.AWSGlue
+import com.amazonaws.services.glue.AWSGlueClient
+import com.amazonaws.services.glue.AWSGlueClientBuilder
 import io.phdata.streamliner.util.TemplateFunction
 
 import collection.JavaConverters._
@@ -10,7 +14,7 @@ object GlueCatalogParser {
 
   def parse(configuration: Configuration): Configuration = {
     val glueCatalog = configuration.source.asInstanceOf[GlueCatalog]
-    val client = new AWSGlueClientBuilder().withRegion(glueCatalog.region).build()
+    val client = AWSGlueClient.builder().withRegion(glueCatalog.region).build()
     val tables = getTables(client, glueCatalog.database).map(mapTable)
     configuration.copy(tables = Some(tables))
   }

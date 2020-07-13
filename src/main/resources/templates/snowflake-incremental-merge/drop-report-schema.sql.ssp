@@ -15,8 +15,7 @@ limitations under the License.
 --%>
 #import(io.phdata.streamliner.configuration.Snowflake)
 <%@ val configuration: io.phdata.streamliner.configuration.Configuration %>
-<%@ val table: io.phdata.streamliner.configuration.TableDefinition %>
 #{
     val destination = configuration.destination.asInstanceOf[Snowflake]
 }#
-DROP TABLE IF EXISTS ${destination.reportingDatabase.name}.${destination.reportingDatabase.schema}.${table.destinationName};
+<% render("../shared/snowflake/drop-schema.ssp", Map("database" -> destination.reportingDatabase)) %>

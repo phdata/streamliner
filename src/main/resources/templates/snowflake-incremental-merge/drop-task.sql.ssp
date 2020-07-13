@@ -16,16 +16,7 @@ limitations under the License.
 #import(io.phdata.streamliner.configuration.Snowflake)
 <%@ val configuration: io.phdata.streamliner.configuration.Configuration %>
 <%@ val table: io.phdata.streamliner.configuration.TableDefinition %>
-<%@ val typeMapping: Map[String, Map[String, String]]%>
 #{
     val destination = configuration.destination.asInstanceOf[Snowflake]
 }#
-CREATE TABLE IF NOT EXISTS ${destination.reportingDatabase.name}.${destination.reportingDatabase.schema}.${table.destinationName} (
-<% val orderedColumns = io.phdata.streamliner.util.TemplateFunction.orderColumns(table) %>
-#for (column <- orderedColumns)
-    <% val mappedDataType = io.phdata.streamliner.util.TemplateFunction.mapDataType(column, typeMapping, "SNOWFLAKE")%>
-    ${column.destinationName} ${mappedDataType} COMMENT '${column.comment.getOrElse("")}',
-#end
-dms_operation STRING,
-dms_ts TIMESTAMP_LTZ
-);
+<% render("../shared/snowflake/drop-task.ssp", Map("database" -> destination.stagingDatabase, "task" ->  s"${table.destinationName}_task")) %>

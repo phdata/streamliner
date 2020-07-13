@@ -37,7 +37,8 @@ object App {
           configurationFile = cli.schema.filePath(),
           outputDirectory = cli.schema.outputPath.toOption,
           passwordOpt = cli.schema.databasePassword.toOption,
-          createDocs = cli.schema.createDocs.getOrElse(false))
+          createDocs = cli.schema.createDocs.getOrElse(false)
+        )
 
       case Some(cli.produceScripts) =>
         PipelineBuilder.build(

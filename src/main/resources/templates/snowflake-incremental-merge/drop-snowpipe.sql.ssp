@@ -19,6 +19,4 @@ limitations under the License.
 #{
     val destination = configuration.destination.asInstanceOf[Snowflake]
 }#
-CREATE STREAM IF NOT EXISTS ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName}_stream
-    ON TABLE ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName}_stg
-    APPEND_ONLY = true;
+<% render("../shared/snowflake/drop-pipe.ssp", Map("database" -> destination.stagingDatabase, "pipe" -> s"${table.destinationName}_pipe")) %>

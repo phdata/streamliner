@@ -23,10 +23,18 @@ object ConfigurationBuilder extends YamlSupport {
 
   private lazy val logger = Logger.getLogger(ConfigurationBuilder.getClass)
 
-  def build(configurationFile: String, outputDirectory: Option[String] = None, passwordOpt: Option[String] = None, createDocs: Boolean = false): Unit =
+  def build(
+      configurationFile: String,
+      outputDirectory: Option[String] = None,
+      passwordOpt: Option[String] = None,
+      createDocs: Boolean = false): Unit =
     build(readConfigurationFile(configurationFile), outputDirectory, passwordOpt, createDocs)
 
-  def build(configuration: Configuration, outputDirectory: Option[String], passwordOpt: Option[String], createDocs: Boolean): Unit = {
+  def build(
+      configuration: Configuration,
+      outputDirectory: Option[String],
+      passwordOpt: Option[String],
+      createDocs: Boolean): Unit = {
     val enhancedConfiguration = configuration.source match {
       case jdbc: Jdbc =>
         passwordOpt match {
@@ -35,11 +43,54 @@ object ConfigurationBuilder extends YamlSupport {
               writeDocs(configuration, password, outputDirectory)
             }
             JDBCParser.parse(configuration, password)
-          case None => throw new RuntimeException("A databasePassword is required when crawling JDBC sources")
+          case None =>
+            throw new RuntimeException("A databasePassword is required when crawling JDBC sources")
         }
       case glue: GlueCatalog => GlueCatalogParser.parse(configuration)
     }
+
+    checkConfiguration(enhancedConfiguration)
     write(enhancedConfiguration, outputDirectory)
+  }
+
+  private def checkConfiguration(configuration: Configuration): Unit = {
+    for (table <- configuration.tables.get) {
+      if (configuration.pipeline.equalsIgnoreCase("INCREMENTAL-WITH-KUDU") || configuration.pipeline
+          .equalsIgnoreCase("TRUNCATE-RELOAD")) {
+        checkPrimaryKeys(table)
+        checkCheckColumn(table)
+        checkNumberOfMappers(table)
+      } else if (configuration.pipeline.equalsIgnoreCase("KUDU-TABLE-DLL") || configuration.pipeline
+          .equalsIgnoreCase("SNOWFLAKE-DMS-CDC")) {
+        checkPrimaryKeys(table)
+      }
+    }
+  }
+
+  private def checkPrimaryKeys(table: TableDefinition): Unit = {
+    if (table.primaryKeys.isEmpty) {
+      logger.warn(s"No primary keys are defined for table: ${table.sourceName}")
+    }
+  }
+
+  private def checkCheckColumn(table: TableDefinition): Unit = {
+    if (table.checkColumn.isEmpty) {
+      logger.warn(
+        s"No check column is defined for table: ${table.sourceName}, sqoop incremental import will fail for this table unless the checkColumn is added manually")
+    }
+  }
+
+  private def checkNumberOfMappers(table: TableDefinition) = {
+    table.numberOfMappers match {
+      case Some(numberOfMappers) =>
+        if (numberOfMappers > 1) {
+          if (table.splitByColumn.isEmpty) {
+            throw new RuntimeException(
+              s"Table: $table, has number of mappers greater than 1 with no splitByColumn defined Sqoop import will fail for this table")
+          }
+        }
+      case None => // no-op
+    }
   }
 
   private def write(configuration: Configuration, outputDirectory: Option[String] = None): Unit = {
