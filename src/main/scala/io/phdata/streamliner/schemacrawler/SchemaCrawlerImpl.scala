@@ -20,7 +20,9 @@ import java.nio.file.Paths
 import java.sql.Connection
 import java.util.logging.Level
 
+import io.phdata.streamliner.configuration.HadoopUserDefinedTable
 import io.phdata.streamliner.configuration.Jdbc
+import io.phdata.streamliner.configuration.SnowflakeUserDefinedTable
 import io.phdata.streamliner.util.FileUtil
 import org.apache.log4j.LogManager
 import schemacrawler.schema.Catalog
@@ -89,9 +91,9 @@ object SchemaCrawlerImpl extends FileUtil {
       .withSchemaInfoLevel(SchemaInfoLevelBuilder.standard())
       .includeSchemas(new RegularExpressionInclusionRule(jdbc.schema))
       .tableTypes(jdbc.tableTypes.asJava)
-    jdbc.tables match {
+    jdbc.userDefinedTable match {
       case Some(tables) =>
-        val tableList = tables.map(t => s"${jdbc.schema}.${t.name}").mkString("|")
+        val tableList = tables.map(t => s"${jdbc.schema}.${t.name}")
         options.includeTables(new RegularExpressionInclusionRule(s"($tableList)"))
       case None => // no-op
     }

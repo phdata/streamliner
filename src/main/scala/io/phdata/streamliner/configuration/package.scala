@@ -30,23 +30,19 @@ package object configuration {
       destination: Destination,
       tables: Option[Seq[TableDefinition]] = None)
 
-  sealed trait Source
-
-  object Source {
-    implicit val decodeSource: Decoder[Source] =
-      Decoder[GlueCatalog]
-        .map[Source](identity)
-        .or(Decoder[Jdbc].map[Source](identity))
-
-    implicit val encodeSource: Encoder[Source] = Encoder.instance {
-      case glue @ GlueCatalog(_, _) => glue.asJson
-      case jdbc @ Jdbc(_, _, _, _, _, _, _, _, _, _) => jdbc.asJson
-    }
+  sealed trait Source {
+    val `type`: String
   }
 
-  case class GlueCatalog(region: String, database: String) extends Source
+  case class GlueCatalog(
+      `type`: String,
+      region: String,
+      database: String,
+      userDefinedTable: Option[Seq[UserDefinedTable]])
+      extends Source
 
   case class Jdbc(
+      `type`: String,
       driverClass: Option[String],
       url: String,
       username: String,
@@ -55,31 +51,23 @@ package object configuration {
       keystoreAlias: Option[String],
       schema: String,
       tableTypes: Seq[String],
-      tables: Option[Seq[Table]],
+      userDefinedTable: Option[Seq[UserDefinedTable]],
       metadata: Option[Map[String, String]])
       extends Source
 
-  sealed trait Destination
-
-  object Destination {
-    implicit val decodeDestination: Decoder[Destination] =
-      Decoder[Hadoop]
-        .map[Destination](identity)
-        .or(Decoder[Snowflake].map[Destination](identity))
-
-    implicit val encodeDestination: Encoder[Destination] = Encoder.instance {
-      case hadoop @ Hadoop(_, _, _) => hadoop.asJson
-      case snowflake @ Snowflake(_, _, _, _, _, _, _) => snowflake.asJson
-    }
+  sealed trait Destination {
+    val `type`: String
   }
 
   case class Hadoop(
+      `type`: String,
       impalaShellCommand: String,
       stagingDatabase: HadoopDatabase,
       reportingDatabase: HadoopDatabase)
       extends Destination
 
   case class Snowflake(
+      `type`: String,
       snowSqlCommand: String,
       storagePath: String,
       storageIntegration: String,
@@ -92,60 +80,64 @@ package object configuration {
   case class HadoopDatabase(name: String, path: String)
   case class SnowflakeDatabase(name: String, schema: String)
 
-  case class Table(
-      name: String,
-      checkColumn: Option[String] = None,
-      numberOfMappers: Option[Int] = Some(1),
-      splitByColumn: Option[String] = None,
-      numberOfPartitions: Option[Int] = Some(2),
-      metadata: Option[Map[String, String]])
+  sealed trait UserDefinedTable {
+    val `type`: String
+    val name: String
+    val primaryKeys: Option[Seq[String]]
+  }
 
-  case class TableDefinition(
+  case class HadoopUserDefinedTable(
+      `type`: String,
+      name: String,
+      primaryKeys: Option[Seq[String]],
+      checkColumn: Option[String],
+      numberOfMappers: Option[Int],
+      splitByColumn: Option[String],
+      numberOfPartitions: Option[Int],
+      metadata: Option[Map[String, String]])
+      extends UserDefinedTable
+
+  case class SnowflakeUserDefinedTable(
+      `type`: String,
+      name: String,
+      primaryKeys: Option[Seq[String]],
+      fileFormat: Option[FileFormat])
+      extends UserDefinedTable
+
+  sealed trait TableDefinition {
+    val `type`: String
+    val sourceName: String
+    val destinationName: String
+    val primaryKeys: Seq[String]
+    val columns: Seq[ColumnDefinition]
+  }
+
+  case class HadoopTable(
+      `type`: String,
       sourceName: String,
       destinationName: String,
-      checkColumn: Option[String] = None,
+      checkColumn: Option[String],
       comment: Option[String],
       primaryKeys: Seq[String],
-      metadata: Option[Map[String, String]] = None,
-      numberOfMappers: Option[Int] = None,
-      splitByColumn: Option[String] = None,
-      numberOfPartitions: Option[Int] = None,
-      storage: Option[StorageDefinition] = None,
+      metadata: Option[Map[String, String]],
+      numberOfMappers: Option[Int],
+      splitByColumn: Option[String],
+      numberOfPartitions: Option[Int],
       columns: Seq[ColumnDefinition])
+      extends TableDefinition
 
-//  sealed trait TableDefinition
-//
-//  object TableDefinition {
-//    implicit val decodeHadoopTable: Decoder[TableDefinition] =
-//      Decoder[HadoopTable]
-//        .map[TableDefinition](identity)
-//        .or(Decoder[SnowflakeTable].map[TableDefinition](identity))
-//
-//    implicit val encodeData: Encoder[TableDefinition] = Encoder.instance {
-//      case hadoop @ HadoopTable(_, _, _, _, _, _, _, _, _, _) => hadoop.asJson
-//      case snowflake @ SnowflakeTable(_, _, _, _, _, _, _) => snowflake.asJson
-//    }
-//  }
-//
-//  case class HadoopTable(sourceName: String,
-//                         destinationName: String,
-//                         checkColumn: Option[String] = None,
-//                         comment: Option[String],
-//                         primaryKeys: Seq[String],
-//                         metadata: Option[Map[String, String]] = None,
-//                         numberOfMappers: Option[Int] = None,
-//                         splitByColumn: Option[String] = None,
-//                         numberOfPartitions: Option[Int] = None,
-//                         //storage: Option[StorageDefinition] = None,
-//                         columns: Seq[ColumnDefinition]) extends TableDefinition
-//
-//  case class SnowflakeTable(sourceName: String,
-//                            destinationName: String,
-//                            comment: Option[String] = None,
-//                            primaryKeys: Seq[String],
-//                            metadata: Option[Map[String, String]] = None,
-//                            storageDefinition: Option[StorageDefinition] = None,
-//                            columns: Seq[ColumnDefinition]) extends TableDefinition
+  case class SnowflakeTable(
+      `type`: String,
+      sourceName: String,
+      destinationName: String,
+      comment: Option[String],
+      primaryKeys: Seq[String],
+      changeColumn: Option[String],
+      incrementalTimeStamp: Option[String],
+      metadata: Option[Map[String, String]],
+      fileFormat: FileFormat,
+      columns: Seq[ColumnDefinition])
+      extends TableDefinition
 
   case class ColumnDefinition(
       sourceName: String,
@@ -155,5 +147,63 @@ package object configuration {
       precision: Option[Int] = None,
       scale: Option[Int] = None)
 
-  case class StorageDefinition(location: String, fileType: String)
+  case class FileFormat(
+      location: String,
+      fileType: String,
+      delimiter: Option[String] = None,
+      nullIf: Option[Set[String]] = None)
+
+  object TableDefinition {
+    implicit val decodeTableDefinition: Decoder[TableDefinition] = Decoder.instance(c =>
+      c.downField("type").as[String].flatMap {
+        case "Hadoop" => c.as[HadoopTable]
+        case "Snowflake" => c.as[SnowflakeTable]
+    })
+
+    implicit val encodeTableDefinition: Encoder[TableDefinition] = Encoder.instance {
+      case hadoopTable @ HadoopTable(_, _, _, _, _, _, _, _, _, _, _) => hadoopTable.asJson
+      case snowflakeTable @ SnowflakeTable(_, _, _, _, _, _, _, _, _, _) => snowflakeTable.asJson
+    }
+  }
+
+  object UserDefinedTable {
+    implicit val decodeUserDefinedTable: Decoder[UserDefinedTable] = Decoder.instance(c =>
+      c.downField("type").as[String].flatMap {
+        case "Hadoop" => c.as[HadoopUserDefinedTable]
+        case "Snowflake" => c.as[SnowflakeUserDefinedTable]
+    })
+
+    implicit val encodeUserDefinedTable: Encoder[UserDefinedTable] = Encoder.instance {
+      case hadoopUserDefinedTable @ HadoopUserDefinedTable(_, _, _, _, _, _, _, _) =>
+        hadoopUserDefinedTable.asJson
+      case snowflakeUserDefinedTable @ SnowflakeUserDefinedTable(_, _, _, _) =>
+        snowflakeUserDefinedTable.asJson
+    }
+  }
+
+  object Destination {
+    implicit val decodeDestination: Decoder[Destination] = Decoder.instance(c =>
+      c.downField("type").as[String].flatMap {
+        case "Hadoop" => c.as[Hadoop]
+        case "Snowflake" => c.as[Snowflake]
+    })
+
+    implicit val encodeDestination: Encoder[Destination] = Encoder.instance {
+      case hadoop @ Hadoop(_, _, _, _) => hadoop.asJson
+      case snowflake @ Snowflake(_, _, _, _, _, _, _, _) => snowflake.asJson
+    }
+  }
+
+  object Source {
+    implicit val decodeSource: Decoder[Source] = Decoder.instance(c =>
+      c.downField("type").as[String].flatMap {
+        case "Glue" => c.as[GlueCatalog]
+        case "Jdbc" => c.as[Jdbc]
+    })
+
+    implicit val encodeSource: Encoder[Source] = Encoder.instance {
+      case glue @ GlueCatalog(_, _, _, _) => glue.asJson
+      case jdbc @ Jdbc(_, _, _, _, _, _, _, _, _, _, _) => jdbc.asJson
+    }
+  }
 }

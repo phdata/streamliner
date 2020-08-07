@@ -18,7 +18,7 @@ package io.phdata.streamliner.schemacrawler
 
 import java.io.File
 
-import io.phdata.streamliner.configuration.Jdbc
+import io.phdata.streamliner.configuration.{Jdbc, SnowflakeUserDefinedTable, UserDefinedTable}
 import org.scalatest.FunSuite
 
 /**
@@ -27,6 +27,7 @@ import org.scalatest.FunSuite
 class SchemaCrawlerImplIntegrationTest extends FunSuite {
 
   val jdbc = Jdbc(
+    `type` = "Jdbc",
     driverClass = None,
     url = "jdbc:mysql://localhost:3306/employees",
     username = "root",

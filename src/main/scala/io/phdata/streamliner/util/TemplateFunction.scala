@@ -18,7 +18,9 @@ package io.phdata.streamliner.util
 
 import io.phdata.streamliner.configuration.ColumnDefinition
 import io.phdata.streamliner.configuration.Configuration
+import io.phdata.streamliner.configuration.HadoopTable
 import io.phdata.streamliner.configuration.Jdbc
+import io.phdata.streamliner.configuration.SnowflakeTable
 import io.phdata.streamliner.configuration.TableDefinition
 
 object TemplateFunction {
@@ -42,7 +44,7 @@ object TemplateFunction {
     }
   }
 
-  def sqoopMapJavaColumn(tableDefinition: TableDefinition): Option[String] = {
+  def sqoopMapJavaColumn(tableDefinition: HadoopTable): Option[String] = {
     val map = tableDefinition.columns.flatMap { column =>
       val stringTypes =
         Seq("clob", "longvarbinary", "varbinary", "rowid", "blob", "nclob", "text", "binary")

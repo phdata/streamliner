@@ -9,7 +9,7 @@ name := "streamliner"
 version := versionFromFile
 isSnapshot := snapshot
 organization := "io.phdata.streamliner"
-scalaVersion := "2.11.12"
+scalaVersion := "2.12.12"
 
 val schemaCrawlerVersion = "16.2.5"
 
@@ -24,8 +24,8 @@ lazy val root = (project in file("."))
       "org.slf4j" % "slf4j-api" % "1.7.30",
       "org.slf4j" % "slf4j-log4j12" % "1.7.30",
       "org.rogach" %% "scallop" % "3.1.1",
-      "io.circe" %% "circe-yaml" % "0.8.0",
-      "io.circe" %% "circe-generic" % "0.8.0",
+      "io.circe" %% "circe-yaml" % "0.13.1",
+      "io.circe" %% "circe-generic" % "0.13.0",
       "us.fatehi" % "schemacrawler-mysql" % schemaCrawlerVersion excludeAll(excludeSlf4jBinding),
       "us.fatehi" % "schemacrawler-postgresql" % schemaCrawlerVersion excludeAll(excludeSlf4jBinding),
       "us.fatehi" % "schemacrawler-oracle" % schemaCrawlerVersion excludeAll(excludeSlf4jBinding),

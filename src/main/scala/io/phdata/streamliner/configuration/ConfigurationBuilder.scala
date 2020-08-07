@@ -16,6 +16,8 @@
 
 package io.phdata.streamliner.configuration
 
+import io.phdata.streamliner.configuration.parser.GlueCatalogParser
+import io.phdata.streamliner.configuration.parser.JDBCParser
 import io.phdata.streamliner.schemacrawler.SchemaCrawlerImpl
 import org.apache.log4j.Logger
 
@@ -55,14 +57,19 @@ object ConfigurationBuilder extends YamlSupport {
 
   private def checkConfiguration(configuration: Configuration): Unit = {
     for (table <- configuration.tables.get) {
-      if (configuration.pipeline.equalsIgnoreCase("INCREMENTAL-WITH-KUDU") || configuration.pipeline
-          .equalsIgnoreCase("TRUNCATE-RELOAD")) {
-        checkPrimaryKeys(table)
-        checkCheckColumn(table)
-        checkNumberOfMappers(table)
-      } else if (configuration.pipeline.equalsIgnoreCase("KUDU-TABLE-DLL") || configuration.pipeline
-          .equalsIgnoreCase("SNOWFLAKE-DMS-CDC")) {
-        checkPrimaryKeys(table)
+      table match {
+        case hadoop: HadoopTable =>
+          if (configuration.pipeline.equalsIgnoreCase("INCREMENTAL-WITH-KUDU")) {
+            checkCheckColumn(hadoop)
+            checkPrimaryKeys(hadoop)
+          } else if (configuration.pipeline.equalsIgnoreCase("KUDU-TABLE-DDL")) {
+            checkPrimaryKeys(hadoop)
+          }
+          checkNumberOfMappers(hadoop)
+        case snowflake: SnowflakeTable =>
+          if (configuration.pipeline.equalsIgnoreCase("SNOWFLAKE-INCREMENTAL-MERGE")) {
+            checkPrimaryKeys(snowflake)
+          }
       }
     }
   }
@@ -73,14 +80,14 @@ object ConfigurationBuilder extends YamlSupport {
     }
   }
 
-  private def checkCheckColumn(table: TableDefinition): Unit = {
+  private def checkCheckColumn(table: HadoopTable): Unit = {
     if (table.checkColumn.isEmpty) {
       logger.warn(
         s"No check column is defined for table: ${table.sourceName}, sqoop incremental import will fail for this table unless the checkColumn is added manually")
     }
   }
 
-  private def checkNumberOfMappers(table: TableDefinition) = {
+  private def checkNumberOfMappers(table: HadoopTable) = {
     table.numberOfMappers match {
       case Some(numberOfMappers) =>
         if (numberOfMappers > 1) {
