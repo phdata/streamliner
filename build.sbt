@@ -51,30 +51,44 @@ mappings in Universal ++= {
 }
 
 mappings in Universal ++= {
-  ((sourceDirectory in Compile).value / "resources" / "templates" / "truncate-reload" * "*").get
+  ((sourceDirectory in Compile).value / "resources" / "templates" / "hadoop" / "truncate-reload" * "*").get
     .map { f =>
-      f -> s"templates/truncate-reload/${f.name}"
+      f -> s"templates/hadoop/truncate-reload/${f.name}"
     }
 }
 
 mappings in Universal ++= {
-  ((sourceDirectory in Compile).value / "resources" / "templates" / "kudu-table-ddl" * "*").get
+  ((sourceDirectory in Compile).value / "resources" / "templates" / "hadoop" / "kudu-table-ddl" * "*").get
     .map { f =>
-      f -> s"templates/kudu-table-ddl/${f.name}"
+      f -> s"templates/hadoop/kudu-table-ddl/${f.name}"
     }
 }
 
 mappings in Universal ++= {
-  ((sourceDirectory in Compile).value / "resources" / "templates" / "incremental-with-kudu" * "*").get
+  ((sourceDirectory in Compile).value / "resources" / "templates" / "hadoop" / "incremental-with-kudu" * "*").get
     .map { f =>
-      f -> s"templates/incremental-with-kudu/${f.name}"
+      f -> s"templates/hadoop/incremental-with-kudu/${f.name}"
     }
 }
 
 mappings in Universal ++= {
-  ((sourceDirectory in Compile).value / "resources" / "templates" / "snowflake-dms-cdc" * "*").get
+  ((sourceDirectory in Compile).value / "resources" / "templates" / "snowflake" / "shared" * "*").get
     .map { f =>
-      f -> s"templates/snowflake-dms-cdc/${f.name}"
+      f -> s"templates/snowflake/shared/${f.name}"
+    }
+}
+
+mappings in Universal ++= {
+  ((sourceDirectory in Compile).value / "resources" / "templates" / "snowflake" / "snowflake-aws-dms-merge" * "*").get
+    .map { f =>
+      f -> s"templates/snowflake/snowflake-dms-cdc/${f.name}"
+    }
+}
+
+mappings in Universal ++= {
+  ((sourceDirectory in Compile).value / "resources" / "templates" / "snowflake" / "snowflake-snowpipe-append" * "*").get
+    .map { f =>
+      f -> s"templates/snowflake/snowflake-snowpipe-append/${f.name}"
     }
 }
 

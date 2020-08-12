@@ -18,16 +18,12 @@ package io.phdata.streamliner
 
 import io.phdata.streamliner.configuration.ConfigurationBuilder
 import io.phdata.streamliner.pipeline.PipelineBuilder
+import org.apache.log4j.LogManager
 import org.apache.log4j.Logger
-//import org.slf4j.LoggerFactory
-
-//import org.apache.hadoop.conf.Configuration
-
-import scala.io.StdIn
 
 object App {
 
-  private val logger = Logger.getLogger(App.getClass)
+  private val logger = LogManager.getLogger(App.getClass)
 
   def main(args: Array[String]): Unit = {
     val cli = new Cli(args)

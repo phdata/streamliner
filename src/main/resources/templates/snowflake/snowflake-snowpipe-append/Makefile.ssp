@@ -56,8 +56,7 @@ first-run:
     $(MAKE) create-snowpipe
 
 clean:
-    $(MAKE) drop-schema
-    $(MAKE) drop table
+    $(MAKE) drop-table
     $(MAKE) drop-snowpipe
 
 
