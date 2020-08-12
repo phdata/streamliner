@@ -1,5 +1,6 @@
 name: phdata-oracle
 source:
+  type: Jdbc
   url: jdbc:oracle:thin:@oraclerds.caewceohkuoi.us-east-1.rds.amazonaws.com:1521:ORCL
   username: HR
   driverClass: oracle.jdbc.OracleDriver
@@ -9,6 +10,7 @@ source:
   passwordFile: hdfs:///user/tfoerster/oracle_password
 pipeline: kudu-table-ddl
 destination:
+  type: Hadoop
   impalaShellCommand: impala-shell -i worker1.valhalla.phdata.io -d default -k --ssl --ca_cert=/opt/cloudera/security/pki/x509/truststore.pem
   stagingDatabase:
     name: user_tfoerster
@@ -18,7 +20,8 @@ destination:
     path: hdfs:///user/tfoerster/db
 environment: dev
 tables:
-- primaryKeys:
+- type: Hadoop
+  primaryKeys:
   - COUNTRY_ID
   sourceName: COUNTRIES
   destinationName: countries
