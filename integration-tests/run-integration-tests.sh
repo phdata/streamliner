@@ -68,7 +68,7 @@ for PIPELINE_TEMPLATE in ${DIR}/templates/*; do
 
 	docker-compose -f ${DIR}/docker-compose.yml exec -T kimpala streamliner scripts \
 	--config /output/${BASENAME}/test/conf/streamliner-configuration.yml \
-	--template-directory /mount/streamliner/templates \
+	--template-directory /mount/streamliner/templates/hadoop \
 	--type-mapping /mount/streamliner/conf/type-mapping.yml -Dlogback.configurationFile=conf/logback.xml
 
 	docker-compose -f ${DIR}/docker-compose.yml exec -T kimpala chmod 770 -R /output
