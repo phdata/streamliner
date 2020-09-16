@@ -91,7 +91,7 @@ object HadoopTableMapper {
 
               val primaryKeys = userTable.primaryKeys match {
                 case Some(pks) => pks
-                case None => Seq()
+                case None => table.primaryKeys
               }
 
               table.copy(

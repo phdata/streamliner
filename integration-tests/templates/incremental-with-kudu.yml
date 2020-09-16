@@ -7,8 +7,9 @@ source:
   passwordFile: hdfs:///user/root/passwordFile
   tableTypes:
   - table
-  tables:
-    - name: employees
+  userDefinedTable:
+    - type: Hadoop
+      name: employees
       checkColumn: emp_no
 pipeline: incremental-with-kudu
 destination:

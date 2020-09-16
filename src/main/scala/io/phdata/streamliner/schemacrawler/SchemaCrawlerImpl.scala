@@ -93,7 +93,7 @@ object SchemaCrawlerImpl extends FileUtil {
       .tableTypes(jdbc.tableTypes.asJava)
     jdbc.userDefinedTable match {
       case Some(tables) =>
-        val tableList = tables.map(t => s"${jdbc.schema}.${t.name}")
+        val tableList = tables.map(t => s"${jdbc.schema}.${t.name}").mkString("|")
         options.includeTables(new RegularExpressionInclusionRule(s"($tableList)"))
       case None => // no-op
     }

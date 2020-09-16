@@ -1,0 +1,44 @@
+<%--
+Copyright 2018 phData Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+--%>
+#import(io.phdata.streamliner.configuration.Hadoop)
+<%@ val configuration: io.phdata.streamliner.configuration.Configuration %>
+<%@ val table: io.phdata.streamliner.configuration.HadoopTable %>
+<%@ val typeMapping: Map[String, Map[String, String]]%>
+#{
+    val destination = configuration.destination.asInstanceOf[Hadoop]
+}#
+set sync_ddl=1;
+CREATE TABLE IF NOT EXISTS `${destination.stagingDatabase.name}`.`stg_${table.destinationName}` (
+<%
+    val columnDefinitions = table.columns.map {
+    column =>
+        val mappedDataType = io.phdata.streamliner.util.TemplateFunction.mapDataType(column, typeMapping, "PARQUET")
+        val dataType = if (mappedDataType.equalsIgnoreCase("DECIMAL")) {
+            s"DECIMAL(${column.precision.get}, ${column.scale.get})"
+        } else {
+            mappedDataType
+        }
+        s"`${column.destinationName}` $dataType COMMENT '${column.comment.getOrElse("")}'"
+    }.mkString(",\n")
+%>
+${columnDefinitions}
+)
+COMMENT '${table.comment.getOrElse("")}'
+STORED AS AVRO
+LOCATION '${destination.stagingDatabase.path}/stg_${table.destinationName}'
+TBLPROPERTIES(
+'avro.schema.url' = '${destination.stagingDatabase.path}/stg_${table.destinationName}/.meta/stg_${table.destinationName}.avsc'
+)

@@ -42,18 +42,18 @@ class SchemaCrawlerImplIntegrationTest extends FunSuite {
 
   test("Get ERD output") {
     val targetFile = "target/erd"
-    SchemaCrawlerImpl.getErdOutput(jdbc, "pipewrench", targetFile)
+    SchemaCrawlerImpl.getErdOutput(jdbc, "streamliner", targetFile)
     assert(new File(targetFile).exists())
   }
 
   test("Get catalogue") {
-    val catalog = SchemaCrawlerImpl.getCatalog(jdbc, "pipewrench")
+    val catalog = SchemaCrawlerImpl.getCatalog(jdbc, "streamliner")
     assert(catalog.getCrawlInfo != null)
   }
 
   test("Get HTML output") {
     val targetFile = "target/html"
-    SchemaCrawlerImpl.getHtmlOutput(jdbc, "pipewrench", targetFile)
+    SchemaCrawlerImpl.getHtmlOutput(jdbc, "streamliner", targetFile)
     assert(new File(targetFile).exists())
   }
 }

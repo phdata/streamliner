@@ -51,6 +51,18 @@ mappings in Universal ++= {
 }
 
 mappings in Universal ++= {
+  ((sourceDirectory in Compile).value / "resources" / "templates" / "hadoop" * "*").get.map { f =>
+    f -> s"templates/hadoop/${f.name}"
+  }
+}
+
+mappings in Universal ++= {
+  ((sourceDirectory in Compile).value / "resources" / "templates" / "snowflake" * "*").get.map { f =>
+    f -> s"templates/snowflake/${f.name}"
+  }
+}
+
+mappings in Universal ++= {
   ((sourceDirectory in Compile).value / "resources" / "templates" / "hadoop" / "truncate-reload" * "*").get
     .map { f =>
       f -> s"templates/hadoop/truncate-reload/${f.name}"
