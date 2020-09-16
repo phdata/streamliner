@@ -1,0 +1,55 @@
+name: ORACLE_DMS_DEMO
+environment: DEV
+pipeline: snowflake-aws-dms-merge
+source:
+  type: Jdbc
+  driverClass: oracle.jdbc.OracleDriver
+  url: jdbc:oracle:thin:@oraclerds.caewceohkuoi.us-east-1.rds.amazonaws.com:1521:ORCL
+  username: admin
+  passwordFile: /
+  schema: HR
+  tableTypes:
+    - table
+destination:
+  type: Snowflake
+  snowSqlCommand: snowsql -c phdata
+  storagePath: s3://phdata-snowflake-stage/data/phdata-task/HR/
+  storageIntegration: PHDATA_S3_READ
+  warehouse: DEFAULT_USER_WH
+  taskSchedule: 5 minutes
+  stagingDatabase:
+    name: USER_TROY
+    schema: HR_STG
+  reportingDatabase:
+    name: USER_TROY
+    schema: HR
+tables:
+  - type: Snowflake
+    sourceName: COUNTRIES
+    destinationName: countries
+    comment: country table. Contains 25 rows. References with locations table.
+    primaryKeys:
+      - COUNTRY_ID
+    fileFormat:
+      location: COUNTRIES
+      fileType: PARQUET
+    columns:
+      - sourceName: COUNTRY_ID
+        destinationName: country_id
+        dataType: CHAR
+        comment: Primary key of countries table.
+        precision: 2
+        scale: 0
+      - sourceName: COUNTRY_NAME
+        destinationName: country_name
+        dataType: VARCHAR2
+        comment: Country name
+        precision: 40
+        scale: 0
+      - sourceName: REGION_ID
+        destinationName: region_id
+        dataType: NUMBER
+        comment: Region ID for the country. Foreign key to region_id column in the departments
+          table.
+        precision: 0
+        scale: -127

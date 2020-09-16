@@ -18,7 +18,7 @@ package io.phdata.streamliner.schemacrawler
 
 import java.io.File
 
-import io.phdata.streamliner.configuration.Jdbc
+import io.phdata.streamliner.configuration.{Jdbc, SnowflakeUserDefinedTable, UserDefinedTable}
 import org.scalatest.FunSuite
 
 /**
@@ -27,6 +27,7 @@ import org.scalatest.FunSuite
 class SchemaCrawlerImplIntegrationTest extends FunSuite {
 
   val jdbc = Jdbc(
+    `type` = "Jdbc",
     driverClass = None,
     url = "jdbc:mysql://localhost:3306/employees",
     username = "root",
@@ -41,18 +42,18 @@ class SchemaCrawlerImplIntegrationTest extends FunSuite {
 
   test("Get ERD output") {
     val targetFile = "target/erd"
-    SchemaCrawlerImpl.getErdOutput(jdbc, "pipewrench", targetFile)
+    SchemaCrawlerImpl.getErdOutput(jdbc, "streamliner", targetFile)
     assert(new File(targetFile).exists())
   }
 
   test("Get catalogue") {
-    val catalog = SchemaCrawlerImpl.getCatalog(jdbc, "pipewrench")
+    val catalog = SchemaCrawlerImpl.getCatalog(jdbc, "streamliner")
     assert(catalog.getCrawlInfo != null)
   }
 
   test("Get HTML output") {
     val targetFile = "target/html"
-    SchemaCrawlerImpl.getHtmlOutput(jdbc, "pipewrench", targetFile)
+    SchemaCrawlerImpl.getHtmlOutput(jdbc, "streamliner", targetFile)
     assert(new File(targetFile).exists())
   }
 }

@@ -9,7 +9,7 @@ name := "streamliner"
 version := versionFromFile
 isSnapshot := snapshot
 organization := "io.phdata.streamliner"
-scalaVersion := "2.11.12"
+scalaVersion := "2.12.12"
 
 val schemaCrawlerVersion = "16.2.5"
 
@@ -24,8 +24,8 @@ lazy val root = (project in file("."))
       "org.slf4j" % "slf4j-api" % "1.7.30",
       "org.slf4j" % "slf4j-log4j12" % "1.7.30",
       "org.rogach" %% "scallop" % "3.1.1",
-      "io.circe" %% "circe-yaml" % "0.8.0",
-      "io.circe" %% "circe-generic" % "0.8.0",
+      "io.circe" %% "circe-yaml" % "0.13.1",
+      "io.circe" %% "circe-generic" % "0.13.0",
       "us.fatehi" % "schemacrawler-mysql" % schemaCrawlerVersion excludeAll(excludeSlf4jBinding),
       "us.fatehi" % "schemacrawler-postgresql" % schemaCrawlerVersion excludeAll(excludeSlf4jBinding),
       "us.fatehi" % "schemacrawler-oracle" % schemaCrawlerVersion excludeAll(excludeSlf4jBinding),
@@ -33,8 +33,8 @@ lazy val root = (project in file("."))
       "us.fatehi" % "schemacrawler-sqlserver" % schemaCrawlerVersion excludeAll(excludeSlf4jBinding),
       "guru.nidi" % "graphviz-java" % "0.8.1",
       "org.scalatra.scalate" %% "scalate-core" % "1.9.0",
-      "org.scalatest" %% "scalatest" % "3.0.5" % "it,test",
-//      "org.apache.hadoop" % "hadoop-common" % "2.8.3"
+      "com.amazonaws" % "aws-java-sdk-glue" % "1.11.774",
+      "org.scalatest" %% "scalatest" % "3.0.5" % "it,test"
     )
   )
 
@@ -51,30 +51,56 @@ mappings in Universal ++= {
 }
 
 mappings in Universal ++= {
-  ((sourceDirectory in Compile).value / "resources" / "templates" / "truncate-reload" * "*").get
+  ((sourceDirectory in Compile).value / "resources" / "templates" / "hadoop" * "*").get.map { f =>
+    f -> s"templates/hadoop/${f.name}"
+  }
+}
+
+mappings in Universal ++= {
+  ((sourceDirectory in Compile).value / "resources" / "templates" / "snowflake" * "*").get.map { f =>
+    f -> s"templates/snowflake/${f.name}"
+  }
+}
+
+mappings in Universal ++= {
+  ((sourceDirectory in Compile).value / "resources" / "templates" / "hadoop" / "truncate-reload" * "*").get
     .map { f =>
-      f -> s"templates/truncate-reload/${f.name}"
+      f -> s"templates/hadoop/truncate-reload/${f.name}"
     }
 }
 
 mappings in Universal ++= {
-  ((sourceDirectory in Compile).value / "resources" / "templates" / "kudu-table-ddl" * "*").get
+  ((sourceDirectory in Compile).value / "resources" / "templates" / "hadoop" / "kudu-table-ddl" * "*").get
     .map { f =>
-      f -> s"templates/kudu-table-ddl/${f.name}"
+      f -> s"templates/hadoop/kudu-table-ddl/${f.name}"
     }
 }
 
 mappings in Universal ++= {
-  ((sourceDirectory in Compile).value / "resources" / "templates" / "incremental-with-kudu" * "*").get
+  ((sourceDirectory in Compile).value / "resources" / "templates" / "hadoop" / "incremental-with-kudu" * "*").get
     .map { f =>
-      f -> s"templates/incremental-with-kudu/${f.name}"
+      f -> s"templates/hadoop/incremental-with-kudu/${f.name}"
     }
 }
 
 mappings in Universal ++= {
-  ((sourceDirectory in Compile).value / "resources" / "templates" / "snowflake-dms-cdc" * "*").get
+  ((sourceDirectory in Compile).value / "resources" / "templates" / "snowflake" / "shared" * "*").get
     .map { f =>
-      f -> s"templates/snowflake-dms-cdc/${f.name}"
+      f -> s"templates/snowflake/shared/${f.name}"
+    }
+}
+
+mappings in Universal ++= {
+  ((sourceDirectory in Compile).value / "resources" / "templates" / "snowflake" / "snowflake-aws-dms-merge" * "*").get
+    .map { f =>
+      f -> s"templates/snowflake/snowflake-dms-cdc/${f.name}"
+    }
+}
+
+mappings in Universal ++= {
+  ((sourceDirectory in Compile).value / "resources" / "templates" / "snowflake" / "snowflake-snowpipe-append" * "*").get
+    .map { f =>
+      f -> s"templates/snowflake/snowflake-snowpipe-append/${f.name}"
     }
 }
 

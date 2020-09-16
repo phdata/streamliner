@@ -20,7 +20,9 @@ import java.nio.file.Paths
 import java.sql.Connection
 import java.util.logging.Level
 
+import io.phdata.streamliner.configuration.HadoopUserDefinedTable
 import io.phdata.streamliner.configuration.Jdbc
+import io.phdata.streamliner.configuration.SnowflakeUserDefinedTable
 import io.phdata.streamliner.util.FileUtil
 import org.apache.log4j.LogManager
 import schemacrawler.schema.Catalog
@@ -42,22 +44,14 @@ import scala.collection.JavaConverters._
 
 object SchemaCrawlerImpl extends FileUtil {
 
-  def getCatalog(jdbc: Jdbc, password: String): Catalog = {
-    val options = getOptions(jdbc)
-    SchemaCrawlerUtility.getCatalog(getConnection(jdbc, password), options)
-  }
+  def getCatalog(jdbc: Jdbc, password: String): Catalog =
+    SchemaCrawlerUtility.getCatalog(getConnection(jdbc, password), getOptions(jdbc))
 
-  def getHtmlOutput(jdbc: Jdbc, password: String, outputPath: String): Unit = {
-    val path = s"$outputPath/docs"
-    val fileName = "schema.html"
-    execute(jdbc, password, TextOutputFormat.html, path, fileName)
-  }
+  def getHtmlOutput(jdbc: Jdbc, password: String, path: String): Unit =
+    execute(jdbc, password, TextOutputFormat.html, path, "schema.html")
 
-  def getErdOutput(jdbc: Jdbc, password: String, outputPath: String): Unit = {
-    val path = s"$outputPath/docs"
-    val fileName = "schema.png"
-    execute(jdbc, password, GraphOutputFormat.png, path, fileName)
-  }
+  def getErdOutput(jdbc: Jdbc, password: String, path: String): Unit =
+    execute(jdbc, password, GraphOutputFormat.png, path, "schema.png")
 
   def execute(
       jdbc: Jdbc,
@@ -97,7 +91,7 @@ object SchemaCrawlerImpl extends FileUtil {
       .withSchemaInfoLevel(SchemaInfoLevelBuilder.standard())
       .includeSchemas(new RegularExpressionInclusionRule(jdbc.schema))
       .tableTypes(jdbc.tableTypes.asJava)
-    jdbc.tables match {
+    jdbc.userDefinedTable match {
       case Some(tables) =>
         val tableList = tables.map(t => s"${jdbc.schema}.${t.name}").mkString("|")
         options.includeTables(new RegularExpressionInclusionRule(s"($tableList)"))

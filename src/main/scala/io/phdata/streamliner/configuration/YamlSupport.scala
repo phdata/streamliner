@@ -19,7 +19,7 @@ import java.io.FileNotFoundException
 
 import io.circe.generic.AutoDerivation
 import io.circe.yaml.Printer
-import io.circe.yaml.parser
+import io.circe.yaml.parser.parse
 import io.phdata.streamliner.util.FileUtil
 import io.circe.syntax._
 
@@ -32,7 +32,7 @@ trait YamlSupport extends FileUtil with AutoDerivation {
       throw new FileNotFoundException(s"Configuration file not found: '$path'.")
     }
 
-    parser.parse(readFile(path)) match {
+    parse(readFile(path)) match {
       case Right(v) =>
         v.as[Configuration] match {
           case Right(c) => c
@@ -47,7 +47,7 @@ trait YamlSupport extends FileUtil with AutoDerivation {
       throw new FileNotFoundException(s"Type mapping file not found: '$path'.")
     }
 
-    parser.parse(readFile(path)) match {
+    parse(readFile(path)) match {
       case Right(v) =>
         v.as[TypeMapping] match {
           case Right(c) => c

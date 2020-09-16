@@ -25,7 +25,7 @@ class PipelineBuilderTest extends FunSuite with YamlSupport {
       .build(
         "src/test/resources/truncate-reload.yml",
         "src/main/resources/type-mapping.yml",
-        "src/main/resources/templates/",
+        "src/main/resources/templates/hadoop",
         Some("target/truncate-reload"))
   }
 
@@ -34,7 +34,7 @@ class PipelineBuilderTest extends FunSuite with YamlSupport {
       .build(
         "src/test/resources/kudu-table-ddl.yml",
         "src/main/resources/type-mapping.yml",
-        "src/main/resources/templates/",
+        "src/main/resources/templates/hadoop",
         Some("target/kudu-table-ddl"))
   }
 
@@ -42,17 +42,18 @@ class PipelineBuilderTest extends FunSuite with YamlSupport {
     PipelineBuilder.build(
       "src/test/resources/incremental-with-kudu.yml",
       "src/main/resources/type-mapping.yml",
-      "src/main/resources/templates/",
+      "src/main/resources/templates/hadoop",
       Some("target/incremental-with-kudu")
     )
   }
 
-  test("Render snowflake-dms-cdc templates") {
+  test("Render snowflake-aws-dms-merge templates") {
     PipelineBuilder.build(
-      "src/test/resources/incremental-with-kudu.yml",
+      "src/test/resources/snowflake-aws-dms-merge.yml",
       "src/main/resources/type-mapping.yml",
-      "src/main/resources/templates/",
-      Some("target/snowflake-dms-cdc"))
+      "src/main/resources/templates/snowflake",
+      Some("target/snowflake-dms-cdc")
+    )
   }
 
 }

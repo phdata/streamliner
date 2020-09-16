@@ -60,15 +60,28 @@ object PipelineBuilder extends FileUtil with YamlSupport {
         val nonTemplateFiles = files.filterNot(f => f.getName.endsWith(".ssp"))
 
         tables.foreach { table =>
-          checkConfiguration(configuration, table)
           val tableDir = s"$outputDirectory/${table.destinationName}"
           createDir(tableDir)
 
           templateFiles.foreach { templateFile =>
             logger.info(s"Rendering file $templateFile")
-            val rendered = engine.layout(
-              templateFile.getPath,
-              Map("configuration" -> configuration, "table" -> table, "typeMapping" -> typeMapping))
+            val rendered = table match {
+              case snowflakeTable: SnowflakeTable =>
+                engine.layout(
+                  templateFile.getPath,
+                  Map(
+                    "configuration" -> configuration,
+                    "table" -> snowflakeTable,
+                    "typeMapping" -> typeMapping))
+              case hadoopTable: HadoopTable =>
+                engine.layout(
+                  templateFile.getPath,
+                  Map(
+                    "configuration" -> configuration,
+                    "table" -> hadoopTable,
+                    "typeMapping" -> typeMapping))
+            }
+
             val replaced = rendered.replace("    ", "\t")
             logger.debug(replaced)
             val fileName = s"$tableDir/${templateFile.getName.replace(".ssp", "")}"
@@ -129,30 +142,6 @@ object PipelineBuilder extends FileUtil with YamlSupport {
     logger.debug(s"File executable flag ${file.canExecute}: '$path'")
     if (file.canExecute) {
       setExecutable(path)
-    }
-  }
-
-  private def checkConfiguration(configuration: Configuration, table: TableDefinition): Unit = {
-    if (configuration.pipeline.equalsIgnoreCase("INCREMENTAL-WITH-KUDU")) {
-      checkPrimaryKeys(table)
-      checkCheckColumn(table)
-    }
-    if (configuration.pipeline.equalsIgnoreCase("KUDU-TABLE-DDL")) {
-      checkPrimaryKeys(table)
-    }
-  }
-
-  private def checkCheckColumn(table: TableDefinition): Unit = {
-    if (table.checkColumn.isEmpty) {
-      throw new RuntimeException(
-        s"'checkColumn' for table: ${table.sourceName} is empty, cannot execute incremental sqoop job")
-    }
-  }
-
-  private def checkPrimaryKeys(table: TableDefinition): Unit = {
-    if (table.primaryKeys.isEmpty) {
-      throw new RuntimeException(
-        s"Primary keys for table: ${table.sourceName} are empty, cannot create Kudu table.")
     }
   }
 }

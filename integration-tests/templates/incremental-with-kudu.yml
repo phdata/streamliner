@@ -1,16 +1,19 @@
 name: incremental-with-kudu # should be the same as the template file base name for integration tests
 source:
+  type: Jdbc
   url: jdbc:mysql://mysql:3306/employees
   username: root
   schema: employees
   passwordFile: hdfs:///user/root/passwordFile
   tableTypes:
   - table
-  tables:
-    - name: employees
+  userDefinedTable:
+    - type: Hadoop
+      name: employees
       checkColumn: emp_no
 pipeline: incremental-with-kudu
 destination:
+  type: Hadoop
   impalaShellCommand: impala-shell -i localhost -d default
   stagingDatabase:
     name: default
