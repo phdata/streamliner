@@ -86,7 +86,7 @@ The Jdbc data source configuration defines connection strings and other attribut
 | --- | --- | --- | --- |
 | type | String | True | Jdbc |
 | username | String | True | The jdbc url for the source system (ex: jdbc:oracle:thin:@{host}:{port}:{sid}) |
-| passwordFile | String | True | Location of the password file stored on the Hadoop File System.  Can be blank for Snowflake destinations. |
+| passwordFile | String | True | Location of the password file stored using Hadoop File System. Should be blank for Snowflake which will use the SnowSQL `--connection` argument. |
 | schema | String | True | The schema on the source system to parse metadata from. |
 | tableTypes | List[String] | True | Controls which objects get parsed on the source system acceptable values are table and view |
 | metadata | Map[String, String] | False | Global metadata map of key value pairs added as metadata on all tables at creation |
@@ -357,7 +357,7 @@ Snowflake's continous ingest tool Snowpipe automatically copies data into the st
 5. Drop report table
 6. Drop staging table
 
-*NOTE:* `clean` does not remove the `staging` and `report` schemas.
+*NOTE:* `clean` does not remove the `staging` and `report` schemas nor does it the `stage` which can be cleaned by `make drop-stage`.
 
 #### Snowflake Snowpipe Append
 See `templates/snowflake/snowflake-snowpipe-append`
@@ -376,7 +376,7 @@ The Snowpipe Append template is A Snowflake data pipeline to append newly arrivi
 1. Drop table
 2. Drop Snowpipe
 
-*NOTE:* `clean` does not remove the schema.
+*NOTE:* `clean` does not remove the schema nor does it the `stage` which can be cleaned by `make drop-stage`.
 
 ## Installing Streamliner
 You can find the latest version of streamliner in [phData's Artifactory](https://repository.phdata.io/artifactory/list/binary/phdata/streamliner/).
