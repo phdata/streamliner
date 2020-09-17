@@ -1,0 +1,3 @@
+# tags to pull documentation versions on docs.customer.phdata.io
+doc-versions:
+#  - { name: 4.0.0, tag: 4.0.0 }
