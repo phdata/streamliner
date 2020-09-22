@@ -1,4 +1,4 @@
-%--
+<%--
 Copyright 2018 phData Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -51,7 +51,7 @@ drop-table: drop-table.sql
 first-run:
     $(MAKE) create-schema
     $(MAKE) create-stage
-    $(MAKE) create table
+    $(MAKE) create-table
     $(MAKE) copy-into
     $(MAKE) create-snowpipe
 
