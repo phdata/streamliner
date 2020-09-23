@@ -1,4 +1,4 @@
-![Streamliner Logo](images/streamliner_logo.png)
+![Streamliner Logo](../images/streamliner_logo.png)
 
 - [Introduction](#introduction)
   * [Why Streamliner](#why-streamliner)
@@ -40,11 +40,11 @@ Streamliner uses SchemaCrawler to query database table metadata through JDBC. It
 
 For example, in order to perform Change Data Capture (CDC) -based continuous replication from a source system to Snowflake, Streamliner could be used to generate the SnowSQL needed to create the required Snowpipe tasks, staging tables, and Snowflake Streams, and merge tasks.
 
-![Streamliner pipeline example](images/streamliner_pipeline.png)
+![Streamliner pipeline example](../images/streamliner_pipeline.png)
 
 Alternatively, Streamliner might also be used in a very different use case to facilitate data ingestion from relational databases (DBMS) to Hadoop by generating the necessary Sqoop ingest scripts and Impala merge statements.
 
-![Streamliner_hadoop example](images/streamliner_hadoop_example.png)
+![Streamliner_hadoop example](../images/streamliner_hadoop_example.png)
 
 ## Why Streamliner
 - Ingest hundreds or thousands of data sources quickly and easily
