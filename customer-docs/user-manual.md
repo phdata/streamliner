@@ -173,6 +173,7 @@ Configuration properties defining the Snowflake destination.
 | snowSqlCommand | String | True | SnowSQL cli command used to execute sql statements from produced DML and DDL scripts |
 | storagePath | String | True | Cloud storage location to find the schema level table objects from (used when creating external stage) |
 | storageIntegration | String | True | Name of the Snowflake storage integration used when created an external stage |
+| snsTopic | String | False | Name of the AWS SNS Topic to be used when configuring Snowpipe. |
 | warehouse | String | True | Name of the Snowflake warehouse to be used when executing tasks and copy into commands |
 | taskSchedule | String | False | Snowflake task schedule |
 | stagingDatabase | [SnowflakeDatabase](#snowflake-database) | True | Staging database where data will staged into in Snowflake |

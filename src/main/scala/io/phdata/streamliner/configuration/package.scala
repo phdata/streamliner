@@ -71,6 +71,7 @@ package object configuration {
       snowSqlCommand: String,
       storagePath: String,
       storageIntegration: String,
+      snsTopic: Option[String],
       warehouse: String,
       taskSchedule: Option[String],
       stagingDatabase: SnowflakeDatabase,
@@ -190,7 +191,7 @@ package object configuration {
 
     implicit val encodeDestination: Encoder[Destination] = Encoder.instance {
       case hadoop @ Hadoop(_, _, _, _) => hadoop.asJson
-      case snowflake @ Snowflake(_, _, _, _, _, _, _, _) => snowflake.asJson
+      case snowflake @ Snowflake(_, _, _, _, _, _, _, _, _) => snowflake.asJson
     }
   }
 
