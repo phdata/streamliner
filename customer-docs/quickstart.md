@@ -35,7 +35,7 @@ publicly accessible:
 
 ![Modify RDS Instance to be Publicly Accessible](../images/quickstart-mysql-config-public-access.png)
 
-MySQL typically uses port `3306` but you should change that to port `33006` to reduce your attack service:
+MySQL typically uses port `3306` but you should change that to port `33006` to reduce your attack surface:
 
 ![Modify RDS Instance to use port 33006](../images/quickstart-mysql-config-port-33006.png)
 
