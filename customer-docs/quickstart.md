@@ -168,6 +168,10 @@ Please note policy in the above document is more complicated than is required. I
 Here is an example of the storage integration creation SQL used:
 
 ```sql
+USE ROLE ACCOUNTADMIN;
+```
+
+```sql
 CREATE STORAGE INTEGRATION STREAMLINER_QUICKSTART_1
   TYPE = EXTERNAL_STAGE
   STORAGE_PROVIDER = S3
@@ -317,34 +321,7 @@ And you will see something like this:
 
 ![Obtain ARN](./images/quickstart-auto-ingest-00.png)
 
-Then open the AWS console, find your bucket, click events: 
-
-![Open S3 Bucket Properties](./images/quickstart-auto-ingest-01.png)
-
-And add a notification to the SQS queue:
-
-![Add Event Notification](./images/quickstart-auto-ingest-02.png)
-
-You can clean up the stages, tables, and tasks for the `departments` table with:
-
-```shell script
-make clean-departments
-```
-
-Once that the above is working, you can execute all tables with `first-run-all`:
-
-```shell script
-make first-run-all
-```
-## See Result
-
-You can now go preview data in the staging tables:
-
-![Preview Data](./images/quickstart-preview-data.png)
-
-# Alternate Option: 
-
-You can also configure Amazon Simple Notification Service (SNS) as a broadcaster to publish event notifications for your S3 bucket to multiple subscribers (e.g. SQS queues or email or AWS Lambda workloads, including the Snowflake SQS queue for Snowpipe automation) through SNS Topic. 
+Next, you can configure Amazon Simple Notification Service (SNS) as a broadcaster to publish S3 event notifications to multiple subscribers (e.g. SQS queues or AWS Lambda workloads, including the Snowflake SQS queue for Snowpipe automation) through SNS Topic. 
 
 ```
 S3 Event -> SNS (SNS Topic) -> SQS Queue -> Snowpipe
@@ -360,7 +337,7 @@ The following steps are involved for using SNS:
 
 - Open AWS Management Console, choose Simple Notification Service (SNS)
 - Create an SNS Topic (to handle all messages for the Snowflake stage location on your S3 bucket).
-  - Let us name it: sf_snowpipe_sns_topic_test
+  - Let us name it: eg. sf_snowpipe_sns_topic_test
   - This will generate a SNS ARN like : arn:aws:sns:us-west-1:YOUR_AWS_ACCOUNT_ID:sf-snowpipe_sns_topic_test
 
 - Subscribe your target destinations for the S3 event notifications (e.g. other SQS queues or AWS Lambda workloads) to this topic. SNS publishes event notifications for your bucket to all subscribers to the topic.
@@ -418,7 +395,7 @@ Eg. Please find a boilerplate policy document which can be edited to include bel
          "Sid":"1",
          "Effect":"Allow",
          "Principal":{ 
-            "AWS":"arn:aws:iam::YOUR_AWS_ACCOUNT_ID:user/c_REPLACE_WITH_YOUR_USER_ID"
+            "AWS":"arn:aws:iam::YOUR_AWS_ACCOUNT_ID:user/REPLACE_WITH_YOUR_USER_ID"
          },
          "Action":[ 
             "sns:Subscribe"
@@ -444,7 +421,6 @@ Eg. Please find a boilerplate policy document which can be edited to include bel
    ]
 }
 ```
-
 ## Edit the SNS Topic policy:
 
 - Return to the AWS Management Console. Choose SNS Topic created from the left-hand navigation pane.
@@ -454,14 +430,34 @@ Eg. Please find a boilerplate policy document which can be edited to include bel
 - Merge the IAM policy addition from the SYSTEM$GET_AWS_SNS_IAM_POLICY function results into the JSON document.
 - Click the Update policy button.
 
-## Configure to publish the S3 event notifications to the SNS Topic  (sf_snowpipe_sns_topic_test)
+## Configure to publish the S3 event notifications to the SNS Topic
 
 Select S3 bucket and configure an event notification for your S3 bucket by completing fields as below:
 - Name: Name of the event notification (e.g. Auto-ingest Snowflake).
 - Events: Select the ObjectCreate (All) option.
 - Send to: Select SNS Topic from the list.
 - SNS Topic ARN: Select the SNS Topic ARN from the dropdown list or add ARN manually in the text box
-    
-Snowpipe with auto-ingest is now configured!
+
+Then open the AWS console, find your bucket, click events: 
+
+![Open S3 Bucket Properties](./images/quickstart-auto-ingest-01.png)
+
+
+Next, you can clean up the stages, tables, and tasks for the `departments` table with:
+
+```shell script
+make clean-departments
+```
+
+Once that the above is working, you can execute all tables with `first-run-all`:
+
+```shell script
+make first-run-all
+```
+## See Result
+
+You can now go preview data in the staging tables:
+
+![Preview Data](./images/quickstart-preview-data.png)
 
 When new data files are added to the S3 bucket, the event notification informs Snowpipe to load them into the target table defined in the pipe.
