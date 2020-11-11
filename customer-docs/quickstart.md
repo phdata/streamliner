@@ -432,15 +432,15 @@ Eg. Please find a boilerplate policy document which can be edited to include bel
 
 ## Configure to publish the S3 event notifications to the SNS Topic
 
+Open the AWS console, find your bucket, click events: 
+
+![Open S3 Bucket Properties](./images/quickstart-auto-ingest-01.png)
+
 Select S3 bucket and configure an event notification for your S3 bucket by completing fields as below:
 - Name: Name of the event notification (e.g. Auto-ingest Snowflake).
 - Events: Select the ObjectCreate (All) option.
 - Send to: Select SNS Topic from the list.
 - SNS Topic ARN: Select the SNS Topic ARN from the dropdown list or add ARN manually in the text box
-
-Then open the AWS console, find your bucket, click events: 
-
-![Open S3 Bucket Properties](./images/quickstart-auto-ingest-01.png)
 
 
 Next, you can clean up the stages, tables, and tasks for the `departments` table with:
