@@ -16,7 +16,14 @@ limitations under the License.
 #import(io.phdata.streamliner.configuration.Snowflake)
 <%@ val configuration: io.phdata.streamliner.configuration.Configuration %>
 <%@ val table: io.phdata.streamliner.configuration.SnowflakeTable %>
+<%@ val typeMapping: Map[String, Map[String, String]]%>
 #{
     val destination = configuration.destination.asInstanceOf[Snowflake]
+    val columns = table.columns.map(column => {
+    val mappedDataType = io.phdata.streamliner.util.TemplateFunction.mapDataType(column, typeMapping, "SNOWFLAKE")
+    s"${column.destinationName} $mappedDataType COMMENT '${column.comment.getOrElse("")}'"
+    }).mkString(",\n")
 }#
-<% render("../shared/create-stage.ssp", Map("destination" -> destination, "stage" -> s"${destination.stageName.get}"))%>
+CREATE TABLE IF NOT EXISTS ${destination.reportingDatabase.name}.${destination.reportingDatabase.schema}.${table.destinationName}_stg (
+    ${columns}
+);

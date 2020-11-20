@@ -22,6 +22,7 @@ import io.circe.yaml.Printer
 import io.circe.yaml.parser.parse
 import io.phdata.streamliner.util.FileUtil
 import io.circe.syntax._
+import io.circe.yaml.Printer.StringStyle
 
 trait YamlSupport extends FileUtil with AutoDerivation {
 
@@ -63,7 +64,8 @@ trait YamlSupport extends FileUtil with AutoDerivation {
     val printed = Printer(
       preserveOrder = true,
       dropNullKeys = true,
-      mappingStyle = Printer.FlowStyle.Block
+      mappingStyle = Printer.FlowStyle.Block,
+      stringStyle = StringStyle.DoubleQuoted
     ).pretty(configuration.asJson)
 
     writeFile(printed, s"$path/streamliner-configuration.yml")

@@ -27,14 +27,17 @@ alter-task-resume: alter-task-resume.sql.ssp
 alter-task-suspend: alter-task-suspend.sql
     $(snowsql-cmd) alter-task-suspend.sql
 
-copy-bulk-load-into-stg: copy-bulk-load-into-stg.sql
-    $(snowsql-cmd) copy-bulk-load-into-stg.sql
+copy-historical-load: copy-historical-load.sql
+    $(snowsql-cmd) copy-historical-load.sql
 
-copy-incr-load-into-stg: copy-incr-load-into-stg.sql
-    $(snowsql-cmd) copy-incr-load-into-stg.sql
+copy-incr-load: copy-incr-load.sql
+    $(snowsql-cmd) copy-incr-load.sql
 
-create-report-schema: create-report-schema.sql
-    $(snowsql-cmd) create-report-schema.sql
+create-file-format: create-file-format.sql
+    $(snowsql-cmd) create-file-format.sql
+
+create-merge-task: create-merge-task.sql
+    $(snowsql-cmd) create-merge-task.sql
 
 create-report-table: create-report-table.sql
     $(snowsql-cmd) create-report-table.sql
@@ -42,23 +45,14 @@ create-report-table: create-report-table.sql
 create-snowpipe: create-snowpipe.sql
     $(snowsql-cmd) create-snowpipe.sql
 
-create-stage: create-stage.sql
-    $(snowsql-cmd) create-stage.sql
-
-create-staging-schema: create-staging-schema.sql
-    $(snowsql-cmd) create-staging-schema.sql
-
 create-staging-table: create-staging-table.sql
     $(snowsql-cmd) create-staging-table.sql
 
 create-stream: create-stream.sql
     $(snowsql-cmd) create-stream.sql
 
-create-task: create-task.sql
-    $(snowsql-cmd) create-task.sql
-
-drop-report-schema: drop-report-schema.sql
-    $(snowsql-cmd) drop-report-schema.sql
+drop-merge-task: drop-merge-task.sql
+    $(snowsql-cmd) drop-task.sql
 
 drop-report-table: drop-report-table.sql
     $(snowsql-cmd) drop-report-table.sql
@@ -66,34 +60,23 @@ drop-report-table: drop-report-table.sql
 drop-snowpipe: drop-snowpipe.sql
     $(snowsql-cmd) drop-snowpipe.sql
 
-drop-stage: drop-stage.sql
-    $(snowsql-cmd) drop-stage.sql
-
-drop-staging-schema: drop-staging-schema.sql
-    $(snowsql-cmd) drop-staging-schema.sql
-
 drop-staging-table: drop-staging-table.sql
     $(snowsql-cmd) drop-staging-table.sql
 
 drop-stream: drop-stream.sql
     $(snowsql-cmd) drop-stream.sql
 
-drop-task: drop-task.sql
-    $(snowsql-cmd) drop-task.sql
-
 first-run:
-    $(MAKE) create-staging-schema
     $(MAKE) create-staging-table
-    $(MAKE) create-report-schema
     $(MAKE) create-report-table
-    $(MAKE) create-stage
+    $(MAKE) create-file-format
     $(MAKE) create-stream
-    $(MAKE) copy-bulk-load-into-stg
+    $(MAKE) copy-historical-load
     $(MAKE) create-task
     $(MAKE) alter-task-resume
 
 run:
-    $(MAKE) copy-incr-load-into-stg
+    $(MAKE) copy-incr-load
     $(MAKE) create-snowpipe
 
 stop:

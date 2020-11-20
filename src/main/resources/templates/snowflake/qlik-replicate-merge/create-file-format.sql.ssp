@@ -18,5 +18,12 @@ limitations under the License.
 <%@ val table: io.phdata.streamliner.configuration.SnowflakeTable %>
 #{
     val destination = configuration.destination.asInstanceOf[Snowflake]
+    val options = destination.fileFormat.options.map(o => s"${o._1} = ${o._2}").mkString("\n")
 }#
-<% render("../shared/create-stage.ssp", Map("destination" -> destination, "stage" -> s"${destination.stageName.get}"))%>
+
+USE DATABASE ${destination.stagingDatabase.name};
+
+USE SCHEMA ${destination.stagingDatabase.schema};
+
+CREATE FILE FORMAT IF NOT EXISTS ${destination.fileFormat.name}
+    ${options}

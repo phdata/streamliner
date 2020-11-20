@@ -71,9 +71,11 @@ package object configuration {
       snowSqlCommand: String,
       storagePath: String,
       storageIntegration: String,
-      snsTopic: Option[String],
       warehouse: String,
+      snsTopic: Option[String],
       taskSchedule: Option[String],
+      stageName: Option[String],
+      fileFormat: FileFormat,
       stagingDatabase: SnowflakeDatabase,
       reportingDatabase: SnowflakeDatabase)
       extends Destination
@@ -149,10 +151,8 @@ package object configuration {
       scale: Option[Int] = None)
 
   case class FileFormat(
-      location: String,
-      fileType: String,
-      delimiter: Option[String] = None,
-      nullIf: Option[Set[String]] = None)
+      name: String,
+      options: Map[String, String])
 
   object TableDefinition {
     implicit val decodeTableDefinition: Decoder[TableDefinition] = Decoder.instance(c =>
@@ -191,7 +191,7 @@ package object configuration {
 
     implicit val encodeDestination: Encoder[Destination] = Encoder.instance {
       case hadoop @ Hadoop(_, _, _, _) => hadoop.asJson
-      case snowflake @ Snowflake(_, _, _, _, _, _, _, _, _) => snowflake.asJson
+      case snowflake @ Snowflake(_, _, _, _, _, _, _, _, _, _, _) => snowflake.asJson
     }
   }
 

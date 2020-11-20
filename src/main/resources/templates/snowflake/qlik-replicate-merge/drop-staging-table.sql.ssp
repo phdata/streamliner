@@ -19,4 +19,4 @@ limitations under the License.
 #{
     val destination = configuration.destination.asInstanceOf[Snowflake]
 }#
-<% render("../shared/create-stage.ssp", Map("destination" -> destination, "stage" -> s"${destination.stageName.get}"))%>
+<% render("../shared/drop-table.ssp", Map("database" -> destination.stagingDatabase, "table" -> s"${table.destinationName}_stg")) %>

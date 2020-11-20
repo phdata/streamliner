@@ -14,9 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --%>
 #import(io.phdata.streamliner.configuration.Snowflake)
+#import(io.phdata.streamliner.configuration.Jdbc)
 <%@ val configuration: io.phdata.streamliner.configuration.Configuration %>
 <%@ val table: io.phdata.streamliner.configuration.SnowflakeTable %>
+<%@ val typeMapping: Map[String, Map[String, String]]%>
 #{
+    val source = configuration.source.asInstanceOf[Jdbc]
     val destination = configuration.destination.asInstanceOf[Snowflake]
 }#
-<% render("../shared/create-stage.ssp", Map("destination" -> destination, "stage" -> s"${destination.stageName.get}"))%>
+
+USE DATABASE ${destination.stagingDatabase.name};
+
+USE SCHEMA ${destination.stagingDatabase.schema};
+
+CREATE PIPE IF NOT EXISTS ${table.destinationName}_incr_pipe
+    AUTO_INGEST = true
+    AWS_SNS_TOPIC = '${destination.snsTopic.get}'
+    AS
+        COPY INTO ${table.destinationName}_stg
+        FROM @${destination.stageName.get}/${source.schema}.${table.sourceName}_ct/)
+        FILE_FORMAT = ${destination.fileFormat.name};

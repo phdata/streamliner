@@ -13,10 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --%>
-#import(io.phdata.streamliner.configuration.Snowflake)
-<%@ val configuration: io.phdata.streamliner.configuration.Configuration %>
-<%@ val table: io.phdata.streamliner.configuration.SnowflakeTable %>
-#{
-    val destination = configuration.destination.asInstanceOf[Snowflake]
-}#
-<% render("../shared/create-stage.ssp", Map("destination" -> destination, "stage" -> s"${destination.stageName.get}"))%>
+<%@ val database: io.phdata.streamliner.configuration.SnowflakeDatabase %>
+<%@ val task: String %>
+<%@ val status: String %>
+ALTER TASK ${database.name}.${database.schema}.${task} ${status};
