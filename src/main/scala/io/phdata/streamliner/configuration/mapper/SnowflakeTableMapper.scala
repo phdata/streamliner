@@ -32,8 +32,8 @@ object SnowflakeTableMapper {
       incrementalTimeStamp = None,
       metadata = None,
       fileFormat = FileFormat(
-        location = table.getName,
-        fileType = "PARQUET"
+        name = "",
+        options = Map()
       ),
       columns = table.getColumns.asScala.map(mapSchemaCrawlerColumnDefinition)
     )
@@ -50,8 +50,10 @@ object SnowflakeTableMapper {
       incrementalTimeStamp = None,
       metadata = None,
       fileFormat = FileFormat(
-        location = table.getStorageDescriptor.getLocation,
-        fileType = table.getStorageDescriptor.getOutputFormat
+        name = "",
+        options = Map(
+          "TYPE" -> table.getStorageDescriptor.getOutputFormat
+        )
       ),
       columns = table.getStorageDescriptor.getColumns.asScala.map(mapAWSGlueColumnDefinition)
     )
@@ -86,11 +88,7 @@ object SnowflakeTableMapper {
             case Some(userTable) =>
               val fileFormat = userTable.fileFormat match {
                 case Some(fileFormat) =>
-                  FileFormat(
-                    location = fileFormat.location,
-                    fileType = fileFormat.fileType,
-                    delimiter = fileFormat.delimiter,
-                    nullIf = fileFormat.nullIf)
+                  FileFormat(name = fileFormat.name, options = fileFormat.options)
                 case None => table.fileFormat
               }
               table.copy(

@@ -150,9 +150,7 @@ package object configuration {
       precision: Option[Int] = None,
       scale: Option[Int] = None)
 
-  case class FileFormat(
-      name: String,
-      options: Map[String, String])
+  case class FileFormat(name: String, options: Map[String, String])
 
   object TableDefinition {
     implicit val decodeTableDefinition: Decoder[TableDefinition] = Decoder.instance(c =>
