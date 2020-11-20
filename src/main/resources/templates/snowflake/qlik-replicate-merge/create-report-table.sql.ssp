@@ -26,4 +26,5 @@ limitations under the License.
 }#
 CREATE TABLE IF NOT EXISTS ${destination.reportingDatabase.name}.${destination.reportingDatabase.schema}.${table.destinationName}_stg (
     ${columns}
-);
+)
+COMMENT = '${table.comment.getOrElse("")}';

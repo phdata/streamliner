@@ -33,4 +33,5 @@ CREATE TABLE IF NOT EXISTS ${destination.stagingDatabase.name}.${destination.sta
     header_transaction_id STRING,
     header_timestamp TIMESTAMP,
     ${columns}
-);
+)
+COMMENT = '${table.comment.getOrElse("")}';
