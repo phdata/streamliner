@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS ${destination.stagingDatabase.name}.${destination.sta
     header_change_seq NUMBER,
     header_change_oper STRING,
     header_change_mask STRING,
+    header_stream_position STRING,
     header_operation STRING,
     header_transaction_id STRING,
     header_timestamp TIMESTAMP,
