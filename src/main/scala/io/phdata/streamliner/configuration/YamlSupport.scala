@@ -63,7 +63,8 @@ trait YamlSupport extends FileUtil with AutoDerivation {
     val printed = Printer(
       preserveOrder = true,
       dropNullKeys = true,
-      mappingStyle = Printer.FlowStyle.Block
+      mappingStyle = Printer.FlowStyle.Block,
+      stringStyle = Printer.StringStyle.DoubleQuoted
     ).pretty(configuration.asJson)
 
     writeFile(printed, s"$path/streamliner-configuration.yml")

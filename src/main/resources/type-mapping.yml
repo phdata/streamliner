@@ -81,7 +81,7 @@ date:
   impala: bigint
   parquet: timestamp
   avro: bigint
-  snowflake: date
+  snowflake: timestamp
 timestamp:
   kudu: bigint
   impala: timestamp

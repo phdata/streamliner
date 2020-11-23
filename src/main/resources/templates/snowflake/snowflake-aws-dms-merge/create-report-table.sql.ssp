@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS ${destination.reportingDatabase.name}.${destination.r
     <% val mappedDataType = io.phdata.streamliner.util.TemplateFunction.mapDataType(column, typeMapping, "SNOWFLAKE")%>
     ${column.destinationName} ${mappedDataType} COMMENT '${column.comment.getOrElse("")}',
 #end
-    dms_operation STRING,
-    dms_ts TIMESTAMP_LTZ
-);
+    dms_operation STRING COMMENT 'AWS DMS Operation type',
+    dms_ts TIMESTAMP_LTZ COMMENT 'AWS DMS timestamp'
+)
+COMMENT = '${table.comment.getOrElse("")}';
