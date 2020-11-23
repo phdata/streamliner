@@ -88,6 +88,12 @@ timestamp:
   parquet: timestamp
   avro: bigint
   snowflake: timestamp_ntz
+timestamp(6):
+  kudu: bigint
+  impala: timestamp
+  parquet: timestamp
+  avro: bigint
+  snowflake: timestamp_ntz
 datetime:
   kudu: bigint
   impala: timestamp
