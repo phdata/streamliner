@@ -68,14 +68,14 @@ object PipelineBuilder extends FileUtil with YamlSupport {
             val rendered = table match {
               case snowflakeTable: SnowflakeTable =>
                 engine.layout(
-                  templateFile.getPath,
+                  templateFile.getPath.replace('\\', '/'),
                   Map(
                     "configuration" -> configuration,
                     "table" -> snowflakeTable,
                     "typeMapping" -> typeMapping))
               case hadoopTable: HadoopTable =>
                 engine.layout(
-                  templateFile.getPath,
+                  templateFile.getPath.replace('\\', '/'),
                   Map(
                     "configuration" -> configuration,
                     "table" -> hadoopTable,
@@ -90,7 +90,7 @@ object PipelineBuilder extends FileUtil with YamlSupport {
           }
 
           nonTemplateFiles.foreach { nonTemplateFile =>
-            val content = readFile(nonTemplateFile.getPath)
+            val content = readFile(nonTemplateFile.getPath.replace('\\', '/'))
             val fileName = s"$tableDir/${nonTemplateFile.getName}"
             writeFile(content, fileName)
             isExecutable(fileName)
@@ -124,7 +124,7 @@ object PipelineBuilder extends FileUtil with YamlSupport {
     schemaTemplateFiles.foreach { templateFile =>
       logger.info(s"Rendering file $templateFile")
       val rendered = engine.layout(
-        templateFile.getPath,
+        templateFile.getPath.replace('\\', '/'),
         Map(
           "configuration" -> configuration,
           "tables" -> configuration.tables.get,
