@@ -72,7 +72,7 @@ first-run:
     $(MAKE) create-file-format
     $(MAKE) create-stream
     $(MAKE) copy-historical-load
-    $(MAKE) create-task
+    $(MAKE) create-merge-task
     $(MAKE) alter-task-resume
 
 run:
