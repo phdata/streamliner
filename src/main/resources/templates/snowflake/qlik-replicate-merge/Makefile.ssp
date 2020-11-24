@@ -79,6 +79,9 @@ run:
     $(MAKE) copy-incr-load
     $(MAKE) create-snowpipe
 
+start:
+    $(MAKE) alter-task-resume
+
 stop:
     $(MAKE) alter-task-suspend
 
