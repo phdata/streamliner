@@ -18,13 +18,6 @@ limitations under the License.
 <%@ val table: io.phdata.streamliner.configuration.SnowflakeTable %>
 #{
     val destination = configuration.destination.asInstanceOf[Snowflake]
-    val primaryKeyStmt = table.primaryKeys.map(k => s"t.$k = s.$k").mkString(" AND ")
-    val iprimaryKeyStmt = table.primaryKeys.map(k => s"i.$k = si.$k").mkString(" AND ")
-    val primaryKeyStr = table.primaryKeys.map(k => s"$k").mkString(",")
-    val columnStr = table.columns.map(_.destinationName).mkString(", ")
-    val incolumnStr = table.columns.map(c => s"si.${c.destinationName}").mkString(", ")
-    val columnSourceStr = table.columns.map(column => s"s.${column.destinationName}").mkString(", ")
-    val updateColumnStr = table.columns.map(column => s"${column.destinationName} = s.${column.destinationName}").mkString(", ")
 }#
 CREATE TASK IF NOT EXISTS ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName}_task
     WAREHOUSE = ${destination.warehouse}
@@ -32,13 +25,13 @@ CREATE TASK IF NOT EXISTS ${destination.stagingDatabase.name}.${destination.stag
     WHEN SYSTEM$STREAM_HAS_DATA('${table.destinationName}_stg_stream')
     AS
     MERGE INTO ${destination.reportingDatabase.name}.${destination.reportingDatabase.schema}.${table.destinationName} t
-        USING ( SELECT ${incolumnStr}
+        USING ( SELECT ${table.columnList(aAOpt = Some("si"))}, si.header_change_oper
                 FROM ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName}_stg_stream si
-                INNER JOIN ( SELECT ${primaryKeyStr}, MAX(header_timestamp) max_header_timestamp
-                             FROM ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName}_stg_stream
-                             GROUP BY ${primaryKeyStr} ) i
-        ON ${iprimaryKeyStmt} AND i.max_header_timestamp = si.header_timestamp ) s
-    ON ${primaryKeyStmt}
-    WHEN MATCHED AND s.header_change_oper = 'U' THEN UPDATE SET ${updateColumnStr}
+                    INNER JOIN ( SELECT ${table.primaryKeyList}, MAX(header_timestamp) max_header_timestamp
+                                 FROM ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName}_stg_stream
+                                 GROUP BY ${table.primaryKeyList} ) i
+                    ON ${table.pkCondition(aA = Some("i"), bA = Some("si"), " AND ")} AND i.max_header_timestamp = si.header_timestamp ) s
+    ON ${table.pkCondition(aA = Some("t"), bA = Some("s"), " AND ")}
+    WHEN MATCHED AND s.header_change_oper = 'U' THEN UPDATE SET ${table.columnCondition(bA = Some("s"), joiner = ", ")}
     WHEN MATCHED AND s.header_change_oper = 'D' THEN DELETE
-    WHEN NOT MATCHED AND s.header_change_oper != 'D' OR s.header_change_oper IS NULL THEN INSERT (${columnStr}) VALUES (${columnSourceStr});
+    WHEN NOT MATCHED AND s.header_change_oper != 'D' OR s.header_change_oper IS NULL THEN INSERT (${table.columnList}) VALUES (${table.columnList(aAOpt = Some("s"))});

@@ -140,7 +140,29 @@ package object configuration {
       metadata: Option[Map[String, String]],
       fileFormat: FileFormat,
       columns: Seq[ColumnDefinition])
-      extends TableDefinition
+      extends TableDefinition {
+
+    lazy val primaryKeyList = primaryKeys.mkString(",")
+    lazy val columnList = columnList(aAOpt = None)
+
+    def columnList(aAOpt: Option[String] = None): String =
+      columns.map { column =>
+        val aA = aAOpt.fold("")(a => s"$a.")
+        s"$aA${column.destinationName}"
+      }.mkString(", ")
+
+    def pkCondition(aA: Option[String] = None, bA: Option[String] = None, joiner: String): String =
+      primaryKeys.map { pk =>
+        s"${getAlias(aA)}.$pk = ${getAlias(bA)}.$pk"
+      }.mkString(joiner)
+
+    def columnCondition(aA: Option[String] = None, bA: Option[String] = None, joiner: String): String =
+      columns.map { column =>
+        s"${getAlias(aA)}${column.destinationName} = ${getAlias(bA)}${column.destinationName}"
+      }.mkString(joiner)
+
+    private def getAlias(o: Option[String]): String = o.fold("")(s => s"$s.")
+  }
 
   case class ColumnDefinition(
       sourceName: String,
