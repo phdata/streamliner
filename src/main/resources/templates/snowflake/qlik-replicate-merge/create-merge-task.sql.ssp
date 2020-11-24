@@ -26,7 +26,7 @@ limitations under the License.
     val columnSourceStr = table.columns.map(column => s"s.${column.destinationName}").mkString(", ")
     val updateColumnStr = table.columns.map(column => s"${column.destinationName} = s.${column.destinationName}").mkString(", ")
 }#
-CREATE TASK IF NOT EXISTS ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName}_task
+CREATE TASK IF NOT EXISTS ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName}_merge_task
     WAREHOUSE = ${destination.warehouse}
     SCHEDULE = '${destination.taskSchedule.getOrElse("5 minutes")}'
     WHEN SYSTEM$STREAM_HAS_DATA('${table.destinationName}_stg_stream')
