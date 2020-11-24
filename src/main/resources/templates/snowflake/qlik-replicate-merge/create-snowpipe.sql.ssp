@@ -32,5 +32,5 @@ CREATE PIPE IF NOT EXISTS ${table.destinationName}_incr_pipe
     AWS_SNS_TOPIC = '${destination.snsTopic.get}'
     AS
         COPY INTO ${table.destinationName}_stg
-        FROM @${destination.stageName.get}/${source.schema}.${table.sourceName}_ct/)
+        FROM @${destination.stagingDatabase.name}.raw.${destination.stageName.get}/${source.schema}.${table.sourceName}_ct/
         FILE_FORMAT = ${destination.fileFormat.name};
