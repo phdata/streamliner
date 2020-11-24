@@ -26,4 +26,4 @@ USE DATABASE ${destination.stagingDatabase.name};
 USE SCHEMA ${destination.stagingDatabase.schema};
 
 CREATE FILE FORMAT IF NOT EXISTS ${destination.fileFormat.name}
-    ${options}
+    ${options};
