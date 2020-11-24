@@ -52,7 +52,7 @@ create-stream: create-stream.sql
     $(snowsql-cmd) create-stream.sql
 
 drop-merge-task: drop-merge-task.sql
-    $(snowsql-cmd) drop-task.sql
+    $(snowsql-cmd) drop-merge-task.sql
 
 drop-report-table: drop-report-table.sql
     $(snowsql-cmd) drop-report-table.sql
@@ -84,7 +84,7 @@ stop:
 
 clean:
     $(MAKE) alter-task-suspend
-    $(MAKE) drop-task
+    $(MAKE) drop-merge-task
     $(MAKE) drop-snowpipe
     $(MAKE) drop-stream
     $(MAKE) drop-report-table
