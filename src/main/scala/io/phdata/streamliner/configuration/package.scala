@@ -142,8 +142,8 @@ package object configuration {
       columns: Seq[ColumnDefinition])
       extends TableDefinition {
 
-    lazy val primaryKeyList = primaryKeys.mkString(",")
-    lazy val columnList = columnList(aAOpt = None)
+    lazy val primaryKeyList: String = primaryKeys.mkString(",")
+    lazy val columnList: String = columnList(aAOpt = None)
 
     def columnList(aAOpt: Option[String] = None): String =
       columns.map { column =>
@@ -153,7 +153,7 @@ package object configuration {
 
     def pkCondition(aA: Option[String] = None, bA: Option[String] = None, joiner: String): String =
       primaryKeys.map { pk =>
-        s"${getAlias(aA)}.$pk = ${getAlias(bA)}.$pk"
+        s"${getAlias(aA)}$pk = ${getAlias(bA)}$pk"
       }.mkString(joiner)
 
     def columnCondition(aA: Option[String] = None, bA: Option[String] = None, joiner: String): String =
