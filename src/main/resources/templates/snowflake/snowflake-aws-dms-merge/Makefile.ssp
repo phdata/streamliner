@@ -21,8 +21,8 @@ limitations under the License.
 }#
 snowsql-cmd=${destination.snowSqlCommand} -f
 
-alter-task-resume: alter-task-resume.sql.ssp
-    $(snowsql-cmd) alter-task-resume.sql.ssp
+alter-task-resume: alter-task-resume.sql
+    $(snowsql-cmd) alter-task-resume.sql
 
 alter-task-suspend: alter-task-suspend.sql
     $(snowsql-cmd) alter-task-suspend.sql
