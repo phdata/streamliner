@@ -29,7 +29,7 @@ object TemplateFunction {
       column: ColumnDefinition,
       typeMapping: Map[String, Map[String, String]],
       storageFormat: String): String = {
-    val cColumn = normalizeColumnDefinition(column)
+    val cColumn = normalizeColumnDefinition(column, storageFormat)
     typeMapping.get(cColumn.dataType.toLowerCase) match {
       case Some(dataTypeMap) =>
         dataTypeMap.get(storageFormat.toLowerCase) match {
@@ -51,7 +51,7 @@ object TemplateFunction {
       val intTypes = Seq("tinyint", "int", "smallint", "integer", "short")
       val floatTypes = Seq("float")
       val longDataTypes = Seq("bigint")
-      val dataType = checkOracleNumberType(column).dataType.toLowerCase
+      val dataType = checkOracleNumberType(column, "HADOOP").dataType.toLowerCase
       if (stringTypes.contains(dataType)) {
         Some(s"${column.destinationName}=String")
       } else if (floatTypes.contains(dataType)) {
@@ -131,13 +131,13 @@ object TemplateFunction {
    * @return a new ColumnDefinition if changes are needed, the original ColumnDefinition otherwise
    */
   private[util] def normalizeColumnDefinition(
-      columnDefinition: ColumnDefinition): ColumnDefinition = {
+      columnDefinition: ColumnDefinition, format: String): ColumnDefinition = {
     val col = columnDefinition.copy(
       dataType = columnDefinition.dataType.toLowerCase.stripSuffix(" identity"))
-    checkOracleNumberType(col)
+    checkOracleNumberType(col, format)
   }
 
-  private def checkOracleNumberType(columnDefinition: ColumnDefinition): ColumnDefinition = {
+  private def checkOracleNumberType(columnDefinition: ColumnDefinition, format: String): ColumnDefinition = {
     val precision = columnDefinition.precision.getOrElse(0)
     val scale = columnDefinition.scale.getOrElse(0)
     if (columnDefinition.dataType.toUpperCase.equals("NUMBER")) {
@@ -147,8 +147,10 @@ object TemplateFunction {
         columnDefinition.copy(dataType = "DECIMAL")
       } else if (precision >= 10 && precision <= 19 && scale == 0) {
         columnDefinition.copy(dataType = "BIGINT")
-      } else if (precision == 0 && scale == -127) {
+      } else if (precision == 0 && scale == -127 && !format.equalsIgnoreCase("SNOWFLAKE")) {
         columnDefinition.copy(dataType = "VARCHAR")
+      } else if (precision == 0 && scale == -127 && format.equalsIgnoreCase("SNOWFLAKE")) {
+        columnDefinition.copy(dataType = "NUMBER")
       } else {
         columnDefinition.copy(dataType = "INTEGER")
       }
