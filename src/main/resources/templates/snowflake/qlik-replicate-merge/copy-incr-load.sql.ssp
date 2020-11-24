@@ -28,5 +28,5 @@ USE DATABASE ${destination.stagingDatabase.name};
 USE SCHEMA ${destination.stagingDatabase.schema};
 
 COPY INTO ${table.destinationName}_stg
-FROM @${destination.stageName.get}/${source.schema}.${table.sourceName}_ct/)
+FROM @${destination.stagingDatabase.name}.raw.${destination.stageName.get}/${source.schema}.${table.sourceName}_ct/
 FILE_FORMAT = ${destination.fileFormat.name};

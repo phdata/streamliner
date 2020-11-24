@@ -52,7 +52,7 @@ create-stream: create-stream.sql
     $(snowsql-cmd) create-stream.sql
 
 drop-merge-task: drop-merge-task.sql
-    $(snowsql-cmd) drop-task.sql
+    $(snowsql-cmd) drop-merge-task.sql
 
 drop-report-table: drop-report-table.sql
     $(snowsql-cmd) drop-report-table.sql
@@ -72,19 +72,22 @@ first-run:
     $(MAKE) create-file-format
     $(MAKE) create-stream
     $(MAKE) copy-historical-load
-    $(MAKE) create-task
+    $(MAKE) create-merge-task
     $(MAKE) alter-task-resume
 
 run:
     $(MAKE) copy-incr-load
     $(MAKE) create-snowpipe
 
+start:
+    $(MAKE) alter-task-resume
+
 stop:
     $(MAKE) alter-task-suspend
 
 clean:
     $(MAKE) alter-task-suspend
-    $(MAKE) drop-task
+    $(MAKE) drop-merge-task
     $(MAKE) drop-snowpipe
     $(MAKE) drop-stream
     $(MAKE) drop-report-table

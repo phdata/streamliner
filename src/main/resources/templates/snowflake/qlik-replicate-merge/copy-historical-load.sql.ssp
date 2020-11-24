@@ -21,6 +21,9 @@ limitations under the License.
 #{
     val source = configuration.source.asInstanceOf[Jdbc]
     val destination = configuration.destination.asInstanceOf[Snowflake]
+    val columnList = table.columns.zipWithIndex.map { case (c, i) =>
+        "$" + s"${i +1}"
+    }.mkString(",\n")
 }#
 
 USE DATABASE ${destination.stagingDatabase.name};
@@ -28,5 +31,9 @@ USE DATABASE ${destination.stagingDatabase.name};
 USE SCHEMA ${destination.stagingDatabase.schema};
 
 COPY INTO ${table.destinationName}_stg
-FROM @${destination.stageName.get}/${source.schema}.${table.sourceName}/)
+FROM (
+    with ts as (CURRENT_TIMESTAMP())
+    select '1','','','','','',ts,
+    ${columnList}
+    from @${destination.stagingDatabase.name}.raw.${destination.stageName.get}/${source.schema}.${table.sourceName}/)
 FILE_FORMAT = ${destination.fileFormat.name};

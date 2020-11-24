@@ -24,7 +24,7 @@ limitations under the License.
     s"${column.destinationName} $mappedDataType COMMENT '${column.comment.getOrElse("")}'"
     }).mkString(",\n")
 }#
-CREATE TABLE IF NOT EXISTS ${destination.reportingDatabase.name}.${destination.reportingDatabase.schema}.${table.destinationName}_stg (
+CREATE TABLE IF NOT EXISTS ${destination.reportingDatabase.name}.${destination.reportingDatabase.schema}.${table.destinationName} (
     ${columns}
 )
 COMMENT = '${table.comment.getOrElse("")}';
