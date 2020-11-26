@@ -109,7 +109,7 @@ Create source endpoint:
 
 Open `IAM` in the AWS console and then create a Role. Select `DMS` as the trusted entity:
 
-![Create role trusted entity](../quickstart-repl-04-create-role-trusted-entity.png)
+![Create role trusted entity](../images/quickstart-repl-04-create-role-trusted-entity.png)
 
 In this quickstart example, a policy called,  `policy-streamliner-quickstart-1`, was created in the earlier step.
 
