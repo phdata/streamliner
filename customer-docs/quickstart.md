@@ -33,15 +33,15 @@ Even though the intent of this quickstart is to give a real-world streamliner ex
 Therefore, after you have created your mysql instance using the instructions above, modify the instance to make it
 publicly accessible:
 
-![Modify RDS Instance to be Publicly Accessible](./images/quickstart-mysql-config-public-access.png)
+![Modify RDS Instance to be Publicly Accessible](../images/quickstart-mysql-config-public-access.png)
 
 MySQL typically uses port `3306` but you should change that to port `33006` to reduce your attack surface:
 
-![Modify RDS Instance to use port 33006](./images/quickstart-mysql-config-port-33006.png)
+![Modify RDS Instance to use port 33006](../images/quickstart-mysql-config-port-33006.png)
 
 Now you need to open port `33006` to the public internet:
 
-![Modify Security group open port 33006](./images/quickstart-mysql-config-firewall.png)
+![Modify Security group open port 33006](../images/quickstart-mysql-config-firewall.png)
 
 Now you need to load some sample data. You can load a well-known MySQL Test Database with fake employee data:
 
@@ -61,7 +61,7 @@ called `SANDBOX_POC1` with a warehouse created for that workspace called `SANDBO
 
 Create an S3 bucket:
 
-![Create AWS S3 Bucket](./images/quickstart-ingest-create-bucket.png)
+![Create AWS S3 Bucket](../images/quickstart-ingest-create-bucket.png)
 
 ## Create Landing Location policy
 
@@ -97,63 +97,63 @@ Both Snowflake and AWS DMS will need to be able to read from and write to the bu
 
 Create Replication Instance:
 
-![Create Replication Instance](./images/quickstart-repl-01-create-instance.png)
+![Create Replication Instance](../images/quickstart-repl-01-create-instance.png)
 
 Wait for it to be available:
 
-![Wait for it to be available](./images/quickstart-repl-02-instance-created.png)
+![Wait for it to be available](../images/quickstart-repl-02-instance-created.png)
 
 Create source endpoint:
 
-![Create source endpoint](./images/quickstart-repl-03-create-source-endpoint.png)
+![Create source endpoint](../images/quickstart-repl-03-create-source-endpoint.png)
 
 Open `IAM` in the AWS console and then create a Role. Select `DMS` as the trusted entity:
 
-![Create role trusted entity](./images/quickstart-repl-04-create-role-trusted-entity.png)
+![Create role trusted entity](../quickstart-repl-04-create-role-trusted-entity.png)
 
 In this quickstart example, a policy called,  `policy-streamliner-quickstart-1`, was created in the earlier step.
 
-![Create role policy](./images/quickstart-repl-05-create-role-policy.png)
+![Create role policy](../images/quickstart-repl-05-create-role-policy.png)
 
 Give the role a name:
 
-![Create role name](./images/quickstart-repl-06-create-role-name.png)
+![Create role name](../images/quickstart-repl-06-create-role-name.png)
 
 Copy the ARN:
 
-![Create role ARN](./images/quickstart-repl-07-create-role-arn.png)
+![Create role ARN](../images/quickstart-repl-07-create-role-arn.png)
 
 Back in DMS, create the target endpoint where you will need the ARN from the previous step:
 
-![Create target endpoint](./images/quickstart-repl-08-create-target-endpoint.png)
+![Create target endpoint](../images/quickstart-repl-08-create-target-endpoint.png)
 
 Add `dataFormat=parquet;` to the extra connection attributes:
 
-![Add parquet](./images/quickstart-repl-09-create-target-endpoint.png)
+![Add parquet](../images/quickstart-repl-09-create-target-endpoint.png)
 
 Test both endpoints:
 
-![Test endpoint](./images/quickstart-repl-10-test-endpoint.png)
+![Test endpoint](../images/quickstart-repl-10-test-endpoint.png)
 
 Verify the test results are _successful_:
 
-![Test endpoint result](./images/quickstart-repl-11-test-endpoint-result.png)
+![Test endpoint result](../images/quickstart-repl-11-test-endpoint-result.png)
 
 Create a task:
 
-![Create task](./images/quickstart-repl-12-create-task.png)
+![Create task](../images/quickstart-repl-12-create-task.png)
 
 Make sure to select enable Cloudwatch logs or if anything goes wrong you will have no idea what happened:
 
-![cloudwatch logs](./images/quickstart-repl-13-create-task.png)
+![cloudwatch logs](../images/quickstart-repl-13-create-task.png)
 
 Click `Add new selection rule` and under `Schema` select `Enter Schema` which populates wildcard values for schema and table.
 
-![Add new selection rule](./images/quickstart-repl-14-create-task.png)
+![Add new selection rule](../images/quickstart-repl-14-create-task.png)
 
 After the task is created and successfully running, change back to S3 and you should see the data:
 
-![refresh s3](./images/quickstart-repl-15-refresh-s3.png)
+![refresh s3](../images/quickstart-repl-15-refresh-s3.png)
 
 S3 is now populated with the data from the MySQL database.
 
@@ -264,7 +264,7 @@ config file, you need to delete the output and run the `schema` command before s
 3. Note that there are two role contexts on the Snowflake UI. The one in the upper right is for the page and
 the one in the query page is for the query itself. This can cause issues if you create objects with the `ACCOUNTADMIN` role, for example.
 
-![Snowflake roles troubleshooting](./images/quickstart-troubleshoot-roles.png)
+![Snowflake roles troubleshooting](../images/quickstart-troubleshoot-roles.png)
 
 ## Extract Schema
 
@@ -319,7 +319,7 @@ desc pipe departments_pipe;
 
 And you will see something like this:
 
-![Obtain ARN](./images/quickstart-auto-ingest-00.png)
+![Obtain ARN](../images/quickstart-auto-ingest-00.png)
 
 Make a note of the SQS Queue ARN to use it later.
 
@@ -328,7 +328,7 @@ Next, you can configure Amazon Simple Notification Service (SNS) as a broadcaste
 ```
 S3 Event -> SNS (SNS Topic) -> SQS Queue -> Snowpipe
 ```
-![SNS-SQS-Snowflake](./images/quickstart_sns_topic_filtering_sqs_lamda_endpoint.png)
+![SNS-SQS-Snowflake](../images/quickstart_sns_topic_filtering_sqs_lamda_endpoint.png)
 
 [Image Source: Amazon Topic Based filtering](https://aws.amazon.com/blogs/compute/simplify-pubsub-messaging-with-amazon-sns-message-filtering/)
 
@@ -353,7 +353,7 @@ The SNS ARN will be used in generating an IAM policy in the Snowflake UI that ca
 - Open AWS Console, Click on SQS and Select the existing SQS queue.
 - And, subscribe SQS Queue to the SNS Topic created.
 
-![Subscribe-SQS-Queue-to-SNS-Topic](./images/quickstart-sqs-queue-subscribe-sns-topic.png)
+![Subscribe-SQS-Queue-to-SNS-Topic](../images/quickstart-sqs-queue-subscribe-sns-topic.png)
 
 Using a Snowflake client, query the SYSTEM$GET_AWS_SNS_IAM_POLICY system function with your SNS topic ARN
 
@@ -362,7 +362,7 @@ SELECT SYSTEM$GET_AWS_SNS_IAM_POLICY('arn:aws:sns:us-east-1:YOUR_AWS_ACCOUNT_ID:
 ```
 The function returns an IAM policy that grants a Snowflake SQS queue permission to subscribe to the SNS topic as shown in example below:
 
-![snowflake-iam-policy-sns-topic](./images/quickstart-snowflake-iam-policy-sqs-sns-topic.png)
+![snowflake-iam-policy-sns-topic](../images/quickstart-snowflake-iam-policy-sqs-sns-topic.png)
 
 Eg: Please find a boilerplate policy document which can be edited to include required privileges as below:
 
@@ -438,7 +438,7 @@ Eg: Please find a boilerplate policy document which can be edited to include req
 
 Open the AWS console, find your bucket, click events: 
 
-![Open S3 Bucket Properties](./images/quickstart-auto-ingest-01.png)
+![Open S3 Bucket Properties](../images/quickstart-auto-ingest-01.png)
 
 Select S3 bucket and configure an event notification for your S3 bucket by completing fields as below:
 - Name: Name of the event notification (e.g. Auto-ingest-Snowflake).
@@ -462,6 +462,6 @@ make first-run-all
 
 You can now go preview data in the staging tables:
 
-![Preview Data](./images/quickstart-preview-data.png)
+![Preview Data](../images/quickstart-preview-data.png)
 
 When new data files are added to the S3 bucket, the event notification informs Snowpipe to load them into the target table defined in the pipe.
