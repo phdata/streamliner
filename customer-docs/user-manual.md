@@ -225,16 +225,16 @@ source:
 destination:
   type: Snowflake
   snowSqlCommand: snowsql -c phdata
-    storagePath: "s3://{bucket}/{path}"
-    storageIntegration: "STORAGE_INTEGRATION_READ"
-    warehouse: "DEFAULT_WH"
-    taskSchedule: "5 minutes"
-    stagingDatabase:
-      name: SALES_FORECAST
-      schema: STAGE
-    reportingDatabase:
-      name: SALES_FORECAST
-      schema: RAW
+  storagePath: "s3://{bucket}/{path}"
+  storageIntegration: "STORAGE_INTEGRATION_READ"
+  warehouse: "DEFAULT_WH"
+  taskSchedule: "5 minutes"
+  stagingDatabase:
+    name: SALES_FORECAST
+    schema: STAGE
+  reportingDatabase:
+    name: SALES_FORECAST
+    schema: RAW
 ```
 
 ## Templates
