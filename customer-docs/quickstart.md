@@ -191,10 +191,10 @@ GRANT ALL ON INTEGRATION STREAMLINER_QUICKSTART_1 TO ROLE sysadmin;
 
 ## Download
 
-Find the [latest version](curl -O https://repository.phdata.io/artifactory/list/binary/phdata/streamliner/) and then download:
+Find the [latest version](https://repository.phdata.io/artifactory/list/binary/phdata/streamliner/) and then download:
 
 ```shell
-curl -O curl -O https://repository.phdata.io/artifactory/list/binary/phdata/streamliner/streamliner-<VERSION>.zip
+curl -O https://repository.phdata.io/artifactory/list/binary/phdata/streamliner/streamliner-<VERSION>.zip
 ```
 
 and unzip:
