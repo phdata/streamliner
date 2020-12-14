@@ -1,4 +1,4 @@
-![Streamliner Logo](../images/streamliner_logo.png)
+![Streamliner Logo](./images/streamliner_logo.png)
 
 - [Introduction](#introduction)
   * [Why Streamliner](#why-streamliner)
