@@ -1,0 +1,56 @@
+<%--
+Copyright 2018 phData Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+--%>
+#import(io.phdata.streamliner.configuration.Snowflake)
+<%@ val configuration: io.phdata.streamliner.configuration.Configuration %>
+<%@ val table: io.phdata.streamliner.configuration.SnowflakeTable %>
+#{
+    val destination = configuration.destination.asInstanceOf[Snowflake]
+
+}#
+create or replace function ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.table_qa(schema_name varchar, table_name varchar, minimum_runs float, number_of_stddev float)
+returns table (metric_name varchar, metric_value varchar, pass_qa boolean)
+as
+$$
+select
+    metric_name,
+    metric_value,
+    case when runcount < minimum_runs then true
+            when currentavg between  historicalavg - number_of_stddev * historicalstd
+                and historicalavg + number_of_stddev * historicalstd then true
+            else false end as PassQA
+from (
+    select
+        METRIC_NAME,
+        METRIC_VALUE,
+        AVG(case when RunOrder > 1 then METRIC end)    as HistoricalAvg,
+        STDDEV(case when RunOrder > 1 then METRIC end) as HistoricalStd,
+        AVG(case when RunOrder = 1 then METRIC end)    as CurrentAvg,
+        COUNT(DISTINCT RunOrder)                       as RunCount
+    from (
+        select
+            metric_name,
+            coalesce(METRIC_VALUE, 'Null') as metric_value,
+            metric,
+            ROW_NUMBER() OVER (PARTITION BY METRIC_NAME, METRIC_VALUE
+                                ORDER BY RUN_DATE DESC, RUN_TIME DESC) as RunOrder
+        from QA_METRICS QM
+        where TABLE_NAME = table_name
+            and SCHEMA_NAME = schema_name
+    ) A
+    GROUP BY METRIC_NAME, METRIC_VALUE
+) B
+$$
+;

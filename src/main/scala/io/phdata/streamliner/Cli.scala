@@ -29,7 +29,7 @@ class Cli(args: Seq[String]) extends ScallopConf(args) {
 
     val outputPath: ScallopOption[String] = opt[String](
       "output-path",
-      descr = "Directory path where Pipewrench configuration should be written to",
+      descr = "Directory path where Streamliner configuration should be written to",
       required = false)
 
     val databasePassword: ScallopOption[String] = opt[String](
@@ -49,7 +49,7 @@ class Cli(args: Seq[String]) extends ScallopConf(args) {
   val produceScripts = new Subcommand("scripts") {
 
     val filePath: ScallopOption[String] =
-      opt[String]("config", descr = "Path to pipewrench configuration", required = true)
+      opt[String]("config", descr = "Path to streamliner configuration", required = true)
 
     val outputPath: ScallopOption[String] = opt[String](
       "output-path",
