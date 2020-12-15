@@ -34,5 +34,3 @@ CREATE TASK IF NOT EXISTS ${destination.stagingDatabase.name}.${destination.stag
                 ${destination.quality.standardDeviations});
 
 ALTER TASK ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName}_qa_task RESUME;
-
-ALTER TASK ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName}_qa_task SUSPEND;
