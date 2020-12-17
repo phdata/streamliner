@@ -25,7 +25,7 @@ returns float null
 language javascript
 as
 $$
-var table_command = `SELECT COLUMN_NAME, TABLE_NAME, TABLE_SCHEMA, hour(current_timestamp()) || ':' || minute(current_timestamp()) || ':' || second(current_timestamp())
+var table_command = `SELECT COLUMN_NAME, TABLE_NAME, TABLE_SCHEMA, to_time(current_timestamp())
 FROM INFORMATION_SCHEMA.COLUMNS C
 WHERE TABLE_SCHEMA = :1
 AND TABLE_NAME = :2;`;
