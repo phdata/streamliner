@@ -28,7 +28,8 @@ $$
 var table_command = `SELECT COLUMN_NAME, TABLE_NAME, TABLE_SCHEMA, to_time(current_timestamp())
 FROM INFORMATION_SCHEMA.COLUMNS C
 WHERE TABLE_SCHEMA = :1
-AND TABLE_NAME = :2;`;
+    AND TABLE_NAME = :2
+    AND IS_IDENTITY = 'NO';`;
 var table_statement = snowflake.createStatement(
 { sqlText: table_command, binds: [SCHEMA_NAME, TABLE_NAME]} );
 var column_results = table_statement.execute();
