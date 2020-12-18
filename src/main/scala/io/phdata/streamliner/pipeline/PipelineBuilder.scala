@@ -98,7 +98,7 @@ object PipelineBuilder extends FileUtil with YamlSupport {
         }
       case None =>
         throw new RuntimeException(
-          "Tables section is not found. Check the configuration (example: pipewrench-configuration.yml) file")
+          "Tables section is not found. Check the configuration (example: streamliner-configuration.yml) file")
     }
     writeSchemaMakeFile(configuration, typeMapping, templateDirectory, outputDirectory)
   }

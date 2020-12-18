@@ -28,6 +28,10 @@
     + [Snowflake Templates](#snowflake-templates)
       - [Snowflake AWS DMS Merge](#snowflake-aws-dms-merge)
       - [Snowflake Snowpipe Append](#snowflake-snowpipe-append)
+  * [QA Process](#qa-process)
+    + [Overview](#qa-overview)
+    + [Process](#qa-process)
+    + [What it does and doesn't do](#qa-dos-don'ts)
   * [Installing Streamliner](#installing-streamliner)
   * [Executing Streamliner](#executing-streamliner)
     + [Schema Parsing](#schema-parsing)
@@ -186,6 +190,8 @@ Configuration properties defining the Snowflake database.
 | --- | --- | --- | --- |
 | name | String | True | Snowflake database name |
 | schema | String | True | Snowflake schema name |
+
+
 
 ### Initial Configuration Example
 
@@ -378,6 +384,38 @@ The Snowpipe Append template is A Snowflake data pipeline to append newly arrivi
 2. Drop Snowpipe
 
 *NOTE:* `clean` does not remove the schema nor does it the `stage` which can be cleaned by `make drop-stage`.
+
+## QA Process 
+
+###Overview
+When creating data pipelines, measuring quality is always very important. Streamliner supports templates for collecting metrics
+on columns of tables and compare them over time. This method is based off of [control charts](https://en.wikipedia.org/wiki/Control_chart)
+to measure the variablility of the amount of data over time.
+
+###Process
+To take a control chart process and convert it to pipelines the process needs to complete the following steps:
+
+1.	Capture the occurrences of data values across all columns in a table.
+2.	Not capture data that is small or a small percentage of the values in a column.
+3.	Store each “run” of data in a metrics vault.
+4.	Compare the current “run” to the average and standard deviation of the previous runs for each value in each column of the table.
+
+Starting out with collecting and storing the data, in every database using this process we would want to create a “Metrics” table to store all of the data. That table would have the time and date of the run, the column name being looked at, the value in that column, and the count of records with that value. To collect the data in snowflake, a stored procedure can find all the columns on the table, calculate the counts for each value, and insert the data into the “Metrics” table.
+
+To easily collect the data, we can add a stream to the table we are monitoring and have a task that runs the stored procedure to collect the data. Once the data is collected and stored, the stored procedure can check if the values are within the UCL and LCL or 3 standard deviations away from the historical mean. If there are any values outside the range, the stored procedure can call an external api alerting users that some of the date requires investigation. Below is a diagram showing the dataflow.
+
+![QA_process](../images/streamliner_qa-process.png)
+
+####Dos and Don'ts
+This process should be used when monitoring on ongoing pipeline. It will detect if a statistical
+anomaly in the values of the data. It will not tell you if something is wrong or confirm data fits a 
+predefined structure. The metrics repo also needs data to inform if data fits the
+historical pattern, so it will take time before the results from the QA Proces become dependable.
+
+Constraints on tables, proper monitoring of logs, and unit tests are still recommended.
+
+The metrics repo can also be connected to from a visualization tool to allow
+users dig into the values and how they change over time.
 
 ## Installing Streamliner
 You can find the latest version of streamliner in [phData's Artifactory](https://repository.phdata.io/artifactory/list/binary/phdata/streamliner/).

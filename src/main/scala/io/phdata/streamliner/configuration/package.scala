@@ -74,12 +74,20 @@ package object configuration {
       snsTopic: Option[String],
       warehouse: String,
       taskSchedule: Option[String],
+      quality: SnowflakeQAOptions,
       stagingDatabase: SnowflakeDatabase,
       reportingDatabase: SnowflakeDatabase)
       extends Destination
 
   case class HadoopDatabase(name: String, path: String)
   case class SnowflakeDatabase(name: String, schema: String)
+  case class SnowflakeQAOptions(
+      taskSchedule: Option[String],
+      minimumPercentage: Option[Double],
+      minimumCount: Option[Int],
+      minimumRuns: Option[Int],
+      standardDeviations: Option[Double]
+  )
 
   sealed trait UserDefinedTable {
     val `type`: String
@@ -191,7 +199,7 @@ package object configuration {
 
     implicit val encodeDestination: Encoder[Destination] = Encoder.instance {
       case hadoop @ Hadoop(_, _, _, _) => hadoop.asJson
-      case snowflake @ Snowflake(_, _, _, _, _, _, _, _, _) => snowflake.asJson
+      case snowflake @ Snowflake(_, _, _, _, _, _, _, _, _, _) => snowflake.asJson
     }
   }
 
