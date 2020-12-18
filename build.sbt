@@ -104,6 +104,13 @@ mappings in Universal ++= {
     }
 }
 
+mappings in Universal ++= {
+  ((sourceDirectory in Compile).value / "resources" / "templates" / "snowflake" / "snowflake-snowpipe-append-with-qa" * "*").get
+    .map { f =>
+      f -> s"templates/snowflake/snowflake-snowpipe-append-with-qa/${f.name}"
+    }
+}
+
 enablePlugins(JavaServerAppPackaging, UniversalDeployPlugin, RpmArtifactoryDeployPlugin)
 
 mainClass in Compile := Some("io.phdata.streamliner.App")
