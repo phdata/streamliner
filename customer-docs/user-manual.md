@@ -407,11 +407,15 @@ To easily collect the data, we can add a stream to the table we are monitoring a
 ![QA_process](../images/streamliner_qa-process.png)
 
 ####Dos and Don'ts
-This process should be used when monitoring on ongoing pipeline. It will not tell you if something is wrong or confirm data fits a predefined structure.
-If will give fail a check if the amount of data spikes up or down, if fields 
-start dropping off. Otherwise constraints and other type of testing should
-be used on top of this process.
+This process should be used when monitoring on ongoing pipeline. It will detect if a statistical
+anomaly in the values of the data. It will not tell you if something is wrong or confirm data fits a 
+predefined structure. The metrics repo also needs data to inform if data fits the
+historical pattern, so it will take time before the results from the QA Proces become dependable.
 
+Constraints on tables, proper monitoring of logs, and unit tests are still recommended.
+
+The metrics repo can also be connected to from a visualization tool to allow
+users dig into the values and how they change over time.
 
 ## Installing Streamliner
 You can find the latest version of streamliner in [phData's Artifactory](https://repository.phdata.io/artifactory/list/binary/phdata/streamliner/).
