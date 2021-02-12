@@ -74,7 +74,7 @@ package object configuration {
       snsTopic: Option[String],
       warehouse: String,
       taskSchedule: Option[String],
-      quality: SnowflakeQAOptions,
+      quality: Option[SnowflakeQAOptions],
       stagingDatabase: SnowflakeDatabase,
       reportingDatabase: SnowflakeDatabase)
       extends Destination
