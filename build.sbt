@@ -11,7 +11,9 @@ isSnapshot := snapshot
 organization := "io.phdata.streamliner"
 scalaVersion := "2.12.12"
 
-val schemaCrawlerVersion = "16.2.5"
+val schemaCrawlerVersion = "16.12.3"
+scalacOptions += "-target:jvm-1.8"
+javacOptions ++= Seq("-source", "1.8", "-target", "1.8")
 
 val excludeSlf4jBinding = ExclusionRule(organization = "org.slf4j")
 
