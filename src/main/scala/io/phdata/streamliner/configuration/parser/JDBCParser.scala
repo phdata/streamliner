@@ -17,7 +17,7 @@ object JDBCParser {
     val catalog = SchemaCrawlerImpl.getCatalog(jdbc, password)
 
     val tables =
-      catalog.getSchemas.asScala.find(s => s.getFullName.equals(jdbc.schema)) match {
+      catalog.getSchemas.asScala.find(s => s.getName.equals(jdbc.schema)) match {
         case Some(schema) =>
           val schemaCrawlerTables = catalog.getTables(schema).asScala.toList
           configuration.destination match {
