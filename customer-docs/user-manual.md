@@ -90,7 +90,7 @@ The Jdbc data source configuration defines connection strings and other attribut
 | --- | --- | --- | --- |
 | type | String | True | Jdbc |
 | username | String | True | The jdbc url for the source system (ex: jdbc:oracle:thin:@{host}:{port}:{sid}) |
-| passwordFile | String | True | Location of the password file stored using Hadoop File System. Should be blank for Snowflake which will use the SnowSQL `--connection` argument. |
+| passwordFile | String | True | Only applicable when destination is Hadoop, should be empty string when destination is Snowflake which will use `--database-password`. Location of the password file stored using Hadoop File System. |
 | schema | String | True | The schema on the source system to parse metadata from. |
 | tableTypes | List[String] | True | Controls which objects get parsed on the source system acceptable values are table and view |
 | metadata | Map[String, String] | False | Global metadata map of key value pairs added as metadata on all tables at creation |
@@ -433,7 +433,7 @@ CLI Arguments:
 | --- | --- | --- | --- |
 | config | String | True | Location of the initial ingest configuration file |
 | output-path | String | False | Location where Streamliner output should be written to.  Default location will create an `output` directory where ever the script was ran from. |
-| database-password | String | False | Relational database password used when parsing Jdbc source types |
+| database-password | String | False | Relational database password used when parsing Jdbc source types. Not used when importing to Hadoop which uses the `passwordFile` Yaml key. |
 | create-docs | Boolean | False | Control flag to indicate whether an ERD and HTML file should be created when parsing Jdbc source types |
 
 CMD: `<install directory>/bin/streamliner schema --config ingest-config.yml --database-password <pass>`
