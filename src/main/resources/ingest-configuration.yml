@@ -2,22 +2,43 @@ name: "" # Unique name for data ingestion
 environment: "" # Environment identifier
 pipeline: "" # Pipeline name must match a directory in the the provided template folder (ie incremental-with-kudu, kudu-table-ddl, truncate-reload)
 source:
+  type: Jdbc # Data source type Jdbc or Glue
   url: "" # JDBC Connection url
   username: "" # JDBC Username
-  passwordFile: "" # HDFS location of password file
+  passwordFile: "/" # HDFS location of password file
   schema: "" # JDBC Schema / database name
   tableTypes: # Controls the types of tables included in the configuration output
     - table
-    - view
 # OPTIONAL: table whitelisting
-#  tables:
+#  userDefinedTable:
 #    - name: table1
+#      type: Snowflake
 #    - name: table2
+#      type: Snowflake
 destination:
-  impalaShellCommand: "" # Impala shell command copied from CM
-  stagingDatabase:
-    name: "" # Staging database
-    path: "" # Staging database hdfs path
-  reportingDatabase:
-    name: "" # Reporting database name (these can be the same as staging database if template allows)
-    path: "" # Reporting database path (these can be the same as staging database if template allows)
+  type: Snowflake # Destination type Snowflake or Hadoop
+  snowSqlCommand: snowsql -c <connection> # SnowSQL connection
+  storagePath: "" # S3 or Azure storage url
+  storageIntegration: "" # Snowflake storage integration name (Storage integrations are not created with Streamliner)
+  warehouse: "" # Snowflake warehouse name (Warehouses are not created with Streamliner)
+  taskSchedule: "" # https://docs.snowflake.com/en/user-guide/tasks-intro.html#task-scheduling-and-daylight-saving-time
+  stageName: "" # Snowflake external stage name (Stages are not created with Streamliner)
+  fileFormat: # Snowflake file format https://docs.snowflake.com/en/sql-reference/sql/create-file-format.html
+    name: ""
+    options:
+      type: ""
+  stagingDatabase: # Staging database
+    name: ""
+    schema: ""
+  reportingDatabase: # Reporting database
+    name: ""
+    schema: ""
+#destination:
+#   type: Hadoop
+#  impalaShellCommand: "" # Impala shell command copied from CM
+#  stagingDatabase:
+#    name: "" # Staging database
+#    path: "" # Staging database hdfs path
+#  reportingDatabase:
+#    name: "" # Reporting database name (these can be the same as staging database if template allows)
+#    path: "" # Reporting database path (these can be the same as staging database if template allows)

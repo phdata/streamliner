@@ -94,7 +94,7 @@ The Jdbc data source configuration defines connection strings and other attribut
 | schema | String | True | The schema on the source system to parse metadata from. |
 | tableTypes | List[String] | True | Controls which objects get parsed on the source system acceptable values are table and view |
 | metadata | Map[String, String] | False | Global metadata map of key value pairs added as metadata on all tables at creation |
-| tables | List[UserDefinedTable] | False | [User defined table](#user-defined-table) attributes (provides a whitelisting of tables to be parsed) |
+| userDefinedTable | List[UserDefinedTable] | False | [User defined table](#user-defined-table) attributes (provides a whitelisting of tables to be parsed) |
 
 #### AWS Glue Data Catalog
 The AWS Glue data catalog configuration defines which Glue Data Catalog database to collect metadata from.
@@ -104,7 +104,7 @@ The AWS Glue data catalog configuration defines which Glue Data Catalog database
 | type | String | True | Glue |
 | region | String | True | AWS region (ex. us-east-1)
 | database | String | True | AWS Glue data catalog database to parse table list from |
-| tables | List[UserDefinedTable] | False | [User defined table](#user-defined-table) attributes |
+| userDefinedTable | List[UserDefinedTable] | False | [User defined table](#user-defined-table) attributes |
 
 ##### User Defined Table
 The user defined table configuration object allows the user to enhance the metadata about a specific table with custom properties.
