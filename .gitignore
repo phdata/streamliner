@@ -5,3 +5,4 @@ integration-tests/pipewrench
 **/private*
 **/*.log
 .DS_Store*
+build-support/artifactory.env

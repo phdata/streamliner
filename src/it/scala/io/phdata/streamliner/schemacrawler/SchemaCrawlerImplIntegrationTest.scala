@@ -18,7 +18,7 @@ package io.phdata.streamliner.schemacrawler
 
 import java.io.File
 
-import io.phdata.streamliner.configuration.{Jdbc, SnowflakeUserDefinedTable, UserDefinedTable}
+import io.phdata.streamliner.configuration.Jdbc
 import org.scalatest.FunSuite
 
 /**

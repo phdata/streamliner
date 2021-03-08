@@ -1,3 +1,4 @@
 # tags to pull documentation versions on docs.customer.phdata.io
 doc-versions:
-  - { name: 3.2, tag: 3.2-docs, weight: 1000, archive: false }
+  - { name: 3.4, tag: 3.4, weight: 1000, archive: false }
+  - { name: 3.2, tag: 3.2-docs-typos, weight: 1000, archive: true }

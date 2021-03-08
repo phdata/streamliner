@@ -168,6 +168,10 @@ Please note policy in the above document is more complicated than is required. I
 Here is an example of the storage integration creation SQL used:
 
 ```sql
+USE ROLE ACCOUNTADMIN;
+```
+
+```sql
 CREATE STORAGE INTEGRATION STREAMLINER_QUICKSTART_1
   TYPE = EXTERNAL_STAGE
   STORAGE_PROVIDER = S3
@@ -187,10 +191,10 @@ GRANT ALL ON INTEGRATION STREAMLINER_QUICKSTART_1 TO ROLE sysadmin;
 
 ## Download
 
-Find the [latest version](curl -O https://repository.phdata.io/artifactory/list/binary/phdata/streamliner/) and then download:
+Find the [latest version](https://repository.phdata.io/artifactory/list/binary/phdata/streamliner/) and then download:
 
 ```shell
-curl -O curl -O https://repository.phdata.io/artifactory/list/binary/phdata/streamliner/streamliner-<VERSION>.zip
+curl -O https://repository.phdata.io/artifactory/list/binary/phdata/streamliner/streamliner-<VERSION>.zip
 ```
 
 and unzip:
@@ -303,7 +307,7 @@ Goodbye!
 
 In order to enable "auto ingest" where files are automatically ingested when placed in S3, you need to do some additional work.
 
-First in the Snowflake console, run the following sql to get the name of the SQS topic required:
+First in the Snowflake console, run the following sql to get the name of the SQS queue arn required:
 
 ```sql
 USE DATABASE SANDBOX_POC1;
@@ -317,15 +321,133 @@ And you will see something like this:
 
 ![Obtain ARN](../images/quickstart-auto-ingest-00.png)
 
-Then open the AWS console, find your bucket, click events: 
+Make a note of the SQS Queue ARN to use it later.
+
+Next, you can configure Amazon Simple Notification Service (SNS) as a broadcaster to publish S3 event notifications to multiple subscribers (e.g. SQS queues or AWS Lambda ). In this case, the Snowflake SQS queue for Snowpipe automation through SNS Topic. 
+
+```
+S3 Event -> SNS (SNS Topic) -> SQS Queue -> Snowpipe
+```
+![SNS-SQS-Snowflake](../images/quickstart_sns_topic_filtering_sqs_lamda_endpoint.png)
+
+[Image Source: Amazon Topic Based filtering](https://aws.amazon.com/blogs/compute/simplify-pubsub-messaging-with-amazon-sns-message-filtering/)
+
+The following steps are involved for using SNS:
+- Create an SNS topic (to receive notifications sent from your S3 bucket) and Subscribe to S3 bucket.
+- Create an SQS queue for Snowflake; and subscribe the Snowflake SQS Queue to the SNS Topic.
+- And, Configure S3 bucket to publish events to the SNS topic.
+
+## Create an Amazon SNS Topic and Subscription
+
+- Open AWS Management Console, choose Simple Notification Service (SNS)
+- Create an SNS Topic (to handle all messages for the Snowflake stage location on your S3 bucket).
+  - Name the topic eg. sf_snowpipe_sns_topic_test
+  - This will generate a SNS ARN like arn:aws:sns:us-west-1:YOUR_AWS_ACCOUNT_ID:sf-snowpipe_sns_topic_test
+
+- Next, subscribe the target destinations (SQS queues or AWS Lambda workloads) for the S3 event notifications to this topic. SNS publishes event notifications from S3 bucket to all subscribers to the topic.
+
+The SNS ARN will be used in generating an IAM policy in the Snowflake UI that can listen to the topic.
+
+## Create SQS Queue and subscribe the Snowflake SQS queue to the SNS Topic
+
+- Open AWS Console, Click on SQS and Select the existing SQS queue.
+- And, subscribe SQS Queue to the SNS Topic created.
+
+![Subscribe-SQS-Queue-to-SNS-Topic](../images/quickstart-sqs-queue-subscribe-sns-topic.png)
+
+Using a Snowflake client, query the SYSTEM$GET_AWS_SNS_IAM_POLICY system function with your SNS topic ARN
+
+```sql
+SELECT SYSTEM$GET_AWS_SNS_IAM_POLICY('arn:aws:sns:us-east-1:YOUR_AWS_ACCOUNT_ID:sf_snowpipe_sns_topic_test);
+```
+The function returns an IAM policy that grants a Snowflake SQS queue permission to subscribe to the SNS topic as shown in example below:
+
+![snowflake-iam-policy-sns-topic](../images/quickstart-snowflake-iam-policy-sqs-sns-topic.png)
+
+Eg: Please find a boilerplate policy document which can be edited to include required privileges as below:
+
+```json
+{ 
+   "Version":"2008-10-17",
+   "Id":"__default_policy_ID",
+   "Statement":[ 
+      { 
+         "Sid":"__default_statement_ID",
+         "Effect":"Allow",
+         "Principal":{ 
+            "AWS":"*"
+         },
+         "Action":[ 
+            "SNS:GetTopicAttributes",
+            "SNS:SetTopicAttributes",
+            "SNS:AddPermission",
+            "SNS:RemovePermission",
+            "SNS:DeleteTopic",
+            "SNS:Subscribe",
+            "SNS:ListSubscriptionsByTopic",
+            "SNS:Publish",
+            "SNS:Receive"
+         ],
+         "Resource":"arn:aws:sns:us-west-1:YOUR_AWS_ACCOUNT_ID:sf-snowpipe_sns_topic_test",
+         "Condition":{ 
+            "StringEquals":{ 
+               "AWS:SourceOwner":"YOUR_AWS_ACCOUNT_ID"
+            }
+         }
+      },
+      { 
+         "Sid":"1",
+         "Effect":"Allow",
+         "Principal":{ 
+            "AWS":"arn:aws:iam::YOUR_AWS_ACCOUNT_ID:user/REPLACE_WITH_YOUR_USER_ID"
+         },
+         "Action":[ 
+            "sns:Subscribe"
+         ],
+         "Resource":[ 
+            "arn:aws:sns:us-west-1:YOUR_AWS_ACCOUNT_ID:sf-snowpipe_sns_topic_test"
+         ]
+      },
+      { 
+         "Sid":"s3-event-notifier",
+         "Effect":"Allow",
+         "Principal":{ 
+            "Service":"s3.amazonaws.com"
+         },
+         "Action":"SNS:Publish",
+         "Resource":"arn:aws:sns:us-west-1:YOUR_AWS_ACCOUNT_ID:sf-snowpipe_sns_topic_test",
+         "Condition":{ 
+            "ArnLike":{ 
+               "aws:SourceArn":"arn:aws:s3:*:*:REPLACE_WITH_BUCKET_NAME"
+            }
+         }
+      }
+   ]
+}
+```
+## Edit the SNS Topic policy:
+
+- Return to the AWS Management Console. Choose SNS Topic created from the left-hand navigation pane.
+- Select the checkbox beside the topic for your S3 bucket, and from the Actions menu, click Edit topic policy. 
+- Click the Advanced view tab to edit the JSON format of the policy.
+
+- Merge the IAM policy addition from the SYSTEM$GET_AWS_SNS_IAM_POLICY function results into the JSON document.
+- Click the Update policy button.
+
+## Configure to publish the S3 event notifications to the SNS Topic
+
+Open the AWS console, find your bucket, click events: 
 
 ![Open S3 Bucket Properties](../images/quickstart-auto-ingest-01.png)
 
-And add a notification to the SQS queue:
+Select S3 bucket and configure an event notification for your S3 bucket by completing fields as below:
+- Name: Name of the event notification (e.g. Auto-ingest-Snowflake).
+- Events: Select the ObjectCreate (All) option.
+- Send to: Select SNS Topic from the list.
+- SNS Topic ARN: Select the SNS Topic ARN from the dropdown list or add ARN manually in the text box
 
-![Add Event Notification](../images/quickstart-auto-ingest-02.png)
 
-You can clean up the stages, tables, and tasks for the `departments` table with:
+Next, you can clean up the stages, tables, and tasks for the `departments` table with:
 
 ```shell script
 make clean-departments
@@ -341,3 +463,5 @@ make first-run-all
 You can now go preview data in the staging tables:
 
 ![Preview Data](../images/quickstart-preview-data.png)
+
+When new data files are added to the S3 bucket, the event notification informs Snowpipe to load them into the target table defined in the pipe.
