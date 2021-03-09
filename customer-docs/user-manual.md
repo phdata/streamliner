@@ -404,7 +404,7 @@ Starting out with collecting and storing the data, in every database using this 
 
 To easily collect the data, we can add a stream to the table we are monitoring and have a task that runs the stored procedure to collect the data. Once the data is collected and stored, the stored procedure can check if the values are within the UCL and LCL or 3 standard deviations away from the historical mean. If there are any values outside the range, the stored procedure can call an external api alerting users that some of the date requires investigation. Below is a diagram showing the dataflow.
 
-![QA_process](../images/streamliner_qa-process.png)
+![QA_process](../images/streamliner-qa-process.png)
 
 ####Dos and Don'ts
 This process should be used when monitoring on ongoing pipeline. It will detect if a statistical
