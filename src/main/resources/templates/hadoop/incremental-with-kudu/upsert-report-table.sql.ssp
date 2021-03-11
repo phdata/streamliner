@@ -19,7 +19,7 @@ limitations under the License.
 <%@ val typeMapping: Map[String, Map[String, String]]%>
 #{
     val destination = configuration.destination.asInstanceOf[Hadoop]
-    val columns = io.phdata.streamliner.util.TemplateFunction.columnOrCast(configuration, table, typeMapping, "AVRO", "KUDU")
+    val columns = table.columns.map(c => c.castColumn(typeMapping, "AVRO", "KUDU"))
 }#
 set sync_ddl=1;
 REFRESH `${destination.stagingDatabase.name}`.`stg_${table.destinationName}`;

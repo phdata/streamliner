@@ -19,8 +19,7 @@ limitations under the License.
 <%@ val typeMapping: Map[String, Map[String, String]]%>
 #{
     val destination = configuration.destination.asInstanceOf[Snowflake]
-    val destColumnStr = table.columns.map(column => s"${column.destinationName}").mkString(", ")
-    val sourceColumnStr = table.columns.map(column => s"$$1:${column.sourceName}::${io.phdata.streamliner.util.TemplateFunction.mapDataType(column, typeMapping, "SNOWFLAKE")}").mkString(", ")
+    val sourceColumnStr = table.sourceColumnConversion(typeMapping)
 }#
 USE DATABASE ${destination.stagingDatabase.name};
 
@@ -29,7 +28,7 @@ USE SCHEMA ${destination.stagingDatabase.schema};
 CREATE PIPE IF NOT EXISTS ${table.destinationName}_pipe
     AUTO_INGEST = true
     AS
-        COPY INTO ${table.destinationName} (${destColumnStr})
+        COPY INTO ${table.destinationName} (${table.columnList()})
             FROM ( SELECT ${sourceColumnStr}
                 FROM @${configuration.name}_stage/${table.sourceName})
         FILE_FORMAT = ( TYPE = PARQUET);

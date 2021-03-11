@@ -19,11 +19,7 @@ limitations under the License.
 <%@ val typeMapping: Map[String, Map[String, String]]%>
 #{
     val destination = configuration.destination.asInstanceOf[Snowflake]
-    val columnDefinition = table.columns.map(column => {
-    val dataType = io.phdata.streamliner.util.TemplateFunction.mapDataType(column, typeMapping, "SNOWFLAKE")
-    s"${column.destinationName} ${dataType} COMMENT '${column.comment.getOrElse("")}'"
-    }).mkString(",\n")
 }#
 CREATE TABLE IF NOT EXISTS ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName} (
-${columnDefinition}
+${table.columnDDL(typeMapping)}
 );

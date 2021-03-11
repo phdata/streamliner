@@ -2,14 +2,13 @@ package io.phdata.streamliner.configuration.mapper
 
 import com.amazonaws.services.glue.model.{Column => AWSColumn}
 import com.amazonaws.services.glue.model.{Table => AWSTable}
-import io.phdata.streamliner.util.TemplateFunction
 import io.phdata.streamliner.configuration._
 import schemacrawler.schema.{Column => SchemaCrawlerColumn}
 import schemacrawler.schema.{Table => SchemaCrawlerTable}
 
 import collection.JavaConverters._
 
-object SnowflakeTableMapper {
+object SnowflakeTableMapper extends TableMapper {
 
   def mapSchemaCrawlerTables(
       tables: List[SchemaCrawlerTable],
@@ -25,7 +24,7 @@ object SnowflakeTableMapper {
     SnowflakeTable(
       `type` = "Snowflake",
       sourceName = table.getName,
-      destinationName = TemplateFunction.cleanse(table.getName),
+      destinationName = cleanseName(table.getName),
       comment = Option(table.getRemarks),
       primaryKeys = table.getColumns.asScala.filter(c => c.isPartOfPrimaryKey).map(_.getName),
       changeColumn = None,
@@ -43,7 +42,7 @@ object SnowflakeTableMapper {
     SnowflakeTable(
       `type` = "Snowflake",
       sourceName = table.getName,
-      destinationName = TemplateFunction.cleanse(table.getName),
+      destinationName = cleanseName(table.getName),
       comment = Option(table.getDescription),
       primaryKeys = Seq(),
       changeColumn = None,
@@ -60,7 +59,7 @@ object SnowflakeTableMapper {
   private def mapSchemaCrawlerColumnDefinition(column: SchemaCrawlerColumn): ColumnDefinition =
     ColumnDefinition(
       sourceName = column.getName,
-      destinationName = TemplateFunction.cleanse(column.getName),
+      destinationName = cleanseName(column.getName),
       dataType = column.getColumnDataType.getName,
       comment = Option(column.getRemarks),
       precision = Option(column.getSize),
@@ -70,7 +69,7 @@ object SnowflakeTableMapper {
   private def mapAWSGlueColumnDefinition(column: AWSColumn): ColumnDefinition =
     ColumnDefinition(
       sourceName = column.getName,
-      destinationName = TemplateFunction.cleanse(column.getName),
+      destinationName = cleanseName(column.getName),
       dataType = column.getType,
       comment = Option(column.getComment)
     )

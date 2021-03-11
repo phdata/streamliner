@@ -19,7 +19,7 @@ limitations under the License.
 <%@ val typeMapping: Map[String, Map[String, String]]%>
 #{
     val destination = configuration.destination.asInstanceOf[Hadoop]
-    val columns = io.phdata.streamliner.util.TemplateFunction.columnOrCast(configuration, table, typeMapping, "AVRO", "PARQUET")
+    val columns = table.columns.map(c => c.castColumn(typeMapping, "AVRO", "PARQUET"))
     val partition = "${var:ingest_partition}"
 }#
 INSERT OVERWRITE TABLE `${destination.stagingDatabase.name}`.`part_${table.destinationName}` PARTITION (ingest_partition=${partition})

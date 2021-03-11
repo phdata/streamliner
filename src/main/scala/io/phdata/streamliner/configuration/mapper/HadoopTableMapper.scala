@@ -3,13 +3,12 @@ package io.phdata.streamliner.configuration.mapper
 import com.amazonaws.services.glue.model.{Column => AWSColumn}
 import com.amazonaws.services.glue.model.{Table => AWSTable}
 import io.phdata.streamliner.configuration._
-import io.phdata.streamliner.util.TemplateFunction
 import schemacrawler.schema.{Column => SchemaCrawlerColumn}
 import schemacrawler.schema.{Table => SchemaCrawlerTable}
 
 import collection.JavaConverters._
 
-object HadoopTableMapper {
+object HadoopTableMapper extends TableMapper {
 
   def mapSchemaCrawlerTables(
       tables: List[SchemaCrawlerTable],
@@ -25,7 +24,7 @@ object HadoopTableMapper {
     HadoopTable(
       `type` = "Hadoop",
       sourceName = table.getName,
-      destinationName = TemplateFunction.cleanse(table.getName),
+      destinationName = cleanseName(table.getName),
       checkColumn = None,
       comment = Option(table.getRemarks),
       primaryKeys = table.getColumns.asScala.filter(c => c.isPartOfPrimaryKey).map(_.getName),
@@ -41,7 +40,7 @@ object HadoopTableMapper {
     HadoopTable(
       `type` = "Hadoop",
       sourceName = table.getName,
-      destinationName = TemplateFunction.cleanse(table.getName),
+      destinationName = cleanseName(table.getName),
       checkColumn = None,
       comment = Option(table.getDescription),
       primaryKeys = Seq(),
@@ -56,7 +55,7 @@ object HadoopTableMapper {
   private def mapSchemaCrawlerColumnDefinition(column: SchemaCrawlerColumn): ColumnDefinition =
     ColumnDefinition(
       sourceName = column.getName,
-      destinationName = TemplateFunction.cleanse(column.getName),
+      destinationName = cleanseName(column.getName),
       dataType = column.getColumnDataType.getName,
       comment = Option(column.getRemarks),
       precision = Option(column.getSize),
@@ -66,7 +65,7 @@ object HadoopTableMapper {
   private def mapAWSGlueColumnDefinition(column: AWSColumn): ColumnDefinition =
     ColumnDefinition(
       sourceName = column.getName,
-      destinationName = TemplateFunction.cleanse(column.getName),
+      destinationName = cleanseName(column.getName),
       dataType = column.getType,
       comment = Option(column.getComment)
     )

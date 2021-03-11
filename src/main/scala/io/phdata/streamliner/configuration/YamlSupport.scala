@@ -25,8 +25,6 @@ import io.circe.syntax._
 
 trait YamlSupport extends FileUtil with AutoDerivation {
 
-  type TypeMapping = Map[String, Map[String, String]]
-
   def readConfigurationFile(path: String): Configuration = {
     if (!fileExists(path)) {
       throw new FileNotFoundException(s"Configuration file not found: '$path'.")
