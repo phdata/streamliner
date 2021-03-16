@@ -27,7 +27,7 @@ number:
   impala: decimal
   parquet: decimal
   avro: string
-  snowflake: decimal
+  snowflake: number
 numeric:
   kudu: string
   impala: string

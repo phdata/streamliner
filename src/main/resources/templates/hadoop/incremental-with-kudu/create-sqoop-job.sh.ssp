@@ -18,11 +18,11 @@ limitations under the License.
 #import(io.phdata.streamliner.configuration.Jdbc)
 <%@ val configuration: io.phdata.streamliner.configuration.Configuration %>
 <%@ val table: io.phdata.streamliner.configuration.HadoopTable %>
+<%@ val typeMapping: Map[String, Map[String, String]]%>
 #{
     val source = configuration.source.asInstanceOf[Jdbc]
     val destination = configuration.destination.asInstanceOf[Hadoop]
-    val tableColumns = io.phdata.streamliner.util.TemplateFunction.sourceColumns(configuration, table)
-    val javaColumnMap = io.phdata.streamliner.util.TemplateFunction.sqoopMapJavaColumn(table)
+    val javaColumnMap = table.sqoopMapJavaColumns(typeMapping)
 }#
 set -euo pipefail
 
@@ -49,6 +49,6 @@ sqoop job -D 'sqoop.metastore.client.record.password=true'  -D 'mapreduce.job.na
     --compression-codec snappy \\
     -m ${table.numberOfMappers.getOrElse(1)} \\
     --query 'SELECT
-${tableColumns}
+${table.sourceColumns(source.driverClass.get)}
 FROM ${source.schema}.${table.sourceName}
 WHERE $CONDITIONS'

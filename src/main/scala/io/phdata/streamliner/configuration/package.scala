@@ -22,6 +22,8 @@ import io.circe.syntax._
 
 package object configuration {
 
+  type TypeMapping = Map[String, Map[String, String]]
+
   case class Configuration(
       name: String,
       environment: String,
@@ -80,7 +82,9 @@ package object configuration {
       extends Destination
 
   case class HadoopDatabase(name: String, path: String)
+
   case class SnowflakeDatabase(name: String, schema: String)
+
   case class SnowflakeQAOptions(
       taskSchedule: Option[String],
       minimumPercentage: Option[Double],
@@ -119,6 +123,37 @@ package object configuration {
     val destinationName: String
     val primaryKeys: Seq[String]
     val columns: Seq[ColumnDefinition]
+
+    def columnList(aliasOpt: Option[String] = None): String =
+      columns
+        .map { column =>
+          aliasOpt match {
+            case Some(alias) => s"${alias}.${column.destinationName}"
+            case None => s"${column.destinationName}"
+          }
+        }
+        .mkString(",")
+
+    def pkConstraint(aAlias: String, bAlias: String, joinCondition: String = " AND "): String =
+      primaryKeys
+        .map { pk =>
+          s"${aAlias}.${pk} = ${bAlias}.${pk}"
+        }
+        .mkString(joinCondition)
+
+    def columnConstraint(
+        aAlias: Option[String] = None,
+        bAlias: String,
+        joinCondition: String = " AND "): String =
+      columns
+        .map { column =>
+          aAlias match {
+            case Some(alias) =>
+              s"${alias}.${column.destinationName} = ${bAlias}.${column.destinationName}"
+            case None => s"${column.destinationName} = ${bAlias}.${column.destinationName}"
+          }
+        }
+        .mkString(joinCondition)
   }
 
   case class HadoopTable(
@@ -133,7 +168,46 @@ package object configuration {
       splitByColumn: Option[String],
       numberOfPartitions: Option[Int],
       columns: Seq[ColumnDefinition])
-      extends TableDefinition
+      extends TableDefinition {
+
+    lazy val pkList: String = primaryKeys.map(pk => s"`$pk`").mkString(",")
+
+    lazy val orderColumnsPKsFirst: Seq[ColumnDefinition] = {
+      val pkColumnDefs = columns.filter(c => primaryKeys.contains(c.sourceName))
+      val nonPKColumnDefs = columns.filterNot(c => primaryKeys.contains(c.sourceName))
+      pkColumnDefs ++ nonPKColumnDefs
+    }
+
+    def columnDDL(typeMapping: TypeMapping, targetFormat: String): String =
+      columns
+        .map { column =>
+          s"`${column.destinationName}` ${column.mapDataTypeHadoop(typeMapping, targetFormat)} '${column.comment
+            .getOrElse("")}"
+        }
+        .mkString(",\n")
+
+    def sourceColumns(driverClass: String): String =
+      columns
+        .map { column =>
+          if (driverClass.toLowerCase.contains("oracle") || driverClass.toLowerCase.contains(
+              "sqlserver")) {
+            column.sourceName + " AS " + "\"" + column.destinationName + "\""
+          } else {
+            s"`${column.sourceName}` AS ${column.destinationName}"
+          }
+        }
+        .mkString(",\n")
+
+    def sqoopMapJavaColumns(typeMapping: TypeMapping): Option[String] = {
+      val map = columns.flatMap(c => c.mapDataTypeJava(typeMapping))
+
+      if (map.isEmpty) {
+        None
+      } else {
+        Some(map.mkString(","))
+      }
+    }
+  }
 
   case class SnowflakeTable(
       `type`: String,
@@ -146,7 +220,23 @@ package object configuration {
       metadata: Option[Map[String, String]],
       fileFormat: FileFormat,
       columns: Seq[ColumnDefinition])
-      extends TableDefinition
+      extends TableDefinition {
+
+    lazy val pkList: String = primaryKeys.mkString(",")
+
+    def sourceColumnConversion(typeMapping: TypeMapping): String = {
+      columns.map { column =>
+        s"$$1:${column.sourceName}::${column.mapDataTypeSnowflake(typeMapping)}"
+      }
+    }.mkString(",\n")
+
+    def columnDDL(typeMapping: TypeMapping): String = {
+      columns.map { column =>
+        s"${column.destinationName} ${column.mapDataTypeSnowflake(typeMapping)} '${column.comment.getOrElse("")}"
+      }
+    }.mkString(",\n")
+
+  }
 
   case class ColumnDefinition(
       sourceName: String,
@@ -154,7 +244,100 @@ package object configuration {
       dataType: String,
       comment: Option[String] = None,
       precision: Option[Int] = None,
-      scale: Option[Int] = None)
+      scale: Option[Int] = None) {
+
+    def cleanseDataType: String = dataType.toUpperCase.stripSuffix(" IDENTITY")
+
+    def mapDataTypeHadoop(typeMapping: TypeMapping, targetFormat: String): String = {
+      val cleanDataType = cleanseDataType
+      val p = precision.getOrElse(0)
+      val s = scale.getOrElse(0)
+
+      // Oracle specific type mapping
+      if (cleanDataType.equalsIgnoreCase("NUMBER")) {
+        if (s > 0) {
+          s"DECIMAL($p, $s)"
+        } else if (p > 19 && s == 0) {
+          s"DECIMAL($p, $s)"
+        } else if (p >= 10 && p <= 19 && s == 0) {
+          s"BIGINT"
+        } else if (p == 0 && s == -127) {
+          s"VARCHAR"
+        } else {
+          s"INTEGER"
+        }
+      } else if (cleanDataType.equalsIgnoreCase("DECIMAL")) {
+        s"DECIMAL($p, $s)"
+      } else {
+        mapDataType(cleanDataType, typeMapping, targetFormat)
+      }
+    }
+
+    def mapDataTypeSnowflake(typeMapping: TypeMapping): String = {
+      val cleanDataType = cleanseDataType
+      val p = precision.getOrElse(0)
+      val s = scale.getOrElse(0)
+
+      // Oracle specific type mapping
+      if (cleanDataType.equalsIgnoreCase("NUMBER")) {
+        if (p == 0 && (s == -127 || s == 0)) {
+          s"NUMBER(38, 8)"
+        } else {
+          s"NUMBER($p, $s)"
+        }
+      } else {
+        mapDataType(cleanDataType, typeMapping, "SNOWFLAKE")
+      }
+    }
+
+    private def mapDataType(
+        sourceDataType: String,
+        typeMapping: TypeMapping,
+        targetFormat: String): String = {
+      typeMapping.get(sourceDataType.toLowerCase) match {
+        case Some(dataTypeMap) =>
+          dataTypeMap.get(targetFormat.toLowerCase) match {
+            case Some(dataType) => dataType
+            case None =>
+              throw new RuntimeException(
+                s"No type mapping found for data type: '$dataType' and storage format: $targetFormat in provided type mapping")
+          }
+        case None =>
+          throw new RuntimeException(
+            s"No type mapping found for data type: '$dataType' in provided type mapping file")
+      }
+    }
+
+    def mapDataTypeJava(typeMapping: TypeMapping): Option[String] = {
+      val strings =
+        Seq("clob", "longvarbinary", "varbinary", "rowid", "blob", "nclob", "text", "binary")
+      val ints = Seq("tinyint", "int", "smallint", "integer", "short")
+
+      val dataType = mapDataTypeHadoop(typeMapping, "AVRO").toLowerCase
+      if (strings.contains(dataType)) {
+        Some(s"$destinationName=String")
+      } else if (ints.contains(dataType)) {
+        Some(s"$destinationName=Integer")
+      } else if (dataType.equalsIgnoreCase("float")) {
+        Some(s"$destinationName=Float")
+      } else if (dataType.equalsIgnoreCase("bigint")) {
+        Some(s"$destinationName=Long")
+      } else {
+        None
+      }
+    }
+
+    def castColumn(typeMapping: TypeMapping, sourceFormat: String, targetFormat: String): String = {
+      val sourceDataType = mapDataTypeHadoop(typeMapping, sourceFormat)
+      val targetDataType = mapDataTypeHadoop(typeMapping, targetFormat)
+
+      if (sourceDataType.equalsIgnoreCase(targetDataType)) {
+        s"`${destinationName}`"
+      } else {
+        s"CAST(`$destinationName` AS $targetDataType) AS `${destinationName}`"
+      }
+    }
+  }
 
   case class FileFormat(
       location: String,

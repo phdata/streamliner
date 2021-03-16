@@ -22,15 +22,14 @@ limitations under the License.
 }#
 set sync_ddl=1;
 CREATE TABLE IF NOT EXISTS `${destination.reportingDatabase.name}`.`${table.destinationName}` (
-<% val orderedColumns = io.phdata.streamliner.util.TemplateFunction.orderColumns(table) %>
+<% val orderedColumns = table.orderColumnsPKsFirst %>
 #for (column <- orderedColumns)
-    <% val mappedDataType = io.phdata.streamliner.util.TemplateFunction.mapDataType(column, typeMapping, "KUDU")%>
-    `${column.destinationName}` ${mappedDataType} COMMENT '${column.comment.getOrElse("")}',
+    `${column.destinationName}` ${column.mapDataTypeHadoop(typeMapping, "KUDU")} COMMENT '${column.comment.getOrElse("")}',
 #end
-PRIMARY KEY (${io.phdata.streamliner.util.TemplateFunction.primaryKeys(table)})
+PRIMARY KEY (${table.primaryKeys.mkString(",")})
 )
 #if (table.primaryKeys.nonEmpty)
-PARTITION BY HASH (${table.primaryKeys.map(k => s"`$k`").mkString(",")}) PARTITIONS ${table.numberOfPartitions.getOrElse(2)}
+PARTITION BY HASH (${table.pkList}) PARTITIONS ${table.numberOfPartitions.getOrElse(2)}
 #end
 COMMENT '${table.comment.getOrElse("")}'
 STORED AS KUDU

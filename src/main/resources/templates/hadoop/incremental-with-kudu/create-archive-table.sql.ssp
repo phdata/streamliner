@@ -22,19 +22,7 @@ limitations under the License.
 }#
 set sync_ddl=1;
 CREATE TABLE IF NOT EXISTS `${destination.stagingDatabase.name}`.`arch_${table.destinationName}` (
-<%
-    val columnDefinitions = table.columns.map {
-    column =>
-        val mappedDataType = io.phdata.streamliner.util.TemplateFunction.mapDataType(column, typeMapping, "PARQUET")
-        val dataType = if (mappedDataType.equalsIgnoreCase("DECIMAL")) {
-            s"DECIMAL(${column.precision.get}, ${column.scale.get})"
-        } else {
-            mappedDataType
-        }
-        s"`${column.destinationName}` $dataType COMMENT '${column.comment.getOrElse("")}'"
-        }.mkString(",\n")
-%>
-${columnDefinitions}
+${table.columnDDL(typeMapping, "PARQUET")}
 )
 PARTITIONED BY (ingest_date STRING)
 COMMENT '${table.comment.getOrElse("")}'
