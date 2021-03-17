@@ -387,12 +387,12 @@ The Snowpipe Append template is A Snowflake data pipeline to append newly arrivi
 
 ## QA Process 
 
-###Overview
+### Overview
 When creating data pipelines, measuring quality is always very important. Streamliner supports templates for collecting metrics
 on columns of tables and compare them over time. This method is based off of [control charts](https://en.wikipedia.org/wiki/Control_chart)
 to measure the variablility of the amount of data over time.
 
-###Process
+### Process
 To take a control chart process and convert it to pipelines the process needs to complete the following steps:
 
 1.	Capture the occurrences of data values across all columns in a table.
@@ -406,7 +406,7 @@ To easily collect the data, we can add a stream to the table we are monitoring a
 
 ![QA_process](../images/streamliner_qa-process.png)
 
-####Dos and Don'ts
+#### Dos and Don'ts
 This process should be used when monitoring on ongoing pipeline. It will detect if a statistical
 anomaly in the values of the data. It will not tell you if something is wrong or confirm data fits a 
 predefined structure. The metrics repo also needs data to inform if data fits the
