@@ -22,6 +22,19 @@ import io.circe.syntax._
 
 package object configuration {
 
+  // only add quotes if required since it makes the identifier case sensitive
+  // note we call this for hadoop and snowflake, but hadoop cleanses columns
+  // so in the hadoop case we'll always hit the else
+  val IDENTIFIER_WITHOUT_SPECIAL_CHARS = "^[A-Za-z0-9_]+$";
+
+  def quoteIdentifierIfNeeded(identifier: String): String = {
+    if (identifier.matches(IDENTIFIER_WITHOUT_SPECIAL_CHARS)) {
+      identifier
+    } else {
+      "\"" + identifier + "\""
+    }
+  }
+
   type TypeMapping = Map[String, Map[String, String]]
 
   case class Configuration(
@@ -128,8 +141,8 @@ package object configuration {
       columns
         .map { column =>
           aliasOpt match {
-            case Some(alias) => s"${alias}.${column.destinationName}"
-            case None => s"${column.destinationName}"
+            case Some(alias) => s"${alias}.${quoteIdentifierIfNeeded(column.destinationName)}"
+            case None => s"${quoteIdentifierIfNeeded(column.destinationName)}"
           }
         }
         .mkString(",")
@@ -149,7 +162,7 @@ package object configuration {
         .map { column =>
           aAlias match {
             case Some(alias) =>
-              s"${alias}.${column.destinationName} = ${bAlias}.${column.destinationName}"
+              s"${alias}.${quoteIdentifierIfNeeded(column.destinationName)} = ${bAlias}.${quoteIdentifierIfNeeded(column.destinationName)}"
             case None => s"${column.destinationName} = ${bAlias}.${column.destinationName}"
           }
         }
@@ -181,8 +194,8 @@ package object configuration {
     def columnDDL(typeMapping: TypeMapping, targetFormat: String): String =
       columns
         .map { column =>
-          s"`${column.destinationName}` ${column.mapDataTypeHadoop(typeMapping, targetFormat)} '${column.comment
-            .getOrElse("")}"
+          s"`${column.destinationName}` ${column.mapDataTypeHadoop(typeMapping, targetFormat)} COMMENT '${column.comment
+            .getOrElse("")}'"
         }
         .mkString(",\n")
 
@@ -226,13 +239,14 @@ package object configuration {
 
     def sourceColumnConversion(typeMapping: TypeMapping): String = {
       columns.map { column =>
-        s"$$1:${column.sourceName}::${column.mapDataTypeSnowflake(typeMapping)}"
+        s"$$1:${quoteIdentifierIfNeeded(column.sourceName)}::${column.mapDataTypeSnowflake(typeMapping)}"
       }
     }.mkString(",\n")
 
     def columnDDL(typeMapping: TypeMapping): String = {
       columns.map { column =>
-        s"${column.destinationName} ${column.mapDataTypeSnowflake(typeMapping)} '${column.comment.getOrElse("")}"
+        s"${quoteIdentifierIfNeeded(column.destinationName)} ${column.mapDataTypeSnowflake(
+          typeMapping)} COMMENT '${column.comment.getOrElse("")}'"
       }
     }.mkString(",\n")
 

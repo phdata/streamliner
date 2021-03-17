@@ -32,6 +32,6 @@ CREATE PIPE IF NOT EXISTS ${table.destinationName}_pipe
 #end
     AS
         COPY INTO ${table.destinationName}_stg (${table.columnList()}, dms_operation, dms_ts)
-            FROM ( SELECT ${sourceColumnStr}, $1:Op::STRING, $1:ts::TIMESTAMP_LTZ
+            FROM ( SELECT ${unescape(sourceColumnStr)}, $1:Op::STRING, $1:ts::TIMESTAMP_LTZ
                    FROM @${configuration.name}_stage/${table.sourceName})
         FILE_FORMAT = ( TYPE = PARQUET);

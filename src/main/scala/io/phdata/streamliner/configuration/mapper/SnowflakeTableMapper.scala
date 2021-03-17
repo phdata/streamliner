@@ -24,7 +24,7 @@ object SnowflakeTableMapper extends TableMapper {
     SnowflakeTable(
       `type` = "Snowflake",
       sourceName = table.getName,
-      destinationName = cleanseName(table.getName),
+      destinationName = table.getName,
       comment = Option(table.getRemarks),
       primaryKeys = table.getColumns.asScala.filter(c => c.isPartOfPrimaryKey).map(_.getName),
       changeColumn = None,
@@ -42,7 +42,7 @@ object SnowflakeTableMapper extends TableMapper {
     SnowflakeTable(
       `type` = "Snowflake",
       sourceName = table.getName,
-      destinationName = cleanseName(table.getName),
+      destinationName = table.getName,
       comment = Option(table.getDescription),
       primaryKeys = Seq(),
       changeColumn = None,
@@ -59,7 +59,7 @@ object SnowflakeTableMapper extends TableMapper {
   private def mapSchemaCrawlerColumnDefinition(column: SchemaCrawlerColumn): ColumnDefinition =
     ColumnDefinition(
       sourceName = column.getName,
-      destinationName = cleanseName(column.getName),
+      destinationName = column.getName,
       dataType = column.getColumnDataType.getName,
       comment = Option(column.getRemarks),
       precision = Option(column.getSize),
@@ -69,7 +69,7 @@ object SnowflakeTableMapper extends TableMapper {
   private def mapAWSGlueColumnDefinition(column: AWSColumn): ColumnDefinition =
     ColumnDefinition(
       sourceName = column.getName,
-      destinationName = cleanseName(column.getName),
+      destinationName = column.getName,
       dataType = column.getType,
       comment = Option(column.getComment)
     )

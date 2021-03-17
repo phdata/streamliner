@@ -25,7 +25,7 @@ USE DATABASE ${destination.stagingDatabase.name};
 
 USE SCHEMA ${destination.stagingDatabase.schema};
 
-COPY INTO ${table.destinationName}_stg (${table.columnList()})
-FROM ( SELECT ${sourceColumnStr}
+COPY INTO ${table.destinationName}_stg (${unescape(table.columnList())})
+FROM ( SELECT ${unescape(sourceColumnStr)}
 FROM @${configuration.name}_stage/${table.sourceName})
 FILE_FORMAT = ( TYPE = PARQUET);

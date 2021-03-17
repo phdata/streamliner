@@ -21,5 +21,5 @@ limitations under the License.
     val destination = configuration.destination.asInstanceOf[Snowflake]
 }#
 CREATE TABLE IF NOT EXISTS ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName} (
-${table.columnDDL(typeMapping)}
+${unescape(table.columnDDL(typeMapping))}
 );
