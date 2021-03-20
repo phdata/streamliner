@@ -22,7 +22,7 @@ limitations under the License.
 }#
 CREATE TABLE IF NOT EXISTS ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName}_stg (
 #for (column <- table.columns)
-    ${column.destinationName} ${column.mapDataTypeSnowflake(typeMapping)} COMMENT '${column.comment.getOrElse("")}',
+    ${unescape(column.destinationName)} ${column.mapDataTypeSnowflake(typeMapping)} COMMENT '${column.comment.getOrElse("")}',
 #end
     dms_operation STRING COMMENT 'AWS DMS Operation type',
     dms_ts TIMESTAMP_LTZ COMMENT 'AWS DMS timestamp'

@@ -108,4 +108,17 @@ object HadoopTableMapper extends TableMapper {
     }
 
   }
+
+  def cleanseName(s: String): String = {
+    val specialCharRegex = "(/|-|\\(|\\)|\\s|\\$)".r
+    val specialChars = specialCharRegex.replaceAllIn(s.toLowerCase, "_")
+    val dupsRegex = "(_{2,})".r
+    val dups = dupsRegex.replaceAllIn(specialChars, "_")
+
+    if (dups.startsWith("/") || dups.startsWith("_")) {
+      dups.substring(1, dups.length)
+    } else {
+      dups
+    }
+  }
 }
