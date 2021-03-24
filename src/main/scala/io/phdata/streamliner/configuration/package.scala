@@ -300,7 +300,12 @@ package object configuration {
           s"NUMBER($p, $s)"
         }
       } else {
-        mapDataType(cleanDataType, typeMapping, "SNOWFLAKE")
+        val dataType = mapDataType(cleanDataType, typeMapping, "SNOWFLAKE")
+        if (dataType.equalsIgnoreCase("varchar")) {
+          s"VARCHAR($p)"
+        } else {
+          dataType
+        }
       }
     }
 

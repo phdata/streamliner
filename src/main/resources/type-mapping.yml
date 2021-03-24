@@ -135,7 +135,7 @@ varchar:
   impala: string
   parquet: string
   avro: string
-  snowflake: string
+  snowflake: varchar
 text:
   kudu: string
   impala: string
