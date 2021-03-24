@@ -303,6 +303,8 @@ package object configuration {
         val dataType = mapDataType(cleanDataType, typeMapping, "SNOWFLAKE")
         if (dataType.equalsIgnoreCase("varchar")) {
           s"VARCHAR($p)"
+        } else if (dataType.equalsIgnoreCase("char")) {
+          s"CHAR($p)"
         } else {
           dataType
         }
