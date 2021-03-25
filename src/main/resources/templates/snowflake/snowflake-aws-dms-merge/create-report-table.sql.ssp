@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS ${destination.reportingDatabase.name}.${destination.r
 #for (column <- table.columns)
     ${unescape(column.destinationName)} ${column.mapDataTypeSnowflake(typeMapping)} COMMENT '${column.comment.getOrElse("")}',
 #end
-    dms_operation STRING COMMENT 'AWS DMS Operation type',
+    dms_operation CHAR COMMENT 'AWS DMS Operation type',
     dms_ts TIMESTAMP_LTZ COMMENT 'AWS DMS timestamp'
 )
 COMMENT = '${table.comment.getOrElse("")}';

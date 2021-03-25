@@ -81,8 +81,32 @@ date:
   impala: bigint
   parquet: timestamp
   avro: bigint
-  snowflake: timestamp
+  snowflake: date
 timestamp:
+  kudu: bigint
+  impala: timestamp
+  parquet: timestamp
+  avro: bigint
+  snowflake: timestamp_ntz
+timestamp(6):
+  kudu: bigint
+  impala: timestamp
+  parquet: timestamp
+  avro: bigint
+  snowflake: timestamp_ntz
+timestamp(7):
+  kudu: bigint
+  impala: timestamp
+  parquet: timestamp
+  avro: bigint
+  snowflake: timestamp_ntz
+timestamp(8):
+  kudu: bigint
+  impala: timestamp
+  parquet: timestamp
+  avro: bigint
+  snowflake: timestamp_ntz
+timestamp(9):
   kudu: bigint
   impala: timestamp
   parquet: timestamp
@@ -135,7 +159,7 @@ varchar:
   impala: string
   parquet: string
   avro: string
-  snowflake: string
+  snowflake: varchar
 text:
   kudu: string
   impala: string
@@ -147,7 +171,7 @@ char:
   impala: string
   parquet: string
   avro: string
-  snowflake: string
+  snowflake: char
 longvarchar:
   kudu: string
   impala: string
@@ -159,31 +183,31 @@ binary:
   impala: string
   parquet: string
   avro: string
-  snowflake: string
+  snowflake: binary
 varbinary:
   kudu: string
   impala: string
   parquet: string
   avro: string
-  snowflake: string
+  snowflake: varbinary
 longvarbinary:
   kudu: string
   impala: string
   parquet: string
   avro: string
-  snowflake: string
+  snowflake: varbinary
 nchar:
   kudu: string
   impala: string
   parquet: string
   avro: string
-  snowflake: string
+  snowflake: char
 nvarchar:
   kudu: string
   impala: string
   parquet: string
   avro: string
-  snowflake: string
+  snowflake: varchar
 longnvarchar:
   kudu: string
   impala: string
@@ -195,7 +219,7 @@ varchar2:
   impala: string
   parquet: string
   avro: string
-  snowflake: string
+  snowflake: varchar
 bit:
   kudu: boolean
   impala: boolean
