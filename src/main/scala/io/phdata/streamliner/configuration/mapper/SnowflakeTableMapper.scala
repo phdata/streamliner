@@ -21,12 +21,20 @@ object SnowflakeTableMapper extends TableMapper {
     userTableDefinitions(tables.map(mapAWSGlueTable), userDefinedTables)
 
   def mapSchemaCrawlerTable(table: SchemaCrawlerTable): SnowflakeTable = {
+    val parsedPrimaryKeys = table.getColumns.asScala.filter(c => c.isPartOfPrimaryKey).map(_.getName)
+
+    val primaryKeys = if (parsedPrimaryKeys.isEmpty) {
+      table.getIndexes.asScala.filter(_.isUnique).flatMap(_.getColumns.asScala.map(_.getName)).toSeq
+    } else {
+      parsedPrimaryKeys
+    }
+
     SnowflakeTable(
       `type` = "Snowflake",
       sourceName = table.getName,
       destinationName = table.getName,
       comment = Option(table.getRemarks),
-      primaryKeys = table.getColumns.asScala.filter(c => c.isPartOfPrimaryKey).map(_.getName),
+      primaryKeys = primaryKeys,
       changeColumn = None,
       incrementalTimeStamp = None,
       metadata = None,
