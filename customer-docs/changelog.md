@@ -36,7 +36,7 @@
 - Updated checkNumberOfMappers function to check numberOfMappers in configuration vs numberOfPartitions
 - Fixed metadata enhancement to include global metadata
 
-# 2.2
+## 2.2
 *Added*
 - Added sqlserver in source column mapping. 69bc1e4569634921daf8ceab40b44d254413d189
 - Ability to use a JCECKS keystore for Sqoop authentication. eb944d32693c42c512ff1fb1399ef6dcb18a9089
@@ -45,7 +45,7 @@
 *Changed*
 - Fixed a bug where a wrong database name was used in a table count template.  69bc1e4569634921daf8ceab40b44d254413d189
 
-# 2.1
+## 2.1
 *Added*
 - Make configuartion & typeMapping variables available to .schema.ssp templates. 
 - Adjust schema crawler logging level from the cli using `--crawler-log-level`. 
@@ -54,7 +54,7 @@
 - Add validate rowcount functionality in the truncate-reload templates. 
 - Preserve the order of tables and columns when writing config files. 
 
-# 2.0
+## 2.0
 *Added*
 - Full integration testing of pipelines `make -C integration-tests/ itest`.
 - Enum type in type-mapping.
