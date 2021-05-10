@@ -1,3 +1,36 @@
+## 4.2
+- Support tables without a primary key, but have a unique index.
+- [Download](https://repository.phdata.io/artifactory/binary/phdata/streamliner/streamliner-4.2.zip)
+
+## 4.1
+- Improved type mapping based on user feedback.
+- [Download](https://repository.phdata.io/artifactory/binary/phdata/streamliner/streamliner-4.1.zip)
+
+## 4.0
+- Snowflake column names are now quoted if they contain special characters as opposed to “cleansing” them like we do with Hadoop. This is to support easy re-pointing of BI tools, queries, etc.
+- Snowflake data types on the other end of the translation are now enhanced. Specifically NUMBER on oracle without precision scale are now NUMBER(38,8) as opposed to string. Please note any custom templates will need upgrading.
+- [Download](https://repository.phdata.io:443/artifactory/binary/phdata/streamliner/streamliner-4.0.zip)
+
+## 3.4
+- Add QA Framework
+- Upgrade to SchemaCrawler 16.12.3 which adds Hive Support.
+- Numerous documentation updates
+- [Download](https://repository.phdata.io/artifactory/binary/phdata/streamliner/streamliner-3.4.zip)
+
+## 3.3
+- Skipped
+
+## 3.2
+- Added Quickstart to documentation
+- [Download](https://repository.phdata.io/artifactory/binary/phdata/streamliner/streamliner-3.2.zip)
+
+## 3.1
+- Skipped
+
+## 3.0
+- Renamed to Streamliner
+- [Download](https://repository.phdata.io/artifactory/binary/phdata/streamliner/streamliner-3.0.0.zip)
+
 ## 2.3
 #### Fixed:
 - Updated checkNumberOfMappers function to check numberOfMappers in configuration vs numberOfPartitions
@@ -35,7 +68,7 @@
   - If it fails we can look up the log stack and see exactly which template failed.
 
 ### Changed:
-- Directory structure for script and config creation.
+- Directory structures for script and config creation.
 - Shortened `--configuration` to `--config` for the lazy. 
   - Use the subcommand `schema` to refer to all things external db schema related in place of `configuration`.
 - Remove log files and ignore logs.
