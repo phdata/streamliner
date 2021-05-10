@@ -32,21 +32,21 @@
 - [Download](https://repository.phdata.io/artifactory/binary/phdata/streamliner/streamliner-3.0.0.zip)
 
 ## 2.3
-#### Fixed:
+*Fixed*
 - Updated checkNumberOfMappers function to check numberOfMappers in configuration vs numberOfPartitions
 - Fixed metadata enhancement to include global metadata
 
 # 2.2
-### Added:
+*Added*
 - Added sqlserver in source column mapping. 69bc1e4569634921daf8ceab40b44d254413d189
 - Ability to use a JCECKS keystore for Sqoop authentication. eb944d32693c42c512ff1fb1399ef6dcb18a9089
 - Upgrade the schemacrawler version to 16.2.5. 276a1adb486ef558a91c6d41bc1b8f86a012fcce
 
-### Changed:
+*Changed*
 - Fixed a bug where a wrong database name was used in a table count template.  69bc1e4569634921daf8ceab40b44d254413d189
 
 # 2.1
-### Added:
+*Added*
 - Make configuartion & typeMapping variables available to .schema.ssp templates. 
 - Adjust schema crawler logging level from the cli using `--crawler-log-level`. 
 - Add a default logback.xml file. e8d4957e8952b378e35800e2fcfe8abf07a009ad
@@ -55,7 +55,7 @@
 - Preserve the order of tables and columns when writing config files. 
 
 # 2.0
-### Added:
+*Added*
 - Full integration testing of pipelines `make -C integration-tests/ itest`.
 - Enum type in type-mapping.
 - Mysql .jar in `lib/` directory.
@@ -67,7 +67,7 @@
 - Log currently rendering file.
   - If it fails we can look up the log stack and see exactly which template failed.
 
-### Changed:
+*Changed*
 - Directory structures for script and config creation.
 - Shortened `--configuration` to `--config` for the lazy. 
   - Use the subcommand `schema` to refer to all things external db schema related in place of `configuration`.
@@ -82,8 +82,7 @@
 - Use `$check_b` value instead of `exit 1` in run-with-logging
 - Refactored the version to read from file.
 
-  
-### Fixes:
+*Fixes*
 - OrderColumns function to create-report-table in the incremental-with-kudu template to fix ordering of columns in Kudu table ddl.
 - Removed newline created in incremental-with-kudu/create-sqoop-job.sh.ssp.
 - False targets in make file for incremental-with-kudu.
