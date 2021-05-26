@@ -42,7 +42,7 @@ trait FileUtil {
 
   def writeFile(content: String, path: String): Unit = {
     logger.info(s"Writing file: $path")
-    logger.debug(s"File content: $content")
+    logger.trace(s"File content: $content")
     val fw = new FileWriter(path)
     fw.write(content)
     fw.close()

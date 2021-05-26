@@ -28,6 +28,7 @@ lazy val root = (project in file("."))
       "org.rogach" %% "scallop" % "3.1.1",
       "io.circe" %% "circe-yaml" % "0.13.1",
       "io.circe" %% "circe-generic" % "0.13.0",
+      "org.apache.commons" % "commons-lang3" % "3.12.0",
       "us.fatehi" % "schemacrawler-mysql" % schemaCrawlerVersion excludeAll(excludeSlf4jBinding),
       "us.fatehi" % "schemacrawler-postgresql" % schemaCrawlerVersion excludeAll(excludeSlf4jBinding),
       "us.fatehi" % "schemacrawler-oracle" % schemaCrawlerVersion excludeAll(excludeSlf4jBinding),
@@ -36,7 +37,8 @@ lazy val root = (project in file("."))
       "guru.nidi" % "graphviz-java" % "0.8.1",
       "org.scalatra.scalate" %% "scalate-core" % "1.9.0",
       "com.amazonaws" % "aws-java-sdk-glue" % "1.11.774",
-      "org.scalatest" %% "scalatest" % "3.0.5" % "it,test"
+      "org.scalatest" %% "scalatest" % "3.0.5" % "it,test",
+      "junit" % "junit" % "4.13.2" % "it,test"
     )
   )
 

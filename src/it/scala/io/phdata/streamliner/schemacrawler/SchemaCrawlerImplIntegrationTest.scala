@@ -48,7 +48,8 @@ class SchemaCrawlerImplIntegrationTest extends FunSuite {
 
   test("Get catalogue") {
     val catalog = SchemaCrawlerImpl.getCatalog(jdbc, "streamliner")
-    assert(catalog.getCrawlInfo != null)
+    assert(catalog.getSchemas != null)
+    assert(!catalog.getSchemas.isEmpty)
   }
 
   test("Get HTML output") {

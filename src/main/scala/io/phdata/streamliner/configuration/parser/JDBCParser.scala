@@ -32,7 +32,7 @@ object JDBCParser {
       }
 
     configuration.copy(
-      source = jdbc.copy(driverClass = Some(catalog.getJdbcDriverInfo.getDriverClassName)),
+      source = jdbc.copy(driverClass = Some(catalog.getDriverClassName)),
       tables = Some(tables)
     )
   }

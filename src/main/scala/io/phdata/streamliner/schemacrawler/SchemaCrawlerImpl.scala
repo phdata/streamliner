@@ -20,8 +20,11 @@ import java.nio.file.Paths
 import java.sql.Connection
 import java.util.logging.Level
 import io.phdata.streamliner.configuration.Jdbc
+import io.phdata.streamliner.schemacrawler.SchemaCrawlerImpl.getConnection
 import io.phdata.streamliner.util.FileUtil
 import org.apache.log4j.LogManager
+import schemacrawler.crawl.StreamlinerCatalog
+import schemacrawler.crawl.StreamlinerSchemaCrawler
 import schemacrawler.inclusionrule.RegularExpressionInclusionRule
 import schemacrawler.schema.Catalog
 import schemacrawler.schemacrawler.LimitOptionsBuilder
@@ -37,12 +40,23 @@ import us.fatehi.utility.LoggingConfig
 import schemacrawler.tools.options.OutputFormat
 import schemacrawler.tools.options.OutputOptionsBuilder
 
+import java.util.function.Supplier
 import scala.collection.JavaConverters._
 
 object SchemaCrawlerImpl extends FileUtil {
 
-  def getCatalog(jdbc: Jdbc, password: String): Catalog =
-    SchemaCrawlerUtility.getCatalog(getConnection(jdbc, password), getOptions(jdbc))
+  def getCatalog(jdbc: Jdbc, password: String): StreamlinerCatalog = {
+    val connectionSupplier = new Supplier[Connection] {
+      override def get(): Connection = getConnection(jdbc, password)
+    }
+    StreamlinerSchemaCrawler
+      .getCatalog(
+        jdbc.schema,
+        jdbc.url,
+        connectionSupplier,
+        getOptions(jdbc),
+        mapTableTypes(jdbc.tableTypes).asJava)
+  }
 
   def getHtmlOutput(jdbc: Jdbc, password: String, path: String): Unit =
     execute(jdbc, password, TextOutputFormat.html, path, "schema.html")
@@ -85,19 +99,10 @@ object SchemaCrawlerImpl extends FileUtil {
 
     val options = SchemaCrawlerOptionsBuilder.newSchemaCrawlerOptions()
     val limitOptionsBuilder = LimitOptionsBuilder.builder()
-    // latest version of schema crawler requires singular names
-    val tableTypes = jdbc.tableTypes
-      .map(i =>
-        i match {
-          case "tables" => "table"
-          case "views" => "view"
-          case s => s
-      })
-      .asJava
     // schema crawler now names the objects differently, eg Hive."default"
     limitOptionsBuilder
       .includeSchemas(new RegularExpressionInclusionRule(s".*${jdbc.schema}.*"))
-      .tableTypes(tableTypes)
+      .tableTypes(mapTableTypes(jdbc.tableTypes).asJava)
     jdbc.userDefinedTable match {
       case Some(tables) =>
         val tableList = tables.map(t => s".*${jdbc.schema}.*\\.${t.name}").mkString("|")
@@ -105,6 +110,17 @@ object SchemaCrawlerImpl extends FileUtil {
       case None => // no-op
     }
     options.withLimitOptions(limitOptionsBuilder.toOptions)
+  }
+
+  private def mapTableTypes(tableTypes: Seq[String]): Seq[String] = {
+    // latest version of schema crawler requires singular names
+    tableTypes
+      .map(i =>
+        i match {
+          case "tables" => "table"
+          case "views" => "view"
+          case s => s
+      })
   }
 
   private def getConnection(jdbc: Jdbc, password: String): Connection = {

@@ -12,8 +12,12 @@ object SnowflakeTableMapper extends TableMapper {
 
   def mapSchemaCrawlerTables(
       tables: List[SchemaCrawlerTable],
-      userDefinedTables: Option[Seq[UserDefinedTable]]): Seq[TableDefinition] =
-    userTableDefinitions(tables.map(mapSchemaCrawlerTable), userDefinedTables)
+      userDefinedTables: Option[Seq[UserDefinedTable]]): Seq[TableDefinition] = {
+    // schema crawler sorts by lower case name so we ensure that behavior here
+    userTableDefinitions(
+      tables.sortBy(_.getName.toLowerCase).map(mapSchemaCrawlerTable),
+      userDefinedTables)
+  }
 
   def mapAWSGlueTables(
       tables: List[AWSTable],
@@ -21,10 +25,11 @@ object SnowflakeTableMapper extends TableMapper {
     userTableDefinitions(tables.map(mapAWSGlueTable), userDefinedTables)
 
   def mapSchemaCrawlerTable(table: SchemaCrawlerTable): SnowflakeTable = {
-    val parsedPrimaryKeys = table.getColumns.asScala.filter(c => c.isPartOfPrimaryKey).map(_.getName)
-
+    val columns = table.getColumns.asScala.sortBy(_.getOrdinalPosition)
+    val parsedPrimaryKeys =
+      columns.filter(c => c.isPartOfPrimaryKey).map(_.getName)
     val primaryKeys = if (parsedPrimaryKeys.isEmpty) {
-      table.getIndexes.asScala.filter(_.isUnique).flatMap(_.getColumns.asScala.map(_.getName)).toSeq
+      columns.filter(c => c.isPartOfUniqueIndex).map(_.getName)
     } else {
       parsedPrimaryKeys
     }
@@ -42,7 +47,7 @@ object SnowflakeTableMapper extends TableMapper {
         location = table.getName,
         fileType = "PARQUET"
       ),
-      columns = table.getColumns.asScala.map(mapSchemaCrawlerColumnDefinition)
+      columns = columns.map(mapSchemaCrawlerColumnDefinition)
     )
   }
 
