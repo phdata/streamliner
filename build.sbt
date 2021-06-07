@@ -38,7 +38,9 @@ lazy val root = (project in file("."))
       "org.scalatra.scalate" %% "scalate-core" % "1.9.0",
       "com.amazonaws" % "aws-java-sdk-glue" % "1.11.774",
       "org.scalatest" %% "scalatest" % "3.0.5" % "it,test",
-      "junit" % "junit" % "4.13.2" % "it,test"
+      "junit" % "junit" % "4.13.2" % "it,test",
+      "org.testcontainers" % "mysql" % "1.15.1" % "it,test",
+      "com.zaxxer" % "HikariCP" % "3.4.5"
     )
   )
 
