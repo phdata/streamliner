@@ -1,11 +1,14 @@
 package schemacrawler.crawl;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.time.StopWatch;
+import org.apache.log4j.Logger;
 import schemacrawler.schema.Catalog;
 import schemacrawler.schema.Column;
 import schemacrawler.schema.Schema;
 import schemacrawler.schema.Table;
-import schemacrawler.schemacrawler.*;
+import schemacrawler.schemacrawler.SchemaCrawlerOptions;
+import schemacrawler.schemacrawler.SchemaReference;
 import schemacrawler.tools.utility.SchemaCrawlerUtility;
 
 import java.io.IOException;
@@ -18,8 +21,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Supplier;
-import org.apache.log4j.Logger;
-import org.apache.commons.lang3.time.StopWatch;
 
 public class StreamlinerSchemaCrawler {
     private static final Logger log = Logger.getLogger(StreamlinerSchemaCrawler.class);

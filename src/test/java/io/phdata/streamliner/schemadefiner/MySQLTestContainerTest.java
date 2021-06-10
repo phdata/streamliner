@@ -1,9 +1,10 @@
-package schemacrawler.crawl;
+package io.phdata.streamliner.schemadefiner;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import io.phdata.streamliner.configuration.ConfigurationBuilder;
 import io.phdata.streamliner.pipeline.PipelineBuilder;
+import io.phdata.streamliner.schemadefiner.ConfigBuilder.SchemaCommand;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -13,6 +14,9 @@ import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.shaded.org.yaml.snakeyaml.Yaml;
 import org.testcontainers.utility.DockerImageName;
 import scala.Option;
+import schemacrawler.crawl.StreamlinerCatalog;
+import schemacrawler.schema.Schema;
+import schemacrawler.schema.Table;
 
 import javax.sql.DataSource;
 import java.io.*;
@@ -27,14 +31,18 @@ import static org.junit.Assert.*;
 public class MySQLTestContainerTest {
 
     private static final DockerImageName MYSQL_57_IMAGE = DockerImageName.parse("mysql:5.7.34");
+    private static final String STREAMLINER_DATABASE_NAME = "STREAMLINER_DB";
+    private static final String STREAMLINER_DATABASE_USERNAME = "streamliner_user";
+    private static final String STREAMLINER_DATABASE_PASSWORD = "streamliner_pwd";
+    private static final String SCHEMA_COMMAND_OUTPUT_PATH= "src/test/output/conf/streamliner-configuration.yml";
     private Connection con = null;
     private Yaml yaml = new Yaml();
 
     @Rule
     public MySQLContainer mysql = new MySQLContainer(MYSQL_57_IMAGE)
-            .withDatabaseName("STREAMLINER_DB")
-            .withUsername("streamliner_user")
-            .withPassword("streamliner_pwd");
+            .withDatabaseName(STREAMLINER_DATABASE_NAME)
+            .withUsername(STREAMLINER_DATABASE_USERNAME)
+            .withPassword(STREAMLINER_DATABASE_PASSWORD);
 
     @Before
     public void before() throws SQLException {
@@ -95,7 +103,7 @@ public class MySQLTestContainerTest {
 
     @Test
     public void testStreamlinerScriptCommand() {
-        String config = "src/test/output/conf/streamliner-configuration.yml";
+        String config = SCHEMA_COMMAND_OUTPUT_PATH;
         String templateDirectory = "src/main/resources/templates/snowflake";
         String typeMapping = "src/main/resources/type-mapping.yml";
         String outputPath = "src/test/output/pipelineConfig";
@@ -121,6 +129,104 @@ public class MySQLTestContainerTest {
         assertEquals(allContents.length, 10);
     }
 
+    @Test
+    public void testJdbcCrawler() throws Exception {
+        SchemaDefiner definer = new JdbcCrawler(mysql.getJdbcUrl(), () -> con,null,null,null);
+
+        // Mysql testcontainer jdbcCrawler
+        StreamlinerCatalog catalog = definer.retrieveSchema();
+
+        assertNotNull(catalog);
+        assertFalse(catalog.getSchemas().isEmpty());
+
+        List<Schema> schemaList = (List<Schema>) catalog.getSchemas();
+        schemaList.stream().forEach(schema -> {
+            if(schema.getCatalogName().equals(STREAMLINER_DATABASE_NAME)) {
+                Table table = ((List<Table>) catalog.getTables(schema)).get(0);
+                assertFalse(catalog.getTables(schema).isEmpty());
+                assertEquals(table.getColumns().size(),  5);
+                assertTrue(table.getName().equals("Persons"));
+                assertEquals(table.getSchema().getCatalogName(),STREAMLINER_DATABASE_NAME);
+            }
+        });
+
+        assertNotNull(catalog.getDriverClassName());
+        assertEquals(mysql.getDriverClassName(), catalog.getDriverClassName());
+    }
+
+    @Test
+    public void testStreamlinerConfigReader() throws Exception {
+        //reading config file generated after schema command and converting it to StreamlinerCatalog
+        SchemaDefiner definer = new StreamlinerConfigReader(SCHEMA_COMMAND_OUTPUT_PATH);
+        StreamlinerCatalog catalog = definer.retrieveSchema();
+
+        assertNotNull(catalog);
+        assertNotNull(catalog.getSchemas());
+        List<Schema> schemaList = (List<Schema>) catalog.getSchemas();
+        schemaList.stream().forEach(schema -> {
+            if(schema.getCatalogName().equals(STREAMLINER_DATABASE_NAME)) {
+                Table table = ((List<Table>) catalog.getTables(schema)).get(0);
+                assertFalse(catalog.getTables(schema).isEmpty());
+                assertEquals(table.getColumns().size(),  5);
+                assertTrue(table.getName().equals("Persons"));
+                assertEquals(table.getSchema().getCatalogName(),STREAMLINER_DATABASE_NAME);
+            }
+        });
+        assertNotNull(catalog.getDriverClassName());
+        assertEquals(mysql.getDriverClassName(), catalog.getDriverClassName());
+    }
+
+    @Test
+    public void testSchemaCommand_new() throws Exception {
+        String config = "src/test/resources/conf/ingest-configuration.yml";
+        String outputPath = "src/test/output/";
+        String dbPass = mysql.getPassword();
+        boolean createDocs = false;
+
+        File generatedOutputFolder = new File(outputPath);
+        deleteDirectory(generatedOutputFolder);
+
+        Map<String, Object> ingestConfigFile = updateSourceDetail(config);
+
+        // schema command with new implementations
+        SchemaCommand.build(config,outputPath,dbPass,createDocs);
+
+        generatedOutputFolder = new File(outputPath + "conf");
+        assertTrue(generatedOutputFolder.exists());
+        assertTrue(generatedOutputFolder.isDirectory());
+
+        File outputFile = new File(outputPath + "conf/streamliner-configuration.yml");
+        assertTrue(outputFile.exists());
+        assertTrue(outputFile.isFile());
+
+        InputStream inputStream = new FileInputStream(outputFile);
+        Map<String, Object> outputConfigFile = yaml.load(inputStream);
+
+        assertEquals(ingestConfigFile.get("name"), outputConfigFile.get("name"));
+        assertEquals(ingestConfigFile.get("pipeline"), outputConfigFile.get("pipeline"));
+
+        assertEquals(((Map<String, Object>) ingestConfigFile.get("source")).get("schema"), ((Map<String, Object>) outputConfigFile.get("source")).get("schema"));
+        assertEquals(((Map<String, Object>) ingestConfigFile.get("destination")).get("type"), ((Map<String, Object>) outputConfigFile.get("destination")).get("type"));
+
+        Map<String, Object> table = ((List<Map<String, Object>>) outputConfigFile.get("tables")).get(0);
+        assertEquals(table.get("type"), "Snowflake");
+        assertEquals(table.get("sourceName"), "Persons");
+
+        List<Map<String, Object>> columnList = ((List<Map<String, Object>>) table.get("columns"));
+        assertFalse(columnList.isEmpty());
+    }
+
+    //@Test
+    public void testGlueCrawler_WIP() throws Exception {
+        String config = "src/test/resources/conf/ingest-configuration-glue.yml";
+        String outputPath = "src/test/output/";
+        String dbPass = mysql.getPassword();
+        boolean createDocs = false;
+
+        File generatedOutputFolder = new File(outputPath);
+        deleteDirectory(generatedOutputFolder);
+        SchemaCommand.build(config,outputPath,dbPass,createDocs);
+    }
 
     boolean deleteDirectory(File directoryToBeDeleted) {
         File[] allContents = directoryToBeDeleted.listFiles();
