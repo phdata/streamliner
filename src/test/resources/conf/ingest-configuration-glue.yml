@@ -1,0 +1,36 @@
+name: "GLUE_DEMO" # Unique name for data ingestion
+environment: "DEV" # Environment identifier
+pipeline: "snowflake-aws-dms-merge" # Pipeline name must match a directory in the the provided template folder (ie incremental-with-kudu, kudu-table-ddl, truncate-reload)
+source:
+  type: Glue
+  region: us-east-1
+  database: mysql
+#source:
+#  type: Jdbc
+#  url: "jdbc:oracle:thin:@oraclerds.caewceohkuoi.us-east-1.rds.amazonaws.com:1521:ORCL" # JDBC Connection url
+#  username: "admin" # JDBC Username
+#  passwordFile: "/" # HDFS location of password file
+#  schema: "HR" # JDBC Schema / database name
+#  tableTypes: # Controls the types of tables included in the configuration output
+#    - table
+#  userDefinedTable:
+#    - type: Snowflake
+#      name: PK_TEST
+destination:
+  type: Snowflake
+  snowSqlCommand: snowsql -c streamliner_admin
+  storagePath: "s3://phdata-snowflake-stage/data/phdata-task/HR/"
+  storageIntegration: "PHDATA_S3_READ"
+  warehouse: "STREAMLINER_POC_WH"
+  taskSchedule: "5 minutes"
+  stageName: "STREAMLINER_POC"
+  fileFormat:
+    name: "fileFormat"
+    options:
+      type: "PARQUET"
+  stagingDatabase:
+    name: STREAMLINER_POC_DB
+    schema: STG
+  reportingDatabase:
+    name: STREAMLINER_POC_DB
+    schema: MAIN
