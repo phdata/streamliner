@@ -8,6 +8,7 @@ import schemacrawler.crawl.SchemaDefinerHelper;
 import schemacrawler.crawl.StreamlinerCatalog;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -21,7 +22,7 @@ public class StreamlinerConfigReader  implements SchemaDefiner{
     }
 
     @Override
-    public StreamlinerCatalog retrieveSchema() throws FileNotFoundException{
+    public StreamlinerCatalog retrieveSchema() throws IOException {
         log.info("Retrieving Schema from path: {}",configFilePath);
         if(!configPathExists(configFilePath)){
             throw new FileNotFoundException("Configuration File not found: " + configFilePath);

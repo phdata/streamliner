@@ -1,15 +1,15 @@
 package io.phdata.streamliner.schemadefiner;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import io.phdata.streamliner.configuration.ConfigurationBuilder;
 import io.phdata.streamliner.pipeline.PipelineBuilder;
 import io.phdata.streamliner.schemadefiner.ConfigBuilder.SchemaCommand;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.testcontainers.containers.JdbcDatabaseContainer;
+import io.phdata.streamliner.schemadefiner.model.ColumnDiff;
+import io.phdata.streamliner.schemadefiner.model.Configuration;
+import io.phdata.streamliner.schemadefiner.model.ConfigurationDiff;
+import io.phdata.streamliner.schemadefiner.model.TableDiff;
+import io.phdata.streamliner.schemadefiner.util.StreamlinerUtil;
+import org.junit.*;
+import org.junit.runners.MethodSorters;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.shaded.org.yaml.snakeyaml.Yaml;
 import org.testcontainers.utility.DockerImageName;
@@ -18,16 +18,17 @@ import schemacrawler.crawl.StreamlinerCatalog;
 import schemacrawler.schema.Schema;
 import schemacrawler.schema.Table;
 
-import javax.sql.DataSource;
 import java.io.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.*;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class MySQLTestContainerTest {
 
     private static final DockerImageName MYSQL_57_IMAGE = DockerImageName.parse("mysql:5.7.34");
@@ -47,8 +48,7 @@ public class MySQLTestContainerTest {
     @Before
     public void before() throws SQLException {
         mysql.start();
-        DataSource ds = getDataSource(mysql);
-        con = ds.getConnection();
+        con = StreamlinerUtil.getConnection(mysql.getJdbcUrl(), mysql.getUsername(), mysql.getPassword());
         performExecuteUpdate(con, "CREATE TABLE Persons (\n" +
                 "    PersonID int,\n" +
                 "    LastName varchar(255),\n" +
@@ -64,7 +64,7 @@ public class MySQLTestContainerTest {
     }
 
     @Test
-    public void testStreamlinerSchemaCommand() throws FileNotFoundException {
+    public void test1StreamlinerSchemaCommand() throws FileNotFoundException {
         String config = "src/test/resources/conf/ingest-configuration.yml";
         String outputPath = "src/test/output/";
         String dbPass = mysql.getPassword();
@@ -102,7 +102,7 @@ public class MySQLTestContainerTest {
     }
 
     @Test
-    public void testStreamlinerScriptCommand() {
+    public void test2StreamlinerScriptCommand() {
         String config = SCHEMA_COMMAND_OUTPUT_PATH;
         String templateDirectory = "src/main/resources/templates/snowflake";
         String typeMapping = "src/main/resources/type-mapping.yml";
@@ -130,7 +130,7 @@ public class MySQLTestContainerTest {
     }
 
     @Test
-    public void testJdbcCrawler() throws Exception {
+    public void test3JdbcCrawler() throws Exception {
         SchemaDefiner definer = new JdbcCrawler(mysql.getJdbcUrl(), () -> con,null,null,null);
 
         // Mysql testcontainer jdbcCrawler
@@ -155,7 +155,7 @@ public class MySQLTestContainerTest {
     }
 
     @Test
-    public void testStreamlinerConfigReader() throws Exception {
+    public void test4StreamlinerConfigReader() throws Exception {
         //reading config file generated after schema command and converting it to StreamlinerCatalog
         SchemaDefiner definer = new StreamlinerConfigReader(SCHEMA_COMMAND_OUTPUT_PATH);
         StreamlinerCatalog catalog = definer.retrieveSchema();
@@ -177,7 +177,7 @@ public class MySQLTestContainerTest {
     }
 
     @Test
-    public void testSchemaCommand_new() throws Exception {
+    public void test5SchemaCommand_new() throws Exception {
         String config = "src/test/resources/conf/ingest-configuration.yml";
         String outputPath = "src/test/output/";
         String dbPass = mysql.getPassword();
@@ -228,6 +228,111 @@ public class MySQLTestContainerTest {
         SchemaCommand.build(config,outputPath,dbPass,createDocs);
     }
 
+  @Test
+  public void test6ConfigurationDiff_serialize() throws IOException {
+    String outputPath = "src/test/output/";
+    String configPath1 = "src/test/resources/conf/ingest-configuration.yml";
+    String configPath2 = "src/test/resources/conf/ingest-configuration-glue.yml";
+
+    // reading previous destination config
+    Configuration conf1 = StreamlinerUtil.readConfigFromPath(configPath1);
+      // reading current destination config
+    Configuration conf2 = StreamlinerUtil.readConfigFromPath(configPath2);
+
+    ColumnDiff columnDiff1 =
+        new ColumnDiff(
+            "Id",
+            "Emp_Id",
+            "Number",
+            "Number",
+            "Emp Id",
+            "Employee Id",
+            255,
+            200,
+            0,
+            0,
+            false,
+            false,
+            true);
+    ColumnDiff columnDiff2 =
+        new ColumnDiff(
+            "Name",
+            "Emp_Name",
+            "Varchar",
+            "Varchar2",
+            "Emp Name",
+            "Employee Name",
+            255,
+            200,
+            0,
+            0,
+            false,
+            false,
+            true);
+    List<ColumnDiff> colList = new ArrayList<>();
+    colList.add(columnDiff1);
+    colList.add(columnDiff2);
+    TableDiff tableDiff1 = new TableDiff("Snowflake", "Employee", colList, true);
+
+    colList = new ArrayList<>();
+    colList.add(columnDiff1);
+    TableDiff tableDiff2 = new TableDiff("Snowflake", "Emp", colList, true);
+
+    List<TableDiff> tableList = new ArrayList<>();
+    tableList.add(tableDiff1);
+    tableList.add(tableDiff2);
+
+    ConfigurationDiff configDiff =
+        new ConfigurationDiff(
+            "STREAMLINER_QUICKSTART_1",
+            "SANDBOX",
+            "snowflake-snowpipe-append",
+            conf1.getDestination(),
+            conf2.getDestination(),
+            tableList);
+
+    deleteDirectory(new File(outputPath));
+    StreamlinerUtil.writeConfigToYaml(configDiff, outputPath);
+  }
+
+  @Test
+  public void test7ConfigurationDiff_deserialize() throws IOException{
+    String configDiffPath = "src/test/output/confDiff/streamliner-configuration-diff.yml";
+    // reading config diff yaml file.
+    ConfigurationDiff configDiff = StreamlinerUtil.readConfigDiffFromPath(configDiffPath);
+
+    assertEquals(configDiff.getName(), "STREAMLINER_QUICKSTART_1");
+    assertEquals(configDiff.getEnvironment(), "SANDBOX");
+    assertEquals(configDiff.getPipeline(), "snowflake-snowpipe-append");
+
+    assertNotNull(configDiff.getPreviousDestination());
+    assertEquals(configDiff.getPreviousDestination().getSnowSqlCommand(), "snowsql -c connection");
+    assertEquals(
+        configDiff.getPreviousDestination().getStoragePath(),
+        "s3://streamliner-quickstart-1/employees/");
+
+    assertNotNull(configDiff.getCurrentDestination());
+    assertEquals(
+        configDiff.getCurrentDestination().getSnowSqlCommand(), "snowsql -c streamliner_admin");
+    assertEquals(
+        configDiff.getCurrentDestination().getStoragePath(),
+        "s3://phdata-snowflake-stage/data/phdata-task/HR/");
+
+    assertNotNull(configDiff.getTableDiffs());
+    assertFalse(configDiff.getTableDiffs().isEmpty());
+    assertEquals(configDiff.getTableDiffs().size(), 2);
+
+    configDiff.getTableDiffs().stream()
+        .forEach(
+            tableDiff -> {
+              if (tableDiff.getDestinationName().equals("Employee")) {
+                assertEquals(tableDiff.getColumnDiffs().size(), 2);
+              } else if (tableDiff.getDestinationName().equals("Emp")) {
+                assertEquals(tableDiff.getColumnDiffs().size(), 1);
+              }
+            });
+  }
+
     boolean deleteDirectory(File directoryToBeDeleted) {
         File[] allContents = directoryToBeDeleted.listFiles();
         if (allContents != null) {
@@ -254,14 +359,5 @@ public class MySQLTestContainerTest {
         Statement statement = con.createStatement();
         int row = statement.executeUpdate(sql);
         return row;
-    }
-
-    private DataSource getDataSource(JdbcDatabaseContainer<?> container) {
-        HikariConfig hikariConfig = new HikariConfig();
-        hikariConfig.setJdbcUrl(container.getJdbcUrl());
-        hikariConfig.setUsername(container.getUsername());
-        hikariConfig.setPassword(container.getPassword());
-        hikariConfig.setDriverClassName(container.getDriverClassName());
-        return new HikariDataSource(hikariConfig);
     }
 }
