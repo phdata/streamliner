@@ -1,20 +1,18 @@
 package io.phdata.streamliner.schemadefiner.util;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature;
 import io.phdata.streamliner.schemadefiner.Mapper.HadoopMapper;
 import io.phdata.streamliner.schemadefiner.Mapper.SnowflakeMapper;
 import io.phdata.streamliner.schemadefiner.model.Configuration;
+import io.phdata.streamliner.schemadefiner.model.ConfigurationDiff;
 import io.phdata.streamliner.schemadefiner.model.Source;
 import io.phdata.streamliner.schemadefiner.model.TableDefinition;
 import org.apache.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
-import org.yaml.snakeyaml.introspector.Property;
-import org.yaml.snakeyaml.nodes.NodeTuple;
-import org.yaml.snakeyaml.nodes.Tag;
-import org.yaml.snakeyaml.representer.Representer;
 import schemacrawler.crawl.StreamlinerCatalog;
 import schemacrawler.inclusionrule.RegularExpressionInclusionRule;
 import schemacrawler.schema.Schema;
@@ -32,7 +30,8 @@ import schemacrawler.tools.options.OutputOptions;
 import schemacrawler.tools.options.OutputOptionsBuilder;
 import us.fatehi.utility.LoggingConfig;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.util.List;
@@ -42,11 +41,15 @@ import java.util.stream.Collectors;
 public class StreamlinerUtil {
     private static final Logger log = LoggerFactory.getLogger(StreamlinerUtil.class);
 
-    public static Configuration readConfigFromPath(String path) throws FileNotFoundException {
-        Yaml yaml = new Yaml(new Constructor(Configuration.class));
-        File configFile = new File(path);
-        InputStream inputStream = new FileInputStream(configFile);
-        Configuration config = yaml.load(inputStream);
+    public static Configuration readConfigFromPath(String path) throws IOException {
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        Configuration config = mapper.readValue(new File(path), Configuration.class);
+        return config;
+    }
+
+    public static ConfigurationDiff readConfigDiffFromPath(String path) throws IOException {
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        ConfigurationDiff config = mapper.readValue(new File(path), ConfigurationDiff.class);
         return config;
     }
 
@@ -67,6 +70,7 @@ public class StreamlinerUtil {
         } else if (ingestConfig.getDestination().getType().equalsIgnoreCase("HADOOP")) {
             tables = HadoopMapper.mapSchemaCrawlerTables(tableList, ingestConfig.getSource().getUserDefinedTable());
         }
+        ingestConfig.getSource().setDriverClass(catalog.getDriverClassName());
         Configuration newConfig = new Configuration(
                 ingestConfig.getName(),
                 ingestConfig.getEnvironment(),
@@ -89,29 +93,33 @@ public class StreamlinerUtil {
 
     }
 
-    private static void writeYamlFile(Configuration outputConfig, String outputDir) throws FileNotFoundException {
-        DumperOptions opt = new DumperOptions();
-        opt.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        opt.setPrettyFlow(true);
+    public static void writeConfigToYaml(ConfigurationDiff outputConfig, String outputDir) throws IOException {
+        if (outputDir.equals("") || outputDir == null) {
+            outputDir = outputDir + "/" + outputConfig.getName() + "/" + outputConfig.getEnvironment() + "/confDiff";
+        } else {
+            outputDir = outputDir + "/confDiff";
+        }
+        createDir(outputDir);
+        outputDir = outputDir + "/streamliner-configuration-diff.yml";
+        writeYamlFile(outputConfig, outputDir);
 
-        Representer representer = new Representer() {
-            @Override
-            protected NodeTuple representJavaBeanProperty(Object javaBean, Property property, Object propertyValue, Tag customTag) {
-                // if value of property is null, ignore it.
-                if (propertyValue == null) {
-                    return null;
-                } else {
-                    return super.representJavaBeanProperty(javaBean, property, propertyValue, customTag);
-                }
-            }
-        };
-        // to remove tags in YAML file
-        representer.addClassTag(Configuration.class, Tag.MAP);
+    }
 
-        //TODO: keep the parameter sequence preserved. like name, environment, pipeline, source, destination
-        Yaml yaml = new Yaml(representer, opt);
-        PrintWriter writer = new PrintWriter(outputDir);
-        yaml.dump(outputConfig, writer);
+  public static void writeYamlFile(Configuration outputConfig, String outputDir)
+      throws IOException {
+    ObjectMapper mapper =
+        new ObjectMapper(new YAMLFactory().disable(Feature.WRITE_DOC_START_MARKER));
+    mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    mapper.writeValue(new File(outputDir), outputConfig);
+  }
+
+    public static void writeYamlFile(ConfigurationDiff outputConfig, String outputDir)
+            throws IOException {
+        ObjectMapper mapper =
+                new ObjectMapper(new YAMLFactory().disable(Feature.WRITE_DOC_START_MARKER));
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+
+        mapper.writeValue(new File(outputDir), outputConfig);
     }
 
     private static void createDir(String outputDir) {

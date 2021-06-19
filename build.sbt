@@ -40,7 +40,7 @@ lazy val root = (project in file("."))
       "org.scalatest" %% "scalatest" % "3.0.5" % "it,test",
       "junit" % "junit" % "4.13.2" % "it,test",
       "org.testcontainers" % "mysql" % "1.15.1" % "it,test",
-      "com.zaxxer" % "HikariCP" % "3.4.5"
+      "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % "2.12.3"
     )
   )
 
