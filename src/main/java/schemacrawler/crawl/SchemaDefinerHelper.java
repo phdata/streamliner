@@ -2,6 +2,8 @@ package schemacrawler.crawl;
 
 import io.phdata.streamliner.schemadefiner.model.Configuration;
 import io.phdata.streamliner.schemadefiner.model.FileFormat;
+import io.phdata.streamliner.schemadefiner.model.Jdbc;
+import io.phdata.streamliner.schemadefiner.model.SnowflakeTable;
 import schemacrawler.schema.Schema;
 import schemacrawler.schema.Table;
 import schemacrawler.schemacrawler.SchemaReference;
@@ -11,15 +13,14 @@ import java.util.*;
 /* this classs is defined to help schemaDefiner to access schemacrawler package-private classes */
 public class SchemaDefinerHelper {
 
-    //  this method is added in this class because MutableTable, MutableColumn, MutablePrimaryKey classes are not public.
-    // These are not accessible outside the package.
     public static StreamlinerCatalog mapTableDefToStreamlinerCatalog(Configuration configuration) {
-        Schema schema = new SchemaReference(configuration.getSource().getSchema(), configuration.getSource().getSchema());
+        Jdbc jdbc = (Jdbc) configuration.getSource();
+        Schema schema = new SchemaReference(jdbc.getSchema(), jdbc.getSchema());
         Map<String, MutableTable> tables = new TreeMap<>();
 
         configuration.getTables().stream().forEach(tableDef -> {
             MutableTable table = new MutableTable(schema, tableDef.getSourceName());
-            table.setRemarks(tableDef.getComment());
+            table.setRemarks(((SnowflakeTable)tableDef).getComment());
             tableDef.getColumns().stream().forEach(columnDef -> {
                 MutableColumn column = new MutableColumn(table, columnDef.getSourceName());
                 column.setColumnDataType(new MutableColumnDataType(schema, columnDef.getDataType()));
@@ -36,7 +37,7 @@ public class SchemaDefinerHelper {
         Map<Schema, List<Table>> result = new HashMap<>();
         result.put(schema, new ArrayList<>(tables.values()));
 
-        return new StreamlinerCatalog(configuration.getSource().getDriverClass(), Arrays.asList(schema),
+        return new StreamlinerCatalog(jdbc.getDriverClass(), Arrays.asList(schema),
                 result);
     }
 

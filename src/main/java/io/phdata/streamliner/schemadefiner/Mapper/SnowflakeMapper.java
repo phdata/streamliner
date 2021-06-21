@@ -1,10 +1,7 @@
 package io.phdata.streamliner.schemadefiner.Mapper;
 
 import io.phdata.streamliner.schemadefiner.GlueCrawler;
-import io.phdata.streamliner.schemadefiner.model.ColumnDefinition;
-import io.phdata.streamliner.schemadefiner.model.FileFormat;
-import io.phdata.streamliner.schemadefiner.model.TableDefinition;
-import io.phdata.streamliner.schemadefiner.model.UserDefinedTable;
+import io.phdata.streamliner.schemadefiner.model.*;
 import schemacrawler.schema.Column;
 import schemacrawler.schema.Table;
 
@@ -16,14 +13,20 @@ import java.util.stream.Collectors;
 public class SnowflakeMapper {
     public static List<TableDefinition> mapSchemaCrawlerTables(List<Table> tables, List<UserDefinedTable> userDefinedTables) {
         // schema crawler sorts by lower case name so we ensure that behavior here
-        List<TableDefinition> sortedTableDef = tables.stream().sorted(Comparator.comparing(table-> table.getName().toLowerCase())).map(table -> mapSchemaCrawlerTable(table)).collect(Collectors.toList());
-        return userTableDefinitions(sortedTableDef, userDefinedTables);
+        List<SnowflakeTable> sortedTableDef = tables.stream().sorted(Comparator.comparing(table-> table.getName().toLowerCase())).map(table -> mapSchemaCrawlerTable(table)).collect(Collectors.toList());
+    return userTableDefinitions(sortedTableDef, userDefinedTables).stream()
+        .map(userTable -> (TableDefinition) userTable)
+        .collect(Collectors.toList());
     }
 
-    private static List<TableDefinition> userTableDefinitions(List<TableDefinition> tables, List<UserDefinedTable> userDefTables) {
+    private static List<SnowflakeTable> userTableDefinitions(List<SnowflakeTable> tables, List<UserDefinedTable> userDefTables) {
         if (userDefTables != null && !userDefTables.isEmpty()) {
+      List<SnowflakeUserDefinedTable> userTables =
+          userDefTables.stream()
+              .map(userTable -> (SnowflakeUserDefinedTable) userTable)
+              .collect(Collectors.toList());
             return tables.stream().map(table -> {
-                userDefTables.stream().forEach(userTable -> {
+                userTables.stream().forEach(userTable -> {
                     if (userTable.getName().equalsIgnoreCase(table.getSourceName())) {
                         if (userTable.getFileFormat() != null) {
                             table.setFileFormat(userTable.getFileFormat());
@@ -41,7 +44,7 @@ public class SnowflakeMapper {
         }
     }
 
-    private static TableDefinition mapSchemaCrawlerTable(Table table) {
+    private static SnowflakeTable mapSchemaCrawlerTable(Table table) {
         // columns are sorted based on ordinal position
         table.getColumns().sort(Comparator.comparing(column -> column.getOrdinalPosition()));
         List<Column> columns = table.getColumns();
@@ -54,18 +57,16 @@ public class SnowflakeMapper {
             primaryKey = parsedPrimaryKeys.stream().map(d->d.getName()).collect(Collectors.toList());
         }
 
-        return new TableDefinition("Snowflake",
-                table.getName(),
-                table.getName(),
-                table.getRemarks(),
-                primaryKey,
-                null,
-                null,
-                null,
-                new FileFormat(table.getName(), "PARQUET"),
-                mapSchemaCrawlerColumnDefinition(columns)
-
-        );
+    return new SnowflakeTable(
+        table.getName(),
+        table.getName(),
+        table.getRemarks(),
+        primaryKey,
+        null,
+        null,
+        null,
+        new FileFormat(table.getName(), "PARQUET"),
+        mapSchemaCrawlerColumnDefinition(columns));
     }
 
     private static List<ColumnDefinition> mapSchemaCrawlerColumnDefinition(List<Column> columns) {
@@ -79,23 +80,23 @@ public class SnowflakeMapper {
     }
 
     public static List<TableDefinition> mapAWSGlueTables(List<Table> glueTables, List<UserDefinedTable> userDefinedTables){
-        List<TableDefinition> glueTableList = glueTables.stream().map(table -> mapAWSGlueTable(table)).collect(Collectors.toList());
-        return userTableDefinitions(glueTableList, userDefinedTables);
+        List<SnowflakeTable> glueTableList = glueTables.stream().map(table -> mapAWSGlueTable(table)).collect(Collectors.toList());
+    return userTableDefinitions(glueTableList, userDefinedTables).stream()
+        .map(userTable -> (TableDefinition) userTable)
+        .collect(Collectors.toList());
     }
 
-    private static TableDefinition mapAWSGlueTable(Table table) {
-        return new TableDefinition("Snowflake",
-                table.getName(),
-                table.getName(),
-                table.getRemarks(),
-                new ArrayList<>(),
-                null,
-                null,
-                null,
-                GlueCrawler.getTableFileFormatMap().get(table),
-                mapAWSGlueColumnDefinition(table.getColumns())
-
-        );
+    private static SnowflakeTable mapAWSGlueTable(Table table) {
+    return new SnowflakeTable(
+        table.getName(),
+        table.getName(),
+        table.getRemarks(),
+        new ArrayList<>(),
+        null,
+        null,
+        null,
+        GlueCrawler.getTableFileFormatMap().get(table),
+        mapAWSGlueColumnDefinition(table.getColumns()));
     }
 
     private static List<ColumnDefinition> mapAWSGlueColumnDefinition(List<Column> columns) {
