@@ -1,5 +1,7 @@
 package io.phdata.streamliner.schemadefiner;
 
+import io.phdata.streamliner.schemadefiner.model.Jdbc;
+import io.phdata.streamliner.schemadefiner.util.StreamlinerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schemacrawler.crawl.StreamlinerCatalog;
@@ -21,13 +23,23 @@ public class JdbcCrawler implements SchemaDefiner {
     private final SchemaCrawlerOptions schemaCrawlerOptions;
     private String schemaName;
     private List<String> tableTypes;
+    private Supplier<Connection> conSupplier =
+      new Supplier<Connection>() {
+        @Override
+        public Connection get() {
+          return StreamlinerUtil.getConnection(jdbcUrl, user, password);
+        }
+      };
 
-    public JdbcCrawler(String jdbcUrl, Supplier<Connection> connectionSupplier, SchemaCrawlerOptions schemaCrawlerOptions, String schemaName, List<String> tableTypes) {
-        this.jdbcUrl = jdbcUrl;
-        this.connectionSupplier = connectionSupplier;
-        this.schemaCrawlerOptions = schemaCrawlerOptions;
-        this.schemaName = schemaName;
-        this.tableTypes = tableTypes;
+    public JdbcCrawler(Jdbc jdbc, String password) {
+        this.jdbcUrl = jdbc.getUrl();
+        this.user = jdbc.getUsername();
+        this.password = password;
+        this.schemaName = jdbc.getSchema();
+        this.tableTypes = jdbc.getTableTypes();
+        this.connectionSupplier = conSupplier;
+        this.schemaCrawlerOptions = StreamlinerUtil.getOptions(jdbc);
+
     }
 
     @Override
@@ -40,6 +52,4 @@ public class JdbcCrawler implements SchemaDefiner {
         }
 
     }
-
-
 }

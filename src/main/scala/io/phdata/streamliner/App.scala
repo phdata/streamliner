@@ -16,10 +16,9 @@
 
 package io.phdata.streamliner
 
-import io.phdata.streamliner.configuration.ConfigurationBuilder
 import io.phdata.streamliner.pipeline.PipelineBuilder
+import io.phdata.streamliner.schemadefiner.ConfigBuilder.SchemaCommand
 import org.apache.log4j.LogManager
-import org.apache.log4j.Logger
 
 object App {
 
@@ -29,12 +28,11 @@ object App {
     val cli = new Cli(args)
     cli.subcommand match {
       case Some(cli.schema) =>
-        ConfigurationBuilder.build(
-          configurationFile = cli.schema.filePath(),
-          outputDirectory = cli.schema.outputPath.toOption,
-          passwordOpt = cli.schema.databasePassword.toOption,
-          createDocs = cli.schema.createDocs.getOrElse(false)
-        )
+        SchemaCommand.build(
+          cli.schema.filePath(),
+          cli.schema.outputPath.getOrElse(""),
+          cli.schema.databasePassword.getOrElse(""),
+          cli.schema.createDocs.getOrElse(false))
 
       case Some(cli.produceScripts) =>
         PipelineBuilder.build(

@@ -67,7 +67,7 @@ public class StreamlinerSchemaCrawler {
     protected static StreamlinerCatalog getOracleCatalog(QueryHandler queryHandler, String schemaName,
                                                        List<String> tableTypes) throws SQLException, InterruptedException {
         Map<String, MutableTable> tables = new TreeMap<>();
-        Schema schema = new SchemaReference(null, schemaName);
+        Schema schema = new SchemaReference(schemaName, schemaName);
         boolean findTables = tableTypes.contains("table");
         boolean findViews = tableTypes.contains("view");
         {

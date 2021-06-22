@@ -1,7 +1,16 @@
 package io.phdata.streamliner.schemadefiner.model;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = false)
+@ToString
+@Getter
+@Setter
 public class ConfigurationDiff{
   private String name;
   private String environment;
@@ -24,54 +33,6 @@ public class ConfigurationDiff{
     this.pipeline = pipeline;
     this.previousDestination = previousDestination;
     this.currentDestination = currentDestination;
-    this.tableDiffs = tableDiffs;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public String getEnvironment() {
-    return environment;
-  }
-
-  public void setEnvironment(String environment) {
-    this.environment = environment;
-  }
-
-  public String getPipeline() {
-    return pipeline;
-  }
-
-  public void setPipeline(String pipeline) {
-    this.pipeline = pipeline;
-  }
-
-  public Destination getPreviousDestination() {
-    return previousDestination;
-  }
-
-  public void setPreviousDestination(Destination previousDestination) {
-    this.previousDestination = previousDestination;
-  }
-
-  public Destination getCurrentDestination() {
-    return currentDestination;
-  }
-
-  public void setCurrentDestination(Destination currentDestination) {
-    this.currentDestination = currentDestination;
-  }
-
-  public List<TableDiff> getTableDiffs() {
-    return tableDiffs;
-  }
-
-  public void setTableDiffs(List<TableDiff> tableDiffs) {
     this.tableDiffs = tableDiffs;
   }
 }

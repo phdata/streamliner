@@ -1,8 +1,17 @@
 package io.phdata.streamliner.schemadefiner.model;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.util.List;
 import java.util.Map;
 
+@EqualsAndHashCode(callSuper = false)
+@ToString
+@Getter
+@Setter
 public class HadoopTable extends TableDefinition {
   private String type;
   private String sourceName;
@@ -38,104 +47,6 @@ public class HadoopTable extends TableDefinition {
     this.numberOfMappers = numberOfMappers;
     this.splitByColumn = splitByColumn;
     this.numberOfPartitions = numberOfPartitions;
-    this.columns = columns;
-  }
-
-  @Override
-  public String getType() {
-    return type;
-  }
-
-  @Override
-  public void setType(String type) {
-    this.type = type;
-  }
-
-  @Override
-  public String getSourceName() {
-    return sourceName;
-  }
-
-  @Override
-  public void setSourceName(String sourceName) {
-    this.sourceName = sourceName;
-  }
-
-  @Override
-  public String getDestinationName() {
-    return destinationName;
-  }
-
-  @Override
-  public void setDestinationName(String destinationName) {
-    this.destinationName = destinationName;
-  }
-
-  public String getCheckColumn() {
-    return checkColumn;
-  }
-
-  public void setCheckColumn(String checkColumn) {
-    this.checkColumn = checkColumn;
-  }
-
-  public String getComment() {
-    return comment;
-  }
-
-  public void setComment(String comment) {
-    this.comment = comment;
-  }
-
-  @Override
-  public List<String> getPrimaryKeys() {
-    return primaryKeys;
-  }
-
-  @Override
-  public void setPrimaryKeys(List<String> primaryKeys) {
-    this.primaryKeys = primaryKeys;
-  }
-
-  public Map<String, String> getMetadata() {
-    return metadata;
-  }
-
-  public void setMetadata(Map<String, String> metadata) {
-    this.metadata = metadata;
-  }
-
-  public Integer getNumberOfMappers() {
-    return numberOfMappers;
-  }
-
-  public void setNumberOfMappers(Integer numberOfMappers) {
-    this.numberOfMappers = numberOfMappers;
-  }
-
-  public String getSplitByColumn() {
-    return splitByColumn;
-  }
-
-  public void setSplitByColumn(String splitByColumn) {
-    this.splitByColumn = splitByColumn;
-  }
-
-  public Integer getNumberOfPartitions() {
-    return numberOfPartitions;
-  }
-
-  public void setNumberOfPartitions(Integer numberOfPartitions) {
-    this.numberOfPartitions = numberOfPartitions;
-  }
-
-  @Override
-  public List<ColumnDefinition> getColumns() {
-    return columns;
-  }
-
-  @Override
-  public void setColumns(List<ColumnDefinition> columns) {
     this.columns = columns;
   }
 }

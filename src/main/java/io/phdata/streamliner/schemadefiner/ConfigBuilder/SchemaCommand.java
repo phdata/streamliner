@@ -9,9 +9,6 @@ import io.phdata.streamliner.schemadefiner.model.Jdbc;
 import io.phdata.streamliner.schemadefiner.util.StreamlinerUtil;
 import schemacrawler.crawl.StreamlinerCatalog;
 
-import java.sql.Connection;
-import java.util.List;
-
 public class SchemaCommand {
 
     public static void build(String configurationFile, String outputDirectory, String password, boolean createDocs) throws Exception {
@@ -19,20 +16,13 @@ public class SchemaCommand {
         Configuration ingestConfig = StreamlinerUtil.readConfigFromPath(configurationFile);
         Configuration outputConfig = null;
         if (ingestConfig.getSource() instanceof Jdbc) {
-            if (password.equals("") || password == null) {
+            if (password == null || password.equals("")) {
                 throw new RuntimeException("A databasePassword is required when crawling JDBC sources");
             }
             if(createDocs){
                 writeDocs(ingestConfig, password, outputDirectory);
             }
-            Jdbc jdbc = (Jdbc) ingestConfig.getSource();
-            String jdbcUrl = jdbc.getUrl();
-            String userName = jdbc.getUsername();
-            String schemaName = jdbc.getSchema();
-            List<String> tableTypes = jdbc.getTableTypes();
-            Connection con = StreamlinerUtil.getConnection(jdbcUrl, userName, password);
-
-            SchemaDefiner schemaDef = new JdbcCrawler(jdbcUrl, () -> con, null, schemaName, tableTypes);
+            SchemaDefiner schemaDef = new JdbcCrawler((Jdbc) ingestConfig.getSource(), password);
             StreamlinerCatalog catalog = schemaDef.retrieveSchema();
             outputConfig = StreamlinerUtil.mapJdbcCatalogToConfig(ingestConfig, catalog);
         } else if (ingestConfig.getSource() instanceof GlueCatalog) {

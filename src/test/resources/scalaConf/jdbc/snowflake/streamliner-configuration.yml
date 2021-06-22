@@ -1,0 +1,594 @@
+name: "STREAMLINER_QUICKSTART_1"
+environment: "SANDBOX"
+pipeline: "snowflake-snowpipe-append"
+source:
+  type: "Jdbc"
+  driverClass: "oracle.jdbc.OracleDriver"
+  url: "jdbc:oracle:thin:@oraclerds.caewceohkuoi.us-east-1.rds.amazonaws.com:1521/ORCL"
+  username: "HR"
+  passwordFile: "/"
+  schema: "HR"
+  tableTypes:
+    - "table"
+destination:
+  type: "Snowflake"
+  snowSqlCommand: "snowsql -c connection"
+  storagePath: "s3://streamliner-quickstart-1/employees/"
+  storageIntegration: "STREAMLINER_QUICKSTART_1"
+  warehouse: "SANDBOX_POC1"
+  taskSchedule: ""
+  stagingDatabase:
+    name: "SANDBOX_POC1"
+    schema: "EMPLOYEES"
+  reportingDatabase:
+    name: ""
+    schema: ""
+tables:
+- type: "Snowflake"
+  sourceName: "COUNTRIES"
+  destinationName: "COUNTRIES"
+  comment: "country table. Contains 25 rows. References with locations table."
+  primaryKeys:
+    - "COUNTRY_ID"
+  fileFormat:
+    location: "COUNTRIES"
+    fileType: "PARQUET"
+  columns:
+  - sourceName: "COUNTRY_ID"
+    destinationName: "COUNTRY_ID"
+    dataType: "CHAR"
+    comment: "Primary key of countries table."
+    precision: 2
+    scale: 0
+  - sourceName: "COUNTRY_NAME"
+    destinationName: "COUNTRY_NAME"
+    dataType: "VARCHAR2"
+    comment: "Country name"
+    precision: 40
+    scale: 0
+  - sourceName: "REGION_ID"
+    destinationName: "REGION_ID"
+    dataType: "NUMBER"
+    comment: "Region ID for the country. Foreign key to region_id column in the departments\
+  \ table."
+    precision: 0
+    scale: -127
+- type: "Snowflake"
+  sourceName: "DEPARTMENTS"
+  destinationName: "DEPARTMENTS"
+  comment: "Departments table that shows details of departments where employees\n\
+  work. Contains 27 rows; references with locations, employees, and job_history\
+  \ tables."
+  primaryKeys:
+    - "DEPARTMENT_ID"
+  fileFormat:
+    location: "DEPARTMENTS"
+    fileType: "PARQUET"
+  columns:
+  - sourceName: "DEPARTMENT_ID"
+    destinationName: "DEPARTMENT_ID"
+    dataType: "NUMBER"
+    comment: "Primary key column of departments table."
+    precision: 4
+    scale: 0
+  - sourceName: "DEPARTMENT_NAME"
+    destinationName: "DEPARTMENT_NAME"
+    dataType: "VARCHAR2"
+    comment: "A not null column that shows name of a department. Administration,\n\
+  Marketing, Purchasing, Human Resources, Shipping, IT, Executive, Public\nRelations,\
+  \ Sales, Finance, and Accounting."
+    precision: 30
+    scale: 0
+  - sourceName: "MANAGER_ID"
+    destinationName: "MANAGER_ID"
+    dataType: "NUMBER"
+    comment: "Manager_id of a department. Foreign key to employee_id column of employees\
+  \ table. The manager_id column of the employee table references this column."
+    precision: 6
+    scale: 0
+  - sourceName: "LOCATION_ID"
+    destinationName: "LOCATION_ID"
+    dataType: "NUMBER"
+    comment: "Location id where a department is located. Foreign key to location_id\
+  \ column of locations table."
+    precision: 4
+    scale: 0
+- type: "Snowflake"
+  sourceName: "EMP"
+  destinationName: "EMP"
+  comment: ""
+  primaryKeys:
+    - "EMPNO"
+  fileFormat:
+    location: "EMP"
+    fileType: "PARQUET"
+  columns:
+  - sourceName: "EMPNO"
+    destinationName: "EMPNO"
+    dataType: "NUMBER"
+    comment: ""
+    precision: 5
+    scale: 0
+  - sourceName: "ENAME"
+    destinationName: "ENAME"
+    dataType: "VARCHAR2"
+    comment: ""
+    precision: 15
+    scale: 0
+  - sourceName: "JOB"
+    destinationName: "JOB"
+    dataType: "VARCHAR2"
+    comment: ""
+    precision: 10
+    scale: 0
+  - sourceName: "MGR"
+    destinationName: "MGR"
+    dataType: "NUMBER"
+    comment: ""
+    precision: 5
+    scale: 0
+  - sourceName: "HIREDATE"
+    destinationName: "HIREDATE"
+    dataType: "DATE"
+    comment: ""
+    precision: 7
+    scale: 0
+  - sourceName: "SAL"
+    destinationName: "SAL"
+    dataType: "NUMBER"
+    comment: ""
+    precision: 7
+    scale: 2
+  - sourceName: "COMM"
+    destinationName: "COMM"
+    dataType: "NUMBER"
+    comment: ""
+    precision: 7
+    scale: 2
+  - sourceName: "DEPTNO"
+    destinationName: "DEPTNO"
+    dataType: "NUMBER"
+    comment: ""
+    precision: 3
+    scale: 0
+- type: "Snowflake"
+  sourceName: "EMP12"
+  destinationName: "EMP12"
+  comment: ""
+  primaryKeys:
+    - "EMPNO"
+  fileFormat:
+    location: "EMP12"
+    fileType: "PARQUET"
+  columns:
+  - sourceName: "EMPNO"
+    destinationName: "EMPNO"
+    dataType: "NUMBER"
+    comment: ""
+    precision: 5
+    scale: 0
+  - sourceName: "ENAME"
+    destinationName: "ENAME"
+    dataType: "VARCHAR2"
+    comment: ""
+    precision: 15
+    scale: 0
+  - sourceName: "JOB"
+    destinationName: "JOB"
+    dataType: "VARCHAR2"
+    comment: ""
+    precision: 10
+    scale: 0
+  - sourceName: "MGR"
+    destinationName: "MGR"
+    dataType: "NUMBER"
+    comment: ""
+    precision: 5
+    scale: 0
+  - sourceName: "HIREDATE"
+    destinationName: "HIREDATE"
+    dataType: "DATE"
+    comment: ""
+    precision: 7
+    scale: 0
+  - sourceName: "SAL"
+    destinationName: "SAL"
+    dataType: "NUMBER"
+    comment: ""
+    precision: 7
+    scale: 2
+  - sourceName: "COMM"
+    destinationName: "COMM"
+    dataType: "NUMBER"
+    comment: ""
+    precision: 7
+    scale: 2
+  - sourceName: "DEPTNO"
+    destinationName: "DEPTNO"
+    dataType: "NUMBER"
+    comment: ""
+    precision: 3
+    scale: 0
+- type: "Snowflake"
+  sourceName: "EMPLOYEE_ID_CONFLICTS"
+  destinationName: "EMPLOYEE_ID_CONFLICTS"
+  comment: ""
+  primaryKeys:
+    - "EMPLOYEE_ID"
+  fileFormat:
+    location: "EMPLOYEE_ID_CONFLICTS"
+    fileType: "PARQUET"
+  columns:
+  - sourceName: "EMPLOYEE_ID"
+    destinationName: "EMPLOYEE_ID"
+    dataType: "NUMBER"
+    comment: ""
+    precision: 5
+    scale: 0
+  - sourceName: "LAST_CONFLICT_EMPLOYEE_ID"
+    destinationName: "LAST_CONFLICT_EMPLOYEE_ID"
+    dataType: "NUMBER"
+    comment: ""
+    precision: 5
+    scale: 0
+- type: "Snowflake"
+  sourceName: "EMPLOYEES"
+  destinationName: "EMPLOYEES"
+  comment: "employees table. Contains 107 rows. References with departments,\njobs,\
+  \ job_history tables. Contains a self reference."
+  primaryKeys:
+    - "EMPLOYEE_ID"
+  fileFormat:
+    location: "EMPLOYEES"
+    fileType: "PARQUET"
+  columns:
+  - sourceName: "EMPLOYEE_ID"
+    destinationName: "EMPLOYEE_ID"
+    dataType: "NUMBER"
+    comment: "Primary key of employees table."
+    precision: 6
+    scale: 0
+  - sourceName: "FIRST_NAME"
+    destinationName: "FIRST_NAME"
+    dataType: "VARCHAR2"
+    comment: "First name of the employee. A not null column."
+    precision: 20
+    scale: 0
+  - sourceName: "LAST_NAME"
+    destinationName: "LAST_NAME"
+    dataType: "VARCHAR2"
+    comment: "Last name of the employee. A not null column."
+    precision: 25
+    scale: 0
+  - sourceName: "EMAIL"
+    destinationName: "EMAIL"
+    dataType: "VARCHAR2"
+    comment: "Email id of the employee"
+    precision: 25
+    scale: 0
+  - sourceName: "PHONE_NUMBER"
+    destinationName: "PHONE_NUMBER"
+    dataType: "VARCHAR2"
+    comment: "Phone number of the employee; includes country code and area code"
+    precision: 20
+    scale: 0
+  - sourceName: "HIRE_DATE"
+    destinationName: "HIRE_DATE"
+    dataType: "DATE"
+    comment: "Date when the employee started on this job. A not null column."
+    precision: 7
+    scale: 0
+  - sourceName: "JOB_ID"
+    destinationName: "JOB_ID"
+    dataType: "VARCHAR2"
+    comment: "Current job of the employee; foreign key to job_id column of the\njobs\
+  \ table. A not null column."
+    precision: 10
+    scale: 0
+  - sourceName: "SALARY"
+    destinationName: "SALARY"
+    dataType: "NUMBER"
+    comment: "Monthly salary of the employee. Must be greater\nthan zero (enforced\
+  \ by constraint emp_salary_min)"
+    precision: 8
+    scale: 2
+  - sourceName: "COMMISSION_PCT"
+    destinationName: "COMMISSION_PCT"
+    dataType: "NUMBER"
+    comment: "Commission percentage of the employee; Only employees in sales\ndepartment\
+  \ elgible for commission percentage"
+    precision: 2
+    scale: 2
+  - sourceName: "MANAGER_ID"
+    destinationName: "MANAGER_ID"
+    dataType: "NUMBER"
+    comment: "Manager id of the employee; has same domain as manager_id in\ndepartments\
+  \ table. Foreign key to employee_id column of employees table.\n(useful for\
+  \ reflexive joins and CONNECT BY query)"
+    precision: 6
+    scale: 0
+  - sourceName: "DEPARTMENT_ID"
+    destinationName: "DEPARTMENT_ID"
+    dataType: "NUMBER"
+    comment: "Department id where employee works; foreign key to department_id\ncolumn\
+  \ of the departments table"
+    precision: 4
+    scale: 0
+- type: "Snowflake"
+  sourceName: "JOB_HISTORY"
+  destinationName: "JOB_HISTORY"
+  comment: "Table that stores job history of the employees. If an employee\nchanges\
+  \ departments within the job or changes jobs within the department,\nnew rows\
+  \ get inserted into this table with old job information of the\nemployee. Contains\
+  \ a complex primary key: employee_id+start_date.\nContains 25 rows. References\
+  \ with jobs, employees, and departments tables."
+  primaryKeys:
+    - "EMPLOYEE_ID"
+    - "START_DATE"
+  fileFormat:
+    location: "JOB_HISTORY"
+    fileType: "PARQUET"
+  columns:
+  - sourceName: "EMPLOYEE_ID"
+    destinationName: "EMPLOYEE_ID"
+    dataType: "NUMBER"
+    comment: "A not null column in the complex primary key employee_id+start_date.\n\
+  Foreign key to employee_id column of the employee table"
+    precision: 6
+    scale: 0
+  - sourceName: "START_DATE"
+    destinationName: "START_DATE"
+    dataType: "DATE"
+    comment: "A not null column in the complex primary key employee_id+start_date.\n\
+  Must be less than the end_date of the job_history table. (enforced by\nconstraint\
+  \ jhist_date_interval)"
+    precision: 7
+    scale: 0
+  - sourceName: "END_DATE"
+    destinationName: "END_DATE"
+    dataType: "DATE"
+    comment: "Last day of the employee in this job role. A not null column. Must be\n\
+  greater than the start_date of the job_history table.\n(enforced by constraint\
+  \ jhist_date_interval)"
+    precision: 7
+    scale: 0
+  - sourceName: "JOB_ID"
+    destinationName: "JOB_ID"
+    dataType: "VARCHAR2"
+    comment: "Job role in which the employee worked in the past; foreign key to\n\
+  job_id column in the jobs table. A not null column."
+    precision: 10
+    scale: 0
+  - sourceName: "DEPARTMENT_ID"
+    destinationName: "DEPARTMENT_ID"
+    dataType: "NUMBER"
+    comment: "Department id in which the employee worked in the past; foreign key\
+  \ to deparment_id column in the departments table"
+    precision: 4
+    scale: 0
+- type: "Snowflake"
+  sourceName: "JOBS"
+  destinationName: "JOBS"
+  comment: "jobs table with job titles and salary ranges. Contains 19 rows.\nReferences\
+  \ with employees and job_history table."
+  primaryKeys:
+    - "JOB_ID"
+  fileFormat:
+    location: "JOBS"
+    fileType: "PARQUET"
+  columns:
+  - sourceName: "JOB_ID"
+    destinationName: "JOB_ID"
+    dataType: "VARCHAR2"
+    comment: "Primary key of jobs table."
+    precision: 10
+    scale: 0
+  - sourceName: "JOB_TITLE"
+    destinationName: "JOB_TITLE"
+    dataType: "VARCHAR2"
+    comment: "A not null column that shows job title, e.g. AD_VP, FI_ACCOUNTANT"
+    precision: 35
+    scale: 0
+  - sourceName: "MIN_SALARY"
+    destinationName: "MIN_SALARY"
+    dataType: "NUMBER"
+    comment: "Minimum salary for a job title."
+    precision: 6
+    scale: 0
+  - sourceName: "MAX_SALARY"
+    destinationName: "MAX_SALARY"
+    dataType: "NUMBER"
+    comment: "Maximum salary for a job title"
+    precision: 6
+    scale: 0
+- type: "Snowflake"
+  sourceName: "LOCATIONS"
+  destinationName: "LOCATIONS"
+  comment: "Locations table that contains specific address of a specific office,\n\
+  warehouse, and/or production site of a company. Does not store addresses /\nlocations\
+  \ of customers. Contains 23 rows; references with the\ndepartments and countries\
+  \ tables."
+  primaryKeys:
+    - "LOCATION_ID"
+  fileFormat:
+    location: "LOCATIONS"
+    fileType: "PARQUET"
+  columns:
+  - sourceName: "LOCATION_ID"
+    destinationName: "LOCATION_ID"
+    dataType: "NUMBER"
+    comment: "Primary key of locations table"
+    precision: 4
+    scale: 0
+  - sourceName: "STREET_ADDRESS"
+    destinationName: "STREET_ADDRESS"
+    dataType: "VARCHAR2"
+    comment: "Street address of an office, warehouse, or production site of a company.\n\
+  Contains building number and street name"
+    precision: 40
+    scale: 0
+  - sourceName: "POSTAL_CODE"
+    destinationName: "POSTAL_CODE"
+    dataType: "VARCHAR2"
+    comment: "Postal code of the location of an office, warehouse, or production site\n\
+  of a company."
+    precision: 12
+    scale: 0
+  - sourceName: "CITY"
+    destinationName: "CITY"
+    dataType: "VARCHAR2"
+    comment: "A not null column that shows city where an office, warehouse, or\nproduction\
+  \ site of a company is located."
+    precision: 30
+    scale: 0
+  - sourceName: "STATE_PROVINCE"
+    destinationName: "STATE_PROVINCE"
+    dataType: "VARCHAR2"
+    comment: "State or Province where an office, warehouse, or production site of\
+  \ a\ncompany is located."
+    precision: 25
+    scale: 0
+  - sourceName: "COUNTRY_ID"
+    destinationName: "COUNTRY_ID"
+    dataType: "CHAR"
+    comment: "Country where an office, warehouse, or production site of a company\
+  \ is\nlocated. Foreign key to country_id column of the countries table."
+    precision: 2
+    scale: 0
+- type: "Snowflake"
+  sourceName: "PK_TEST"
+  destinationName: "PK_TEST"
+  comment: ""
+  primaryKeys:
+    - "PK"
+  fileFormat:
+    location: "PK_TEST"
+    fileType: "PARQUET"
+  columns:
+  - sourceName: "PK"
+    destinationName: "PK"
+    dataType: "VARCHAR2"
+    comment: ""
+    precision: 20
+    scale: 0
+  - sourceName: "COL"
+    destinationName: "COL"
+    dataType: "VARCHAR2"
+    comment: ""
+    precision: 20
+    scale: 0
+- type: "Snowflake"
+  sourceName: "REGIONS"
+  destinationName: "REGIONS"
+  comment: ""
+  primaryKeys:
+    - "REGION_ID"
+  fileFormat:
+    location: "REGIONS"
+    fileType: "PARQUET"
+  columns:
+  - sourceName: "REGION_ID"
+    destinationName: "REGION_ID"
+    dataType: "NUMBER"
+    comment: ""
+    precision: 0
+    scale: -127
+  - sourceName: "REGION_NAME"
+    destinationName: "REGION_NAME"
+    dataType: "VARCHAR2"
+    comment: ""
+    precision: 25
+    scale: 0
+- type: "Snowflake"
+  sourceName: "T1"
+  destinationName: "T1"
+  comment: ""
+  primaryKeys: []
+  fileFormat:
+    location: "T1"
+    fileType: "PARQUET"
+  columns:
+  - sourceName: "A"
+    destinationName: "A"
+    dataType: "FLOAT"
+    comment: ""
+    precision: 126
+    scale: 0
+- type: "Snowflake"
+  sourceName: "TABLE_FOR_IDENTIFER_TESTS"
+  destinationName: "TABLE_FOR_IDENTIFER_TESTS"
+  comment: ""
+  primaryKeys:
+    - "C0"
+  fileFormat:
+    location: "TABLE_FOR_IDENTIFER_TESTS"
+    fileType: "PARQUET"
+  columns:
+  - sourceName: "C0"
+    destinationName: "C0"
+    dataType: "NUMBER"
+    comment: ""
+    precision: 38
+    scale: 0
+  - sourceName: "c1"
+    destinationName: "c1"
+    dataType: "NUMBER"
+    comment: ""
+    precision: 0
+    scale: -127
+  - sourceName: "c2 (something)"
+    destinationName: "c2 (something)"
+    dataType: "NUMBER"
+    comment: ""
+    precision: 0
+    scale: -127
+- type: "Snowflake"
+  sourceName: "VIRTUAL_COLUMNS"
+  destinationName: "VIRTUAL_COLUMNS"
+  comment: ""
+  primaryKeys:
+    - "ID"
+  fileFormat:
+    location: "VIRTUAL_COLUMNS"
+    fileType: "PARQUET"
+  columns:
+  - sourceName: "ID"
+    destinationName: "ID"
+    dataType: "NUMBER"
+    comment: ""
+    precision: 38
+    scale: 0
+  - sourceName: "ICMS_TAX_AMOUNT"
+    destinationName: "ICMS_TAX_AMOUNT"
+    dataType: "FLOAT"
+    comment: ""
+    precision: 126
+    scale: 0
+  - sourceName: "USD_CURR_FX_RATE"
+    destinationName: "USD_CURR_FX_RATE"
+    dataType: "FLOAT"
+    comment: ""
+    precision: 126
+    scale: 0
+  - sourceName: "ICMS_TAX_AMOUNT_USD"
+    destinationName: "ICMS_TAX_AMOUNT_USD"
+    dataType: "NUMBER"
+    comment: ""
+    precision: 0
+    scale: -127
+- type: "Snowflake"
+  sourceName: "single_column_table"
+  destinationName: "single_column_table"
+  comment: ""
+  primaryKeys:
+    - "ID"
+  fileFormat:
+    location: "VIRTUAL_COLUMNS"
+    fileType: "PARQUET"
+  columns:
+  - sourceName: "ID"
+    destinationName: "ID"
+    dataType: "NUMBER"
+    comment: ""
+    precision: 38
+    scale: 0
