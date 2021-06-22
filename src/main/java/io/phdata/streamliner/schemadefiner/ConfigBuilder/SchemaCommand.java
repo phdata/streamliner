@@ -4,7 +4,8 @@ import io.phdata.streamliner.schemadefiner.GlueCrawler;
 import io.phdata.streamliner.schemadefiner.JdbcCrawler;
 import io.phdata.streamliner.schemadefiner.SchemaDefiner;
 import io.phdata.streamliner.schemadefiner.model.Configuration;
-import io.phdata.streamliner.schemadefiner.model.Source;
+import io.phdata.streamliner.schemadefiner.model.GlueCatalog;
+import io.phdata.streamliner.schemadefiner.model.Jdbc;
 import io.phdata.streamliner.schemadefiner.util.StreamlinerUtil;
 import schemacrawler.crawl.StreamlinerCatalog;
 
@@ -17,29 +18,30 @@ public class SchemaCommand {
         // read ingest-configuration.yml
         Configuration ingestConfig = StreamlinerUtil.readConfigFromPath(configurationFile);
         Configuration outputConfig = null;
-        if (ingestConfig.getSource().getType().equalsIgnoreCase("JDBC")) {
+        if (ingestConfig.getSource() instanceof Jdbc) {
             if (password.equals("") || password == null) {
                 throw new RuntimeException("A databasePassword is required when crawling JDBC sources");
             }
             if(createDocs){
                 writeDocs(ingestConfig, password, outputDirectory);
             }
-            String jdbcUrl = ingestConfig.getSource().getUrl();
-            String userName = ingestConfig.getSource().getUsername();
-            String schemaName = ingestConfig.getSource().getSchema();
-            List<String> tableTypes = ingestConfig.getSource().getTableTypes();
+            Jdbc jdbc = (Jdbc) ingestConfig.getSource();
+            String jdbcUrl = jdbc.getUrl();
+            String userName = jdbc.getUsername();
+            String schemaName = jdbc.getSchema();
+            List<String> tableTypes = jdbc.getTableTypes();
             Connection con = StreamlinerUtil.getConnection(jdbcUrl, userName, password);
 
             SchemaDefiner schemaDef = new JdbcCrawler(jdbcUrl, () -> con, null, schemaName, tableTypes);
             StreamlinerCatalog catalog = schemaDef.retrieveSchema();
             outputConfig = StreamlinerUtil.mapJdbcCatalogToConfig(ingestConfig, catalog);
-        } else if (ingestConfig.getSource().getType().equalsIgnoreCase("GLUE")) {
-            SchemaDefiner schemaDef = new GlueCrawler(ingestConfig);
+        } else if (ingestConfig.getSource() instanceof GlueCatalog) {
+            GlueCatalog glue = (GlueCatalog) ingestConfig.getSource();
+            SchemaDefiner schemaDef = new GlueCrawler(glue);
             StreamlinerCatalog catalog = schemaDef.retrieveSchema();
             outputConfig = StreamlinerUtil.mapGlueCatalogToConfig(ingestConfig, catalog);
         }
 
-        //TODO: keep the parameter sequence as same as input file
         StreamlinerUtil.writeConfigToYaml(outputConfig, outputDirectory);
     }
 
@@ -49,8 +51,8 @@ public class SchemaCommand {
         } else {
             outputDir = outputDir + "/docs";
         }
-        Source source = ingestConfig.getSource();
-        StreamlinerUtil.getErdOutput(source, password, outputDir);
-        StreamlinerUtil.getHtmlOutput(source, password, outputDir);
+        Jdbc jdbc = (Jdbc) ingestConfig.getSource();
+        StreamlinerUtil.getErdOutput(jdbc, password, outputDir);
+        StreamlinerUtil.getHtmlOutput(jdbc, password, outputDir);
     }
 }

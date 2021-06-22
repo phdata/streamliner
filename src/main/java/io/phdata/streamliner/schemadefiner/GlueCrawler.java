@@ -5,8 +5,8 @@ import com.amazonaws.services.glue.AWSGlueClient;
 import com.amazonaws.services.glue.model.GetTablesRequest;
 import com.amazonaws.services.glue.model.GetTablesResult;
 import com.amazonaws.services.glue.model.Table;
-import io.phdata.streamliner.schemadefiner.model.Configuration;
 import io.phdata.streamliner.schemadefiner.model.FileFormat;
+import io.phdata.streamliner.schemadefiner.model.GlueCatalog;
 import schemacrawler.crawl.SchemaDefinerHelper;
 import schemacrawler.crawl.StreamlinerCatalog;
 
@@ -20,12 +20,9 @@ public class GlueCrawler implements SchemaDefiner {
     private String region;
     private static Map<schemacrawler.schema.Table, FileFormat> tableFileFormatMap  = new HashMap<>();
 
-    private Configuration config;
-
-    public GlueCrawler(Configuration config) {
-        this.config = config;
-        this.region = config.getSource().getRegion();
-        this.database = config.getSource().getDatabase();
+    public GlueCrawler(GlueCatalog glueCatalog) {
+        this.region = glueCatalog.getRegion();
+        this.database = glueCatalog.getDatabase();
     }
 
     @Override

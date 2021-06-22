@@ -1,15 +1,13 @@
 package io.phdata.streamliner.schemadefiner.util;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature;
 import io.phdata.streamliner.schemadefiner.Mapper.HadoopMapper;
 import io.phdata.streamliner.schemadefiner.Mapper.SnowflakeMapper;
-import io.phdata.streamliner.schemadefiner.model.Configuration;
-import io.phdata.streamliner.schemadefiner.model.ConfigurationDiff;
-import io.phdata.streamliner.schemadefiner.model.Source;
-import io.phdata.streamliner.schemadefiner.model.TableDefinition;
+import io.phdata.streamliner.schemadefiner.model.*;
 import org.apache.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,12 +41,14 @@ public class StreamlinerUtil {
 
     public static Configuration readConfigFromPath(String path) throws IOException {
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         Configuration config = mapper.readValue(new File(path), Configuration.class);
         return config;
     }
 
     public static ConfigurationDiff readConfigDiffFromPath(String path) throws IOException {
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         ConfigurationDiff config = mapper.readValue(new File(path), ConfigurationDiff.class);
         return config;
     }
@@ -60,17 +60,18 @@ public class StreamlinerUtil {
     }
 
     public static Configuration mapJdbcCatalogToConfig(Configuration ingestConfig, StreamlinerCatalog catalog) {
+        Jdbc jdbc = (Jdbc) ingestConfig.getSource();
         List<Schema> schema = catalog.getSchemas().stream()
-                .filter(db -> db.getCatalogName().equals(ingestConfig.getSource().getSchema())).collect(Collectors.toList());
+                .filter(db -> db.getCatalogName().equals(jdbc.getSchema())).collect(Collectors.toList());
         List<Table> tableList = (List<Table>) catalog.getTables(schema.get(0));
 
         List<TableDefinition> tables = null;
-        if (ingestConfig.getDestination().getType().equalsIgnoreCase("SNOWFLAKE")) {
-            tables = SnowflakeMapper.mapSchemaCrawlerTables(tableList, ingestConfig.getSource().getUserDefinedTable());
-        } else if (ingestConfig.getDestination().getType().equalsIgnoreCase("HADOOP")) {
-            tables = HadoopMapper.mapSchemaCrawlerTables(tableList, ingestConfig.getSource().getUserDefinedTable());
+        if (ingestConfig.getDestination() instanceof Snowflake) {
+            tables = SnowflakeMapper.mapSchemaCrawlerTables(tableList, jdbc.getUserDefinedTable());
+        } else if (ingestConfig.getDestination() instanceof Hadoop) {
+            tables = HadoopMapper.mapSchemaCrawlerTables(tableList, jdbc.getUserDefinedTable());
         }
-        ingestConfig.getSource().setDriverClass(catalog.getDriverClassName());
+        jdbc.setDriverClass(catalog.getDriverClassName());
         Configuration newConfig = new Configuration(
                 ingestConfig.getName(),
                 ingestConfig.getEnvironment(),
@@ -108,7 +109,7 @@ public class StreamlinerUtil {
   public static void writeYamlFile(Configuration outputConfig, String outputDir)
       throws IOException {
     ObjectMapper mapper =
-        new ObjectMapper(new YAMLFactory().disable(Feature.WRITE_DOC_START_MARKER));
+        new ObjectMapper(new YAMLFactory().disable(Feature.WRITE_DOC_START_MARKER).disable(Feature.USE_NATIVE_TYPE_ID));
     mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
     mapper.writeValue(new File(outputDir), outputConfig);
   }
@@ -116,7 +117,7 @@ public class StreamlinerUtil {
     public static void writeYamlFile(ConfigurationDiff outputConfig, String outputDir)
             throws IOException {
         ObjectMapper mapper =
-                new ObjectMapper(new YAMLFactory().disable(Feature.WRITE_DOC_START_MARKER));
+                new ObjectMapper(new YAMLFactory().disable(Feature.WRITE_DOC_START_MARKER).disable(Feature.USE_NATIVE_TYPE_ID));
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
         mapper.writeValue(new File(outputDir), outputConfig);
@@ -131,49 +132,49 @@ public class StreamlinerUtil {
     }
 
     public static Configuration mapGlueCatalogToConfig(Configuration ingestConfig, StreamlinerCatalog catalog) {
-        Source source = ingestConfig.getSource();
+        GlueCatalog source = (GlueCatalog) ingestConfig.getSource();
         Schema db = catalog.getSchemas().stream().filter(schema -> schema.getCatalogName().equalsIgnoreCase(source.getDatabase())).collect(Collectors.toList()).get(0);
         List<Table> tableList = (List<Table>) catalog.getTables(db);
         List<TableDefinition> tableDefinitions = null;
-        if (ingestConfig.getDestination().getType().equalsIgnoreCase("SNOWFLAKE")) {
+        if (ingestConfig.getDestination() instanceof Snowflake) {
             tableDefinitions = SnowflakeMapper.mapAWSGlueTables(tableList, source.getUserDefinedTable());
             ingestConfig.setTables(tableDefinitions);
-        } else if (ingestConfig.getDestination().getType().equalsIgnoreCase("HADOOP")) {
+        } else if (ingestConfig.getDestination() instanceof Hadoop) {
             tableDefinitions = HadoopMapper.mapAWSGlueTables(tableList, source.getUserDefinedTable());
             ingestConfig.setTables(tableDefinitions);
         }
         return ingestConfig;
     }
 
-    public static void getHtmlOutput(Source source, String password, String path) throws Exception {
-        execute(source, password, TextOutputFormat.html, path, "schema.html");
+    public static void getHtmlOutput(Jdbc jdbc, String password, String path) throws Exception {
+        execute(jdbc, password, TextOutputFormat.html, path, "schema.html");
     }
 
-    public static void getErdOutput(Source source, String password, String path) throws Exception {
-        execute(source, password, DiagramOutputFormat.png, path, "schema.png");
+    public static void getErdOutput(Jdbc jdbc, String password, String path) throws Exception {
+        execute(jdbc, password, DiagramOutputFormat.png, path, "schema.png");
     }
 
-    private static void execute(Source source, String password, OutputFormat outputFormat, String path, String fileName) throws Exception {
+    private static void execute(Jdbc jdbc, String password, OutputFormat outputFormat, String path, String fileName) throws Exception {
         createDir(path);
         OutputOptions outputOptions = OutputOptionsBuilder.newOutputOptions(outputFormat, Paths.get(path + "/" + fileName));
         SchemaCrawlerExecutable executable = new SchemaCrawlerExecutable("schema");
-        executable.setSchemaCrawlerOptions(getOptions(source));
+        executable.setSchemaCrawlerOptions(getOptions(jdbc));
         executable.setOutputOptions(outputOptions);
-        executable.setConnection(getConnection(source.getUrl(), source.getUsername(), password));
+        executable.setConnection(getConnection(jdbc.getUrl(), jdbc.getUsername(), password));
         executable.execute();
     }
 
-    private static SchemaCrawlerOptions getOptions(Source source) {
+    private static SchemaCrawlerOptions getOptions(Jdbc jdbc) {
         setLogLevel();
 
         SchemaCrawlerOptions options = SchemaCrawlerOptionsBuilder.newSchemaCrawlerOptions();
         LimitOptionsBuilder limitOptionsBuilder = LimitOptionsBuilder.builder();
 
-        limitOptionsBuilder.includeSchemas(new RegularExpressionInclusionRule(".*" + source.getSchema() + ".*"))
-                .tableTypes(mapTableTypes(source.getTableTypes()));
-        if (source.getUserDefinedTable() != null) {
-            List<String> list = source.getUserDefinedTable().stream()
-                    .map(table -> ".*" + source.getSchema() + ".*\\." + table.getName()).collect(Collectors.toList());
+        limitOptionsBuilder.includeSchemas(new RegularExpressionInclusionRule(".*" + jdbc.getSchema() + ".*"))
+                .tableTypes(mapTableTypes(jdbc.getTableTypes()));
+        if (jdbc.getUserDefinedTable() != null) {
+            List<String> list = jdbc.getUserDefinedTable().stream()
+                    .map(table -> ".*" + jdbc.getSchema() + ".*\\." + table.getName()).collect(Collectors.toList());
             String tableList = String.join("|", list);
             limitOptionsBuilder.includeTables(new RegularExpressionInclusionRule(tableList));
         }

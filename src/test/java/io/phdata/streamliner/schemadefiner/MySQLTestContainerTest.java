@@ -3,10 +3,7 @@ package io.phdata.streamliner.schemadefiner;
 import io.phdata.streamliner.configuration.ConfigurationBuilder;
 import io.phdata.streamliner.pipeline.PipelineBuilder;
 import io.phdata.streamliner.schemadefiner.ConfigBuilder.SchemaCommand;
-import io.phdata.streamliner.schemadefiner.model.ColumnDiff;
-import io.phdata.streamliner.schemadefiner.model.Configuration;
-import io.phdata.streamliner.schemadefiner.model.ConfigurationDiff;
-import io.phdata.streamliner.schemadefiner.model.TableDiff;
+import io.phdata.streamliner.schemadefiner.model.*;
 import io.phdata.streamliner.schemadefiner.util.StreamlinerUtil;
 import org.junit.*;
 import org.junit.runners.MethodSorters;
@@ -36,17 +33,17 @@ public class MySQLTestContainerTest {
     private static final String STREAMLINER_DATABASE_USERNAME = "streamliner_user";
     private static final String STREAMLINER_DATABASE_PASSWORD = "streamliner_pwd";
     private static final String SCHEMA_COMMAND_OUTPUT_PATH= "src/test/output/conf/streamliner-configuration.yml";
-    private Connection con = null;
+    private static Connection con = null;
     private Yaml yaml = new Yaml();
 
-    @Rule
-    public MySQLContainer mysql = new MySQLContainer(MYSQL_57_IMAGE)
+    @ClassRule
+    public static MySQLContainer mysql = new MySQLContainer(MYSQL_57_IMAGE)
             .withDatabaseName(STREAMLINER_DATABASE_NAME)
             .withUsername(STREAMLINER_DATABASE_USERNAME)
             .withPassword(STREAMLINER_DATABASE_PASSWORD);
 
-    @Before
-    public void before() throws SQLException {
+    @BeforeClass
+    public static void before() throws SQLException {
         mysql.start();
         con = StreamlinerUtil.getConnection(mysql.getJdbcUrl(), mysql.getUsername(), mysql.getPassword());
         performExecuteUpdate(con, "CREATE TABLE Persons (\n" +
@@ -58,9 +55,10 @@ public class MySQLTestContainerTest {
                 ");");
     }
 
-    @After
-    public void after() {
+    @AfterClass
+    public static void after() throws SQLException {
         mysql.stop();
+        con.close();
     }
 
     @Test
@@ -239,36 +237,16 @@ public class MySQLTestContainerTest {
       // reading current destination config
     Configuration conf2 = StreamlinerUtil.readConfigFromPath(configPath2);
 
-    ColumnDiff columnDiff1 =
-        new ColumnDiff(
-            "Id",
-            "Emp_Id",
-            "Number",
-            "Number",
-            "Emp Id",
-            "Employee Id",
-            255,
-            200,
-            0,
-            0,
-            false,
-            false,
-            true);
-    ColumnDiff columnDiff2 =
-        new ColumnDiff(
-            "Name",
-            "Emp_Name",
-            "Varchar",
-            "Varchar2",
-            "Emp Name",
-            "Employee Name",
-            255,
-            200,
-            0,
-            0,
-            false,
-            false,
-            true);
+    ColumnDefinition prevColDef1 = new ColumnDefinition("ID", "ID", "Number", "Emp Id", 255, 0);
+    ColumnDefinition currColDef1 = new ColumnDefinition("Emp_Id", "Emp_Id", "Number", "Employee Id", 255, 0);
+    ColumnDiff columnDiff1 = new ColumnDiff(prevColDef1, currColDef1, false, false, true);
+
+    ColumnDefinition prevColDef2 =
+        new ColumnDefinition("Name", "Name", "Varchar2", "Emp Name", 255, 0);
+    ColumnDefinition currColDef2 =
+        new ColumnDefinition("Emp_Name", "Emp_Name", "Varchar2", "Employee Name", 255, 0);
+    ColumnDiff columnDiff2 = new ColumnDiff(prevColDef2, currColDef2, false, false, true);
+
     List<ColumnDiff> colList = new ArrayList<>();
     colList.add(columnDiff1);
     colList.add(columnDiff2);
@@ -306,17 +284,15 @@ public class MySQLTestContainerTest {
     assertEquals(configDiff.getPipeline(), "snowflake-snowpipe-append");
 
     assertNotNull(configDiff.getPreviousDestination());
-    assertEquals(configDiff.getPreviousDestination().getSnowSqlCommand(), "snowsql -c connection");
-    assertEquals(
-        configDiff.getPreviousDestination().getStoragePath(),
-        "s3://streamliner-quickstart-1/employees/");
+    Snowflake prevDestination = (Snowflake) configDiff.getPreviousDestination();
+    Snowflake currDestination = (Snowflake) configDiff.getCurrentDestination();
+    assertEquals(prevDestination.getSnowSqlCommand(), "snowsql -c connection");
+    assertEquals(prevDestination.getStoragePath(), "s3://streamliner-quickstart-1/employees/");
 
     assertNotNull(configDiff.getCurrentDestination());
+    assertEquals(currDestination.getSnowSqlCommand(), "snowsql -c streamliner_admin");
     assertEquals(
-        configDiff.getCurrentDestination().getSnowSqlCommand(), "snowsql -c streamliner_admin");
-    assertEquals(
-        configDiff.getCurrentDestination().getStoragePath(),
-        "s3://phdata-snowflake-stage/data/phdata-task/HR/");
+        currDestination.getStoragePath(), "s3://phdata-snowflake-stage/data/phdata-task/HR/");
 
     assertNotNull(configDiff.getTableDiffs());
     assertFalse(configDiff.getTableDiffs().isEmpty());
@@ -355,7 +331,7 @@ public class MySQLTestContainerTest {
         return data;
     }
 
-    private int performExecuteUpdate(Connection con, String sql) throws SQLException {
+    private static int performExecuteUpdate(Connection con, String sql) throws SQLException {
         Statement statement = con.createStatement();
         int row = statement.executeUpdate(sql);
         return row;
