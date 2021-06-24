@@ -75,7 +75,7 @@ public class MySQLTestContainerTest {
         boolean createDocs = false;
         Map<String, Object> ingestConfigFile = updateSourceDetail(config);
         File generatedOutputFolder = new File(outputPath);
-        deleteDirectory(generatedOutputFolder);
+        StreamlinerUtil.deleteDirectory(generatedOutputFolder);
 
         //streamliner schema command
         ConfigurationBuilder.build(config, Option.apply(outputPath), Option.apply(dbPass), createDocs);
@@ -98,8 +98,8 @@ public class MySQLTestContainerTest {
         assertEquals(((Map<String, Object>) ingestConfigFile.get("destination")).get("type"), ((Map<String, Object>) outputConfigFile.get("destination")).get("type"));
 
         Map<String, Object> table = ((List<Map<String, Object>>) outputConfigFile.get("tables")).get(0);
-        assertEquals(table.get("type"), "Snowflake");
-        assertEquals(table.get("sourceName"), "Persons");
+        assertEquals("Snowflake", table.get("type"));
+        assertEquals("Persons", table.get("sourceName"));
 
         List<Map<String, Object>> columnList = ((List<Map<String, Object>>) table.get("columns"));
         assertFalse(columnList.isEmpty());
@@ -113,7 +113,7 @@ public class MySQLTestContainerTest {
         String outputPath = "src/test/output/pipelineConfig";
 
         File generatedOutputFolder = new File(outputPath);
-        deleteDirectory(generatedOutputFolder);
+        StreamlinerUtil.deleteDirectory(generatedOutputFolder);
 
         //Streamliner script command
         PipelineBuilder.build(config, typeMapping, templateDirectory, Option.apply(outputPath));
@@ -122,7 +122,7 @@ public class MySQLTestContainerTest {
         String[] allContents = generatedOutputFolder.list();
 
         //Person directory and Makefile
-        assertEquals(allContents.length, 2);
+        assertEquals(2, allContents.length);
 
         File generatedPersonsDir = new File("src/test/output/pipelineConfig/Persons");
         assertTrue(generatedPersonsDir.exists());
@@ -130,7 +130,7 @@ public class MySQLTestContainerTest {
         allContents = generatedPersonsDir.list();
         // 10 files are generated. copy-into.sql, create-schema.sql, create-snowpipe.sql, create-stage.sql, create-table.sql,
         // drop-schema.sql, drop-snowpipe.sql, drop-stage.sql,  drop-table.sql, Makefile
-        assertEquals(allContents.length, 10);
+        assertEquals(10, allContents.length);
     }
 
     @Test
@@ -151,9 +151,9 @@ public class MySQLTestContainerTest {
             if(schema.getCatalogName().equals(STREAMLINER_DATABASE_NAME)) {
                 Table table = ((List<Table>) catalog.getTables(schema)).get(0);
                 assertFalse(catalog.getTables(schema).isEmpty());
-                assertEquals(table.getColumns().size(),  5);
+                assertEquals(5,  table.getColumns().size());
                 assertTrue(table.getName().equals("Persons"));
-                assertEquals(table.getSchema().getCatalogName(),STREAMLINER_DATABASE_NAME);
+                assertEquals(STREAMLINER_DATABASE_NAME,table.getSchema().getCatalogName());
             }
         });
 
@@ -174,9 +174,9 @@ public class MySQLTestContainerTest {
             if(schema.getCatalogName().equals(STREAMLINER_DATABASE_NAME)) {
                 Table table = ((List<Table>) catalog.getTables(schema)).get(0);
                 assertFalse(catalog.getTables(schema).isEmpty());
-                assertEquals(table.getColumns().size(),  5);
+                assertEquals(5,  table.getColumns().size());
                 assertTrue(table.getName().equals("Persons"));
-                assertEquals(table.getSchema().getCatalogName(),STREAMLINER_DATABASE_NAME);
+                assertEquals(STREAMLINER_DATABASE_NAME,table.getSchema().getCatalogName());
             }
         });
         assertNotNull(catalog.getDriverClassName());
@@ -191,7 +191,7 @@ public class MySQLTestContainerTest {
         boolean createDocs = false;
 
         File generatedOutputFolder = new File(outputPath);
-        deleteDirectory(generatedOutputFolder);
+        StreamlinerUtil.deleteDirectory(generatedOutputFolder);
 
         Map<String, Object> ingestConfigFile = updateSourceDetail(config);
 
@@ -216,8 +216,8 @@ public class MySQLTestContainerTest {
         assertEquals(((Map<String, Object>) ingestConfigFile.get("destination")).get("type"), ((Map<String, Object>) outputConfigFile.get("destination")).get("type"));
 
         Map<String, Object> table = ((List<Map<String, Object>>) outputConfigFile.get("tables")).get(0);
-        assertEquals(table.get("type"), "Snowflake");
-        assertEquals(table.get("sourceName"), "Persons");
+        assertEquals("Snowflake", table.get("type"));
+        assertEquals("Persons", table.get("sourceName"));
 
         List<Map<String, Object>> columnList = ((List<Map<String, Object>>) table.get("columns"));
         assertFalse(columnList.isEmpty());
@@ -231,7 +231,7 @@ public class MySQLTestContainerTest {
         boolean createDocs = false;
 
         File generatedOutputFolder = new File(outputPath);
-        deleteDirectory(generatedOutputFolder);
+        StreamlinerUtil.deleteDirectory(generatedOutputFolder);
         SchemaCommand.build(config,outputPath,dbPass,createDocs);
     }
 
@@ -259,11 +259,11 @@ public class MySQLTestContainerTest {
     List<ColumnDiff> colList = new ArrayList<>();
     colList.add(columnDiff1);
     colList.add(columnDiff2);
-    TableDiff tableDiff1 = new TableDiff("Snowflake", "Employee", colList, true);
+    TableDiff tableDiff1 = new TableDiff("Snowflake", "Employee", colList, true, true);
 
     colList = new ArrayList<>();
     colList.add(columnDiff1);
-    TableDiff tableDiff2 = new TableDiff("Snowflake", "Emp", colList, true);
+    TableDiff tableDiff2 = new TableDiff("Snowflake", "Emp", colList, true, true);
 
     List<TableDiff> tableList = new ArrayList<>();
     tableList.add(tableDiff1);
@@ -278,7 +278,7 @@ public class MySQLTestContainerTest {
             conf2.getDestination(),
             tableList);
 
-    deleteDirectory(new File(outputPath));
+      StreamlinerUtil.deleteDirectory(new File(outputPath));
     StreamlinerUtil.writeConfigToYaml(configDiff, outputPath);
   }
 
@@ -288,20 +288,20 @@ public class MySQLTestContainerTest {
     // reading config diff yaml file.
     ConfigurationDiff configDiff = StreamlinerUtil.readConfigDiffFromPath(configDiffPath);
 
-    assertEquals(configDiff.getName(), "STREAMLINER_QUICKSTART_1");
-    assertEquals(configDiff.getEnvironment(), "SANDBOX");
-    assertEquals(configDiff.getPipeline(), "snowflake-snowpipe-append");
+    assertEquals("STREAMLINER_QUICKSTART_1", configDiff.getName());
+    assertEquals("SANDBOX", configDiff.getEnvironment());
+    assertEquals("snowflake-snowpipe-append", configDiff.getPipeline());
 
     assertNotNull(configDiff.getPreviousDestination());
     Snowflake prevDestination = (Snowflake) configDiff.getPreviousDestination();
     Snowflake currDestination = (Snowflake) configDiff.getCurrentDestination();
-    assertEquals(prevDestination.getSnowSqlCommand(), "snowsql -c connection");
-    assertEquals(prevDestination.getStoragePath(), "s3://streamliner-quickstart-1/employees/");
+    assertEquals("snowsql -c connection", prevDestination.getSnowSqlCommand());
+    assertEquals("s3://streamliner-quickstart-1/employees/", prevDestination.getStoragePath());
 
     assertNotNull(configDiff.getCurrentDestination());
-    assertEquals(currDestination.getSnowSqlCommand(), "snowsql -c streamliner_admin");
+    assertEquals("snowsql -c streamliner_admin", currDestination.getSnowSqlCommand());
     assertEquals(
-        currDestination.getStoragePath(), "s3://phdata-snowflake-stage/data/phdata-task/HR/");
+        "s3://phdata-snowflake-stage/data/phdata-task/HR/", currDestination.getStoragePath());
 
     assertNotNull(configDiff.getTableDiffs());
     assertFalse(configDiff.getTableDiffs().isEmpty());
@@ -311,9 +311,9 @@ public class MySQLTestContainerTest {
         .forEach(
             tableDiff -> {
               if (tableDiff.getDestinationName().equals("Employee")) {
-                assertEquals(tableDiff.getColumnDiffs().size(), 2);
+                assertEquals(2, tableDiff.getColumnDiffs().size());
               } else if (tableDiff.getDestinationName().equals("Emp")) {
-                assertEquals(tableDiff.getColumnDiffs().size(), 1);
+                assertEquals(1, tableDiff.getColumnDiffs().size());
               }
             });
   }
@@ -369,7 +369,7 @@ public class MySQLTestContainerTest {
       "schema", "--config", config, "--database-password", mysql.getPassword()
     };
     testSchemaCommandOptionalParams(generatedConfigFile, schemaCommand2);
-    deleteDirectory(new File("STREAMLINER_QUICKSTART_1"));
+      StreamlinerUtil.deleteDirectory(new File("STREAMLINER_QUICKSTART_1"));
   }
 
   @Test
@@ -387,7 +387,7 @@ public class MySQLTestContainerTest {
   private void testSchemaCommandOptionalParams(String generatedConfigFile, String[] schemaCommand1)
       throws Exception {
     String outputPath = "src/test/output/";
-    deleteDirectory(new File(outputPath));
+      StreamlinerUtil.deleteDirectory(new File(outputPath));
 
     // Scala App main method
     App.main(schemaCommand1);
@@ -409,7 +409,7 @@ public class MySQLTestContainerTest {
                 assertFalse(catalog.getTables(schema).isEmpty());
                 assertEquals(table.getColumns().size(), 5);
                 assertTrue(table.getName().equals("Persons"));
-                assertEquals(table.getSchema().getCatalogName(), STREAMLINER_DATABASE_NAME);
+                assertEquals(STREAMLINER_DATABASE_NAME, table.getSchema().getCatalogName());
               }
             });
   }
@@ -419,7 +419,7 @@ public class MySQLTestContainerTest {
     String outputConfig1 = "src/test/output/temp-config1.yml";
     String outputConfig2 = "src/test/output/temp-config2.yml";
 
-    deleteDirectory(new File(outputPath));
+    StreamlinerUtil.deleteDirectory(new File(outputPath));
     // deserialize
     Configuration config = StreamlinerUtil.readConfigFromPath(inputConfig);
     StreamlinerUtil.createDir(outputPath);
@@ -436,16 +436,6 @@ public class MySQLTestContainerTest {
     assertTrue(config.equals(tempConfig2));
     assertTrue(tempConfig.equals(tempConfig2));
   }
-
-    boolean deleteDirectory(File directoryToBeDeleted) {
-        File[] allContents = directoryToBeDeleted.listFiles();
-        if (allContents != null) {
-            for (File file : allContents) {
-                deleteDirectory(file);
-            }
-        }
-        return directoryToBeDeleted.delete();
-    }
 
     private Map<String, Object> updateSourceDetail(String configPath) throws FileNotFoundException {
         InputStream inputStream = new FileInputStream(configPath);

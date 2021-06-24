@@ -1,0 +1,48 @@
+name: "STREAMLINER_QUICKSTART_1"
+environment: "SANDBOX"
+pipeline: "snowflake-snowpipe-append"
+source:
+  type: "Jdbc"
+  driverClass: "oracle.jdbc.OracleDriver"
+  url: "jdbc:oracle:thin:@oraclerds.caewceohkuoi.us-east-1.rds.amazonaws.com:1521/ORCL"
+  username: "HR"
+  passwordFile: "/"
+  schema: "HR"
+  tableTypes:
+    - "table"
+destination:
+  type: "Snowflake"
+  snowSqlCommand: "snowsql -c connection"
+  storagePath: "s3://streamliner-quickstart-1/employees/"
+  storageIntegration: "STREAMLINER_QUICKSTART_1"
+  warehouse: "SANDBOX_POC1"
+  taskSchedule: ""
+  stagingDatabase:
+    name: "SANDBOX_POC1"
+    schema: "EMPLOYEES"
+  reportingDatabase:
+    name: ""
+    schema: ""
+tables:
+  - type: "Snowflake"
+    sourceName: "Employee"
+    destinationName: "Employee"
+    comment: ""
+    primaryKeys:
+      - "ID"
+    fileFormat:
+      location: "VIRTUAL_COLUMNS"
+      fileType: "PARQUET"
+    columns:
+      - sourceName: "ID"
+        destinationName: "ID"
+        dataType: "NUMBER"
+        comment: ""
+        precision: 38
+        scale: 0
+      - sourceName: "NAME"
+        destinationName: "NAME"
+        dataType: "VARCHAR"
+        comment: ""
+        precision: 38
+        scale: 0
