@@ -1,11 +1,13 @@
 package io.phdata.streamliner.schemadefiner;
 
+import io.phdata.streamliner.App;
 import io.phdata.streamliner.configuration.ConfigurationBuilder;
 import io.phdata.streamliner.pipeline.PipelineBuilder;
 import io.phdata.streamliner.schemadefiner.ConfigBuilder.SchemaCommand;
 import io.phdata.streamliner.schemadefiner.model.*;
 import io.phdata.streamliner.schemadefiner.util.StreamlinerUtil;
 import org.junit.*;
+import org.junit.rules.ExpectedException;
 import org.junit.runners.MethodSorters;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.shaded.org.yaml.snakeyaml.Yaml;
@@ -20,6 +22,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +44,9 @@ public class MySQLTestContainerTest {
             .withDatabaseName(STREAMLINER_DATABASE_NAME)
             .withUsername(STREAMLINER_DATABASE_USERNAME)
             .withPassword(STREAMLINER_DATABASE_PASSWORD);
+
+    @Rule
+    public ExpectedException expectedEx = ExpectedException.none();
 
     @BeforeClass
     public static void before() throws SQLException {
@@ -129,7 +135,10 @@ public class MySQLTestContainerTest {
 
     @Test
     public void test3JdbcCrawler() throws Exception {
-        SchemaDefiner definer = new JdbcCrawler(mysql.getJdbcUrl(), () -> con,null,null,null);
+        List<String> tableTypes = new ArrayList<>();
+        tableTypes.add("table");
+        Jdbc jdbc = new Jdbc(mysql.getJdbcUrl(), mysql.getUsername(), mysql.getDatabaseName(), tableTypes);
+        SchemaDefiner definer = new JdbcCrawler(jdbc, mysql.getPassword());
 
         // Mysql testcontainer jdbcCrawler
         StreamlinerCatalog catalog = definer.retrieveSchema();
@@ -307,6 +316,125 @@ public class MySQLTestContainerTest {
                 assertEquals(tableDiff.getColumnDiffs().size(), 1);
               }
             });
+  }
+
+  @Test
+  public void test8_deserialize_serialize() throws IOException {
+    String[] configList = {
+      "src/test/resources/scalaConf/glue/snowflake/ingest-configuration.yml",
+      "src/test/resources/scalaConf/glue/snowflake/streamliner-configuration.yml",
+      "src/test/resources/scalaConf/jdbc/snowflake/ingest-configuration.yml",
+      "src/test/resources/scalaConf/jdbc/snowflake/streamliner-configuration.yml"
+    };
+    Arrays.asList(configList).stream()
+        .forEach(
+            inputConfig -> {
+              try {
+                deserialize_serialize(inputConfig);
+              } catch (IOException e) {
+                e.printStackTrace();
+              }
+            });
+
+    Configuration config1 =
+        StreamlinerUtil.readConfigFromPath(
+            "src/test/resources/scalaConf/glue/snowflake/ingest-configuration.yml");
+    Configuration config2 =
+        StreamlinerUtil.readConfigFromPath(
+            "src/test/resources/scalaConf/glue/snowflake/streamliner-configuration.yml");
+    assertFalse(config1.equals(config2));
+  }
+
+  @Test
+  public void test9ScalaAppMainMethod_usingNewSchemaCommand_() throws Exception {
+    String config = "src/test/resources/conf/ingest-configuration.yml";
+    String generatedConfigFile = "src/test/output/DEV_SDW/conf/streamliner-configuration.yml";
+    updateSourceDetail(config);
+
+    // --create-docs is optional
+    String schemaCommand1[] = {
+      "schema",
+      "--config",
+      config,
+      "--output-path",
+      "src/test/output/DEV_SDW/",
+      "--database-password",
+      mysql.getPassword()
+    };
+    testSchemaCommandOptionalParams(generatedConfigFile, schemaCommand1);
+
+    generatedConfigFile = "STREAMLINER_QUICKSTART_1/SANDBOX/conf/streamliner-configuration.yml";
+    // --output-path is optional
+    String schemaCommand2[] = {
+      "schema", "--config", config, "--database-password", mysql.getPassword()
+    };
+    testSchemaCommandOptionalParams(generatedConfigFile, schemaCommand2);
+    deleteDirectory(new File("STREAMLINER_QUICKSTART_1"));
+  }
+
+  @Test
+  public void test10SchemaCommandOptionalPassword() {
+    /* --database-password is optional parameter. But if source type is Jdbc then password is mandatory */
+    expectedEx.expect(RuntimeException.class);
+    expectedEx.expectMessage("A databasePassword is required when crawling JDBC source");
+    String config = "src/test/resources/conf/ingest-configuration.yml";
+    // --database-password is optional
+    String schemaCommand[] = {"schema", "--config", config};
+    // Scala App main method
+    App.main(schemaCommand);
+  }
+
+  private void testSchemaCommandOptionalParams(String generatedConfigFile, String[] schemaCommand1)
+      throws Exception {
+    String outputPath = "src/test/output/";
+    deleteDirectory(new File(outputPath));
+
+    // Scala App main method
+    App.main(schemaCommand1);
+
+    File f = new File(generatedConfigFile);
+    assertTrue(f.exists());
+    SchemaDefiner definer = new StreamlinerConfigReader(generatedConfigFile);
+    StreamlinerCatalog catalog = definer.retrieveSchema();
+    assertNotNull(catalog);
+    assertNotNull(catalog.getSchemas());
+    assertFalse(catalog.getSchemas().isEmpty());
+
+    List<Schema> schemaList = (List<Schema>) catalog.getSchemas();
+    schemaList.stream()
+        .forEach(
+            schema -> {
+              if (schema.getCatalogName().equals(STREAMLINER_DATABASE_NAME)) {
+                Table table = ((List<Table>) catalog.getTables(schema)).get(0);
+                assertFalse(catalog.getTables(schema).isEmpty());
+                assertEquals(table.getColumns().size(), 5);
+                assertTrue(table.getName().equals("Persons"));
+                assertEquals(table.getSchema().getCatalogName(), STREAMLINER_DATABASE_NAME);
+              }
+            });
+  }
+
+  private void deserialize_serialize(String inputConfig) throws IOException {
+    String outputPath = "src/test/output/";
+    String outputConfig1 = "src/test/output/temp-config1.yml";
+    String outputConfig2 = "src/test/output/temp-config2.yml";
+
+    deleteDirectory(new File(outputPath));
+    // deserialize
+    Configuration config = StreamlinerUtil.readConfigFromPath(inputConfig);
+    StreamlinerUtil.createDir(outputPath);
+    // serialize
+    StreamlinerUtil.writeYamlFile(config, outputConfig1);
+    // deserialzie
+    Configuration tempConfig = StreamlinerUtil.readConfigFromPath(outputConfig1);
+    assertTrue(config.equals(tempConfig));
+
+    // serialize
+    StreamlinerUtil.writeYamlFile(tempConfig, outputConfig2);
+    // deserialzie
+    Configuration tempConfig2 = StreamlinerUtil.readConfigFromPath(outputConfig2);
+    assertTrue(config.equals(tempConfig2));
+    assertTrue(tempConfig.equals(tempConfig2));
   }
 
     boolean deleteDirectory(File directoryToBeDeleted) {

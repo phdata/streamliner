@@ -1,0 +1,39 @@
+name: "STREAMLINER_QUICKSTART_1" # Unique name for data ingestion
+environment: "SANDBOX" # Environment identifier
+pipeline: "snowflake-snowpipe-append" # Pipeline name must match a directory in the the provided template folder (ie incremental-with-kudu, kudu-table-ddl, truncate-reload)
+source:
+  type: Jdbc # Data source type Jdbc or Glue
+  url: "jdbc:oracle:thin:@oraclerds.caewceohkuoi.us-east-1.rds.amazonaws.com:1521/ORCL" # JDBC Connection url
+  username: "HR" # JDBC Username
+  passwordFile: "/" # HDFS location of password file
+  schema: "HR" # JDBC Schema / database name
+  tableTypes: # Controls the types of tables included in the configuration output
+    - table
+  parallelism: 4
+# OPTIONAL: table whitelisting
+#  userDefinedTable:
+#    - name: table1
+#      type: Snowflake
+#    - name: table2
+#      type: Snowflake
+destination:
+  type: Snowflake # Destination type Snowflake or Hadoop
+  snowSqlCommand: snowsql -c connection # SnowSQL connection
+  storagePath: "s3://streamliner-quickstart-1/employees/" # S3 or Azure storage url
+  storageIntegration: "STREAMLINER_QUICKSTART_1" # Snowflake storage integration name (Storage integrations are not created with Streamliner)
+  warehouse: "SANDBOX_POC1" # Snowflake warehouse name (Warehouses are not created with Streamliner)
+  taskSchedule: "" # https://docs.snowflake.com/en/user-guide/tasks-intro.html#task-scheduling-and-daylight-saving-time
+  stageName: "stage1" # Snowflake external stage name (Stages are not created with Streamliner)
+  fileFormat: # Snowflake file format https://docs.snowflake.com/en/sql-reference/sql/create-file-format.html
+    name: ""
+    options:
+      type: ""
+  stagingDatabase: # Staging database
+    name: "SANDBOX_POC1"
+    schema: "EMPLOYEES"
+  reportingDatabase: # Reporting database
+    name: ""
+    schema: ""
+
+
+

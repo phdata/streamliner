@@ -1,8 +1,17 @@
 package io.phdata.streamliner.schemadefiner.model;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.util.List;
 import java.util.Map;
 
+@EqualsAndHashCode(callSuper = false)
+@ToString
+@Getter
+@Setter
 public class Jdbc extends Source {
   private String type;
   private String driverClass;
@@ -18,91 +27,10 @@ public class Jdbc extends Source {
 
   public Jdbc() {}
 
-  public String getType() {
-    return type;
-  }
-
-  public void setType(String type) {
-    this.type = type;
-  }
-
-  public String getDriverClass() {
-    return driverClass;
-  }
-
-  public void setDriverClass(String driverClass) {
-    this.driverClass = driverClass;
-  }
-
-  public String getUrl() {
-    return url;
-  }
-
-  public void setUrl(String url) {
+  public Jdbc(String url, String username, String schema, List<String> tableTypes) {
     this.url = url;
-  }
-
-  public String getUsername() {
-    return username;
-  }
-
-  public void setUsername(String username) {
     this.username = username;
-  }
-
-  public String getPasswordFile() {
-    return passwordFile;
-  }
-
-  public void setPasswordFile(String passwordFile) {
-    this.passwordFile = passwordFile;
-  }
-
-  public String getJceKeyStorePath() {
-    return jceKeyStorePath;
-  }
-
-  public void setJceKeyStorePath(String jceKeyStorePath) {
-    this.jceKeyStorePath = jceKeyStorePath;
-  }
-
-  public String getKeystoreAlias() {
-    return keystoreAlias;
-  }
-
-  public void setKeystoreAlias(String keystoreAlias) {
-    this.keystoreAlias = keystoreAlias;
-  }
-
-  public String getSchema() {
-    return schema;
-  }
-
-  public void setSchema(String schema) {
     this.schema = schema;
-  }
-
-  public List<String> getTableTypes() {
-    return tableTypes;
-  }
-
-  public void setTableTypes(List<String> tableTypes) {
     this.tableTypes = tableTypes;
-  }
-
-  public List<UserDefinedTable> getUserDefinedTable() {
-    return userDefinedTable;
-  }
-
-  public void setUserDefinedTable(List<UserDefinedTable> userDefinedTable) {
-    this.userDefinedTable = userDefinedTable;
-  }
-
-  public Map<String, String> getMetadata() {
-    return metadata;
-  }
-
-  public void setMetadata(Map<String, String> metadata) {
-    this.metadata = metadata;
   }
 }

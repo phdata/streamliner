@@ -83,27 +83,25 @@ public class StreamlinerUtil {
     }
 
     public static void writeConfigToYaml(Configuration outputConfig, String outputDir) throws IOException {
-        if (outputDir.equals("") || outputDir == null) {
-            outputDir = outputDir + "/" + outputConfig.getName() + "/" + outputConfig.getEnvironment() + "/conf";
+        if (outputDir == null || outputDir.equals("")) {
+            outputDir = outputConfig.getName() + "/" + outputConfig.getEnvironment() + "/conf";
         } else {
             outputDir = outputDir + "/conf";
         }
         createDir(outputDir);
         outputDir = outputDir + "/streamliner-configuration.yml";
         writeYamlFile(outputConfig, outputDir);
-
     }
 
     public static void writeConfigToYaml(ConfigurationDiff outputConfig, String outputDir) throws IOException {
-        if (outputDir.equals("") || outputDir == null) {
-            outputDir = outputDir + "/" + outputConfig.getName() + "/" + outputConfig.getEnvironment() + "/confDiff";
+        if (outputDir == null || outputDir.equals("")) {
+            outputDir = outputConfig.getName() + "/" + outputConfig.getEnvironment() + "/confDiff";
         } else {
             outputDir = outputDir + "/confDiff";
         }
         createDir(outputDir);
         outputDir = outputDir + "/streamliner-configuration-diff.yml";
         writeYamlFile(outputConfig, outputDir);
-
     }
 
   public static void writeYamlFile(Configuration outputConfig, String outputDir)
@@ -123,7 +121,7 @@ public class StreamlinerUtil {
         mapper.writeValue(new File(outputDir), outputConfig);
     }
 
-    private static void createDir(String outputDir) {
+    public static void createDir(String outputDir) {
         File f = new File(outputDir);
         if (!f.exists()) {
             log.debug("Creating directory: {}", outputDir);
@@ -164,7 +162,7 @@ public class StreamlinerUtil {
         executable.execute();
     }
 
-    private static SchemaCrawlerOptions getOptions(Jdbc jdbc) {
+    public static SchemaCrawlerOptions getOptions(Jdbc jdbc) {
         setLogLevel();
 
         SchemaCrawlerOptions options = SchemaCrawlerOptionsBuilder.newSchemaCrawlerOptions();

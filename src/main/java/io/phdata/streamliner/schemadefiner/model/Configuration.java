@@ -1,8 +1,17 @@
 package io.phdata.streamliner.schemadefiner.model;
 
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = false)
+@ToString
+@Getter
+@Setter
 public class Configuration {
     private String name;
     private String environment;
@@ -20,54 +29,6 @@ public class Configuration {
         this.pipeline = pipeline;
         this.source = source;
         this.destination = destination;
-        this.tables = tables;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEnvironment() {
-        return environment;
-    }
-
-    public void setEnvironment(String environment) {
-        this.environment = environment;
-    }
-
-    public String getPipeline() {
-        return pipeline;
-    }
-
-    public void setPipeline(String pipeline) {
-        this.pipeline = pipeline;
-    }
-
-    public Source getSource() {
-        return source;
-    }
-
-    public void setSource(Source source) {
-        this.source = source;
-    }
-
-    public Destination getDestination() {
-        return destination;
-    }
-
-    public void setDestination(Destination destination) {
-        this.destination = destination;
-    }
-
-    public List<TableDefinition> getTables() {
-        return tables;
-    }
-
-    public void setTables(List<TableDefinition> tables) {
         this.tables = tables;
     }
 }
