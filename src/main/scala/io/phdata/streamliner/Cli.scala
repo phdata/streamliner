@@ -66,8 +66,31 @@ class Cli(args: Seq[String]) extends ScallopConf(args) {
     )
   }
 
+  val schemaEvolution = new Subcommand("schema-evolution") {
+
+    val previousConfig: ScallopOption[String] =
+      opt[String](
+        "previous-config",
+        descr = "Path to streamliner previous configuration",
+        required = false)
+
+    val currentConfig: ScallopOption[String] = opt[String](
+      "current-config",
+      descr = "Path to streamliner current configuration",
+      required = true)
+
+    val outputPath: ScallopOption[String] =
+      opt[String](
+        "output-path",
+        descr =
+          "Directory path where Streamliner previous config, current config and configuration difference should be written to",
+        required = false
+      )
+  }
+
   addSubcommand(schema)
   addSubcommand(produceScripts)
+  addSubcommand(schemaEvolution)
 
   verify()
 }
