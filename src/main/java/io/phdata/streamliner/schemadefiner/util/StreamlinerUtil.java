@@ -2,9 +2,11 @@ package io.phdata.streamliner.schemadefiner.util;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import io.phdata.streamliner.schemadefiner.Mapper.HadoopMapper;
 import io.phdata.streamliner.schemadefiner.Mapper.SnowflakeMapper;
 import io.phdata.streamliner.schemadefiner.model.*;
@@ -30,6 +32,9 @@ import us.fatehi.utility.LoggingConfig;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.util.List;
@@ -45,6 +50,22 @@ public class StreamlinerUtil {
         Configuration config = mapper.readValue(new File(path), Configuration.class);
         return config;
     }
+
+  // this method handles even if yaml file is empty. Through normal process jackson throws exception if
+  // yaml file is empty.
+  public static Configuration readYamlFile(String path) throws IOException {
+    Path yamlFile = Paths.get(path);
+    YAMLMapper yamlMapper = new YAMLMapper();
+    JsonNode tree;
+    try (InputStream inputStream = Files.newInputStream(yamlFile)) {
+      tree = yamlMapper.readTree(inputStream);
+    }
+    if (tree.isEmpty()) {
+      return null;
+    }
+    ObjectMapper objectMapper = new ObjectMapper();
+    return objectMapper.treeToValue(tree, Configuration.class);
+  }
 
     public static ConfigurationDiff readConfigDiffFromPath(String path) throws IOException {
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
@@ -212,4 +233,15 @@ public class StreamlinerUtil {
         }
         new LoggingConfig(level);
     }
+
+  public static boolean deleteDirectory(File directoryToBeDeleted) {
+    log.debug("Deleting directory: {}", directoryToBeDeleted.getPath());
+    File[] allContents = directoryToBeDeleted.listFiles();
+    if (allContents != null) {
+      for (File file : allContents) {
+        deleteDirectory(file);
+      }
+    }
+    return directoryToBeDeleted.delete();
+  }
 }
