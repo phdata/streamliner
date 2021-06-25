@@ -10,6 +10,7 @@ import io.phdata.streamliner.schemadefiner.util.StreamlinerUtil;
 import schemacrawler.crawl.StreamlinerCatalog;
 
 public class SchemaCommand {
+    private static final String STREAMLINER_CONFIGURATION_NAME = "streamliner-configuration.yml";
 
     public static void build(String configurationFile, String outputDirectory, String password, boolean createDocs) throws Exception {
         // read ingest-configuration.yml
@@ -32,7 +33,7 @@ public class SchemaCommand {
             outputConfig = StreamlinerUtil.mapGlueCatalogToConfig(ingestConfig, catalog);
         }
 
-        StreamlinerUtil.writeConfigToYaml(outputConfig, outputDirectory);
+        StreamlinerUtil.writeConfigToYaml(outputConfig, outputDirectory, STREAMLINER_CONFIGURATION_NAME);
     }
 
     private static void writeDocs(Configuration ingestConfig, String password, String outputDir) throws Exception {

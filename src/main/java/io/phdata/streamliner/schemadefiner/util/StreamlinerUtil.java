@@ -54,6 +54,7 @@ public class StreamlinerUtil {
   // this method handles even if yaml file is empty. Through normal process jackson throws exception if
   // yaml file is empty.
   public static Configuration readYamlFile(String path) throws IOException {
+    if (path == null) return null;
     Path yamlFile = Paths.get(path);
     YAMLMapper yamlMapper = new YAMLMapper();
     JsonNode tree;
@@ -103,14 +104,14 @@ public class StreamlinerUtil {
         return newConfig;
     }
 
-    public static void writeConfigToYaml(Configuration outputConfig, String outputDir) throws IOException {
+    public static void writeConfigToYaml(Configuration outputConfig, String outputDir, String fileName) throws IOException {
         if (outputDir == null || outputDir.equals("")) {
             outputDir = outputConfig.getName() + "/" + outputConfig.getEnvironment() + "/conf";
         } else {
             outputDir = outputDir + "/conf";
         }
         createDir(outputDir);
-        outputDir = outputDir + "/streamliner-configuration.yml";
+        outputDir = outputDir + "/" + fileName;
         writeYamlFile(outputConfig, outputDir);
     }
 
