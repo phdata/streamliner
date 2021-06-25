@@ -94,6 +94,12 @@ timestamp(6):
   parquet: timestamp
   avro: bigint
   snowflake: timestamp_ntz
+timestamp(6) with time zone:
+  kudu: bigint
+  impala: timestamp
+  parquet: timestamp
+  avro: bigint
+  snowflake: timestamp_ntz
 timestamp(7):
   kudu: bigint
   impala: timestamp
@@ -118,13 +124,13 @@ datetime:
   parquet: timestamp
   avro: bigint
   snowflake: timestamp_ntz
-time_with_timezone:
+time with timezone:
   kudu: bigint
   impala: timestamp
   parquet: timestamp
   avro: bigint
   snowflake: timestamp_tz
-timestamp_with_timezone:
+timestamp with timezone:
   kudu: bigint
   impala: timestamp
   parquet: timestamp
