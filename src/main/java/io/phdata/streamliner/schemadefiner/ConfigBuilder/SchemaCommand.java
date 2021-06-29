@@ -7,9 +7,12 @@ import io.phdata.streamliner.schemadefiner.model.Configuration;
 import io.phdata.streamliner.schemadefiner.model.GlueCatalog;
 import io.phdata.streamliner.schemadefiner.model.Jdbc;
 import io.phdata.streamliner.schemadefiner.util.StreamlinerUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import schemacrawler.crawl.StreamlinerCatalog;
 
 public class SchemaCommand {
+    private static final Logger log = LoggerFactory.getLogger(SchemaCommand.class);
     private static final String STREAMLINER_CONFIGURATION_NAME = "streamliner-configuration.yml";
 
     public static void build(String configurationFile, String outputDirectory, String password, boolean createDocs) throws Exception {

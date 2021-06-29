@@ -25,6 +25,7 @@ public class DiffGeneratorTest {
     StreamlinerUtil.deleteDirectory(new File(outputPath));
   }
 
+  // Please comment this after() if want to see the generated output files.
   @AfterClass
   public static void after() {
     StreamlinerUtil.deleteDirectory(new File(outputPath));

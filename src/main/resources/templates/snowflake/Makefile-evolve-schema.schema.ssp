@@ -1,0 +1,12 @@
+<%@ val tableDiffs: Seq[io.phdata.streamliner.schemadefiner.model.TableDiff] %>
+<%
+	val runTables = tableDiffs.map(t => s"run-${t.destinationName}").mkString(" ")
+%>
+
+run-all: ${runTables}
+
+#for (table <- tableDiffs)
+run-${table.destinationName}:
+	$(MAKE) run -C ${table.destinationName}
+
+#end

@@ -20,7 +20,7 @@ public class DiffGenerator {
       return new ConfigurationDiff(
           currConfig.getName(),
           currConfig.getEnvironment(),
-          currConfig.getPipeline(),
+          "snowflake-schema-evolution",
           null,
           currConfig.getDestination(),
           tableDiffList);
@@ -30,7 +30,7 @@ public class DiffGenerator {
     return new ConfigurationDiff(
         currConfig.getName(),
         currConfig.getEnvironment(),
-        currConfig.getPipeline(),
+        "snowflake-schema-evolution",
         prevConfig.getDestination(),
         currConfig.getDestination(),
         tableDiffList);

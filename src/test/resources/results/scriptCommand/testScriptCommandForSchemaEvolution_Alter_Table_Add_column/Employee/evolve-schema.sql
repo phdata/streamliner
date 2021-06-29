@@ -1,0 +1,1 @@
+ALTER TABLE Employee ADD COLUMN Age NUMBER(38, 0);

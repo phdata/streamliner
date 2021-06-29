@@ -1,0 +1,22 @@
+#import(io.phdata.streamliner.schemadefiner.model.Snowflake)
+<%@ val configurationDiff: io.phdata.streamliner.schemadefiner.model.ConfigurationDiff %>
+<%@ val tableDiff: io.phdata.streamliner.schemadefiner.model.TableDiff %>
+<%@ val templateContext: io.phdata.streamliner.schemadefiner.model.TemplateContext %>
+<%@ val typeMapping: Map[String, Map[String, String]]%>
+#{
+    val destination = configurationDiff.currentDestination.asInstanceOf[Snowflake]
+}#
+
+#if (tableDiff.existsInDestination && tableDiff.existsInSource)
+    #if (tableDiff.allChangesAreCompatible())
+        ALTER TABLE ${tableDiff.destinationName} ADD COLUMN ${unescape(tableDiff.columnDDL(typeMapping))};
+    #elseif (!tableDiff.allChangesAreCompatible())
+        <%
+            templateContext.addError(s"Incompatible change in table ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${tableDiff.destinationName} which will be ignored")
+        %>
+    #end
+#elseif (tableDiff.existsInSource && !tableDiff.existsInDestination)
+    CREATE TABLE IF NOT EXISTS ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${tableDiff.destinationName} (
+    ${unescape(tableDiff.createTableColumnDDL(typeMapping))}
+    );
+#end

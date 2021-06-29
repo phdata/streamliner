@@ -17,7 +17,7 @@ public class Configuration {
     private String environment;
     private String pipeline;
     private Source source;
-    private Destination destination;
+    public Destination destination;
     private List<TableDefinition> tables;
 
     public Configuration() {
