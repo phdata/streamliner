@@ -13,10 +13,10 @@ import java.util.List;
 @Getter
 @Setter
 public class Configuration {
-    private String name;
-    private String environment;
+    public String name;
+    public String environment;
     private String pipeline;
-    private Source source;
+    public Source source;
     public Destination destination;
     private List<TableDefinition> tables;
 

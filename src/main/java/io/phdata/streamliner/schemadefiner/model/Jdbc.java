@@ -14,13 +14,13 @@ import java.util.Map;
 @Setter
 public class Jdbc extends Source {
   private String type;
-  private String driverClass;
-  private String url;
-  private String username;
-  private String passwordFile;
+  public String driverClass = "";
+  public String url;
+  public String username;
+  public String passwordFile;
   private String jceKeyStorePath;
   private String keystoreAlias;
-  private String schema;
+  public String schema;
   private List<String> tableTypes;
   private List<UserDefinedTable> userDefinedTable;
   private Map<String, String> metadata;

@@ -16,9 +16,7 @@
 
 package io.phdata.streamliner
 
-import io.phdata.streamliner.pipeline.PipelineBuilder
-import io.phdata.streamliner.schemadefiner.ConfigBuilder.SchemaCommand
-import io.phdata.streamliner.schemadefiner.ConfigBuilder.SchemaEvolutionCommand
+import io.phdata.streamliner.schemadefiner.ConfigBuilder.{SchemaCommand, SchemaEvolutionCommand, ScriptCommand}
 import org.apache.log4j.LogManager
 
 object App {
@@ -36,11 +34,12 @@ object App {
           cli.schema.createDocs.getOrElse(false))
 
       case Some(cli.produceScripts) =>
-        PipelineBuilder.build(
-          cli.produceScripts.filePath(),
+        ScriptCommand.build(
+          cli.produceScripts.filePath.getOrElse(null),
+          cli.produceScripts.configDiffFilePath.getOrElse(null),
           cli.produceScripts.typeMappingFile(),
           cli.produceScripts.templateDirectory(),
-          cli.produceScripts.outputPath.toOption)
+          cli.produceScripts.outputPath())
 
       case Some(cli.schemaEvolution) =>
         SchemaEvolutionCommand.build(

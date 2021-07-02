@@ -12,14 +12,14 @@ import lombok.ToString;
 public class Snowflake extends Destination {
   private String type;
   public String snowSqlCommand;
-  private String storagePath;
-  private String storageIntegration;
-  private String snsTopic;
-  private String warehouse;
-  private String taskSchedule;
-  private SnowflakeQAOptions quality;
+  public String storagePath;
+  public String storageIntegration;
+  public String snsTopic;
+  public String warehouse;
+  public String taskSchedule = "5 minutes";
+  public SnowflakeQAOptions quality;
   public SnowflakeDatabase stagingDatabase;
-  private SnowflakeDatabase reportingDatabase;
+  public SnowflakeDatabase reportingDatabase;
 
   public Snowflake() {}
 }

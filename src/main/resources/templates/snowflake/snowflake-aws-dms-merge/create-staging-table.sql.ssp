@@ -13,18 +13,19 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --%>
-#import(io.phdata.streamliner.configuration.Snowflake)
-<%@ val configuration: io.phdata.streamliner.configuration.Configuration %>
-<%@ val table: io.phdata.streamliner.configuration.SnowflakeTable %>
+#import(io.phdata.streamliner.schemadefiner.model.Snowflake)
+<%@ val configuration: io.phdata.streamliner.schemadefiner.model.Configuration %>
+<%@ val table: io.phdata.streamliner.schemadefiner.model.SnowflakeTable %>
 <%@ val typeMapping: Map[String, Map[String, String]]%>
+<%@ val util: io.phdata.streamliner.schemadefiner.util.StreamlinerUtil%>
 #{
     val destination = configuration.destination.asInstanceOf[Snowflake]
 }#
 CREATE TABLE IF NOT EXISTS ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName}_stg (
-#for (column <- table.columns)
-    ${unescape(column.destinationName)} ${column.mapDataTypeSnowflake(typeMapping)} COMMENT '${column.comment.getOrElse("")}',
+#for (column <- util.convertListToSeq(table.columns))
+    ${unescape(column.destinationName)} ${column.mapDataTypeSnowflake(typeMapping)} COMMENT '${column.comment}',
 #end
     dms_operation CHAR COMMENT 'AWS DMS Operation type',
     dms_ts TIMESTAMP_LTZ COMMENT 'AWS DMS timestamp'
 )
-COMMENT = '${table.comment.getOrElse("")}';
+COMMENT = '${table.comment}';

@@ -11,9 +11,9 @@ import lombok.ToString;
 @Setter
 public class Hadoop extends Destination {
   private String type;
-  private String impalaShellCommand;
-  private HadoopDatabase stagingDatabase;
-  private HadoopDatabase reportingDatabase;
+  public String impalaShellCommand;
+  public HadoopDatabase stagingDatabase;
+  public HadoopDatabase reportingDatabase;
 
   public Hadoop() {}
 }

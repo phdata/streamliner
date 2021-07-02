@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --%>
 #import(io.phdata.streamliner.configuration.Snowflake)
-<%@ val database: io.phdata.streamliner.configuration.SnowflakeDatabase %>
+<%@ val database: io.phdata.streamliner.schemadefiner.model.SnowflakeDatabase %>
 <%@ val table: String %>
 CREATE STREAM IF NOT EXISTS ${database.name}.${database.schema}.${table}_stream
 ON TABLE ${database.name}.${database.schema}.${table}

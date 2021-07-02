@@ -13,29 +13,30 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --%>
-#import(io.phdata.streamliner.configuration.Hadoop)
-<%@ val configuration: io.phdata.streamliner.configuration.Configuration %>
-<%@ val table: io.phdata.streamliner.configuration.HadoopTable %>
+#import(io.phdata.streamliner.schemadefiner.model.Hadoop)
+<%@ val configuration: io.phdata.streamliner.schemadefiner.model.Configuration %>
+<%@ val table: io.phdata.streamliner.schemadefiner.model.HadoopTable %>
 <%@ val typeMapping: Map[String, Map[String, String]]%>
+<%@ val util: io.phdata.streamliner.schemadefiner.util.StreamlinerUtil%>
 #{
     val destination = configuration.destination.asInstanceOf[Hadoop]
 }#
 set sync_ddl=1;
 CREATE TABLE IF NOT EXISTS `${destination.reportingDatabase.name}`.`${table.destinationName}` (
 <% val orderedColumns = table.orderColumnsPKsFirst %>
-#for (column <- orderedColumns)
-    `${column.destinationName}` ${column.mapDataTypeHadoop(typeMapping, "KUDU")} COMMENT '${column.comment.getOrElse("")}',
+#for (column <- util.convertListToSeq(orderedColumns))
+    `${column.destinationName}` ${column.mapDataTypeHadoop(typeMapping, "KUDU")} COMMENT '${column.comment}',
 #end
-PRIMARY KEY (${table.primaryKeys.mkString(",")})
+PRIMARY KEY (${table.pkAsStringCommaSeparated})
 )
-#if (table.primaryKeys.nonEmpty)
-PARTITION BY HASH (${table.pkList}) PARTITIONS ${table.numberOfPartitions.getOrElse(2)}
+#if (!table.primaryKeys.isEmpty)
+PARTITION BY HASH (${table.pkList}) PARTITIONS ${table.numberOfPartitions}
 #end
-COMMENT '${table.comment.getOrElse("")}'
+COMMENT '${table.comment}'
 STORED AS KUDU
-#if (table.metadata.isDefined)
+#if (table.metadata != null)
 TBLPROPERTIES(
-    <% val metadata = table.metadata.get.map(md => s"'${md._1}' = '${md._2}").mkString(",\n") %>
+    <% val metadata = table.tableMetadata() %>
 ${metadata}
 )
 #end;

@@ -14,10 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --%>
 #!/usr/bin/env bash
-#import(io.phdata.streamliner.configuration.Hadoop)
-#import(io.phdata.streamliner.configuration.Jdbc)
-<%@ val configuration: io.phdata.streamliner.configuration.Configuration %>
-<%@ val table: io.phdata.streamliner.configuration.HadoopTable %>
+#import(io.phdata.streamliner.schemadefiner.model.Hadoop)
+#import(io.phdata.streamliner.schemadefiner.model.Jdbc)
+<%@ val configuration: io.phdata.streamliner.schemadefiner.model.Configuration %>
+<%@ val table: io.phdata.streamliner.schemadefiner.model.HadoopTable %>
 <%@ val typeMapping: Map[String, Map[String, String]]%>
 #{
     val source = configuration.source.asInstanceOf[Jdbc]
@@ -29,7 +29,7 @@ set -euo pipefail
 sqoop job -D 'sqoop.metastore.client.record.password=true'  -D 'mapreduce.job.name=Sqoop Incremental Job - name: ${configuration.name} environment: ${configuration.environment} table: ${table.destinationName}' \\
     --create '${configuration.name}/${configuration.environment}/${table.destinationName}' \\
     -- import \\
-    --driver '${source.driverClass.get}' \\
+    --driver '${source.driverClass}' \\
     --connect '${source.url}' \\
     --username '${source.username}' \\
     --password-file '${source.passwordFile}' \\
@@ -37,18 +37,18 @@ sqoop job -D 'sqoop.metastore.client.record.password=true'  -D 'mapreduce.job.na
     --temporary-rootdir '${destination.stagingDatabase.path}/stg_${table.destinationName}/' \\
 	--incremental append \\
     --append \\
-#if (table.splitByColumn.isDefined) 	--splitBy ${table.splitByColumn.get} \\
-#elseif (javaColumnMap.isDefined)
+#if (table.splitByColumn != null) 	--splitBy ${table.splitByColumn} \\
+#elseif (javaColumnMap != null)
     --map-column-java ${javaColumnMap} \\
 #end
-#if (table.checkColumn.isDefined) 	--check-column ${table.checkColumn.get} \\
+#if (table.checkColumn != null) 	--check-column ${table.checkColumn} \\
 #end
     --as-avrodatafile \\
     --fetch-size 10000 \\
     --compress  \\
     --compression-codec snappy \\
-    -m ${table.numberOfMappers.getOrElse(1)} \\
+    -m ${table.numberOfMappers} \\
     --query 'SELECT
-${table.sourceColumns(source.driverClass.get)}
+${table.sourceColumns(source.driverClass)}
 FROM ${source.schema}.${table.sourceName}
 WHERE $CONDITIONS'

@@ -1,8 +1,6 @@
 package io.phdata.streamliner.schemadefiner;
 
 import io.phdata.streamliner.App;
-import io.phdata.streamliner.configuration.ConfigurationBuilder;
-import io.phdata.streamliner.pipeline.PipelineBuilder;
 import io.phdata.streamliner.schemadefiner.ConfigBuilder.SchemaCommand;
 import io.phdata.streamliner.schemadefiner.model.*;
 import io.phdata.streamliner.schemadefiner.util.StreamlinerUtil;
@@ -12,7 +10,6 @@ import org.junit.runners.MethodSorters;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.shaded.org.yaml.snakeyaml.Yaml;
 import org.testcontainers.utility.DockerImageName;
-import scala.Option;
 import schemacrawler.crawl.StreamlinerCatalog;
 import schemacrawler.schema.Schema;
 import schemacrawler.schema.Table;
@@ -68,72 +65,6 @@ public class MySQLTestContainerTest {
     }
 
     @Test
-    public void test1StreamlinerSchemaCommand() throws FileNotFoundException {
-        String config = "src/test/resources/conf/ingest-configuration.yml";
-        String outputPath = "src/test/output/";
-        String dbPass = mysql.getPassword();
-        boolean createDocs = false;
-        Map<String, Object> ingestConfigFile = updateSourceDetail(config);
-        File generatedOutputFolder = new File(outputPath);
-        StreamlinerUtil.deleteDirectory(generatedOutputFolder);
-
-        //streamliner schema command
-        ConfigurationBuilder.build(config, Option.apply(outputPath), Option.apply(dbPass), createDocs);
-
-        generatedOutputFolder = new File(outputPath + "conf");
-        assertTrue(generatedOutputFolder.exists());
-        assertTrue(generatedOutputFolder.isDirectory());
-
-        File outputFile = new File(outputPath + "conf/streamliner-configuration.yml");
-        assertTrue(outputFile.exists());
-        assertTrue(outputFile.isFile());
-
-        InputStream inputStream = new FileInputStream(outputFile);
-        Map<String, Object> outputConfigFile = yaml.load(inputStream);
-
-        assertEquals(ingestConfigFile.get("name"), outputConfigFile.get("name"));
-        assertEquals(ingestConfigFile.get("pipeline"), outputConfigFile.get("pipeline"));
-
-        assertEquals(((Map<String, Object>) ingestConfigFile.get("source")).get("schema"), ((Map<String, Object>) outputConfigFile.get("source")).get("schema"));
-        assertEquals(((Map<String, Object>) ingestConfigFile.get("destination")).get("type"), ((Map<String, Object>) outputConfigFile.get("destination")).get("type"));
-
-        Map<String, Object> table = ((List<Map<String, Object>>) outputConfigFile.get("tables")).get(0);
-        assertEquals("Snowflake", table.get("type"));
-        assertEquals("Persons", table.get("sourceName"));
-
-        List<Map<String, Object>> columnList = ((List<Map<String, Object>>) table.get("columns"));
-        assertFalse(columnList.isEmpty());
-    }
-
-    @Test
-    public void test2StreamlinerScriptCommand() {
-        String config = SCHEMA_COMMAND_OUTPUT_PATH;
-        String templateDirectory = "src/main/resources/templates/snowflake";
-        String typeMapping = "src/main/resources/type-mapping.yml";
-        String outputPath = "src/test/output/pipelineConfig";
-
-        File generatedOutputFolder = new File(outputPath);
-        StreamlinerUtil.deleteDirectory(generatedOutputFolder);
-
-        //Streamliner script command
-        PipelineBuilder.build(config, typeMapping, templateDirectory, Option.apply(outputPath));
-
-        assertTrue(generatedOutputFolder.exists());
-        String[] allContents = generatedOutputFolder.list();
-
-        //Person directory and Makefile
-        assertEquals(2, allContents.length);
-
-        File generatedPersonsDir = new File("src/test/output/pipelineConfig/Persons");
-        assertTrue(generatedPersonsDir.exists());
-
-        allContents = generatedPersonsDir.list();
-        // 10 files are generated. copy-into.sql, create-schema.sql, create-snowpipe.sql, create-stage.sql, create-table.sql,
-        // drop-schema.sql, drop-snowpipe.sql, drop-stage.sql,  drop-table.sql, Makefile
-        assertEquals(10, allContents.length);
-    }
-
-    @Test
     public void test3JdbcCrawler() throws Exception {
         List<String> tableTypes = new ArrayList<>();
         tableTypes.add("table");
@@ -162,7 +93,7 @@ public class MySQLTestContainerTest {
     }
 
     @Test
-    public void test4StreamlinerConfigReader() throws Exception {
+    public void test5StreamlinerConfigReader() throws Exception {
         //reading config file generated after schema command and converting it to StreamlinerCatalog
         SchemaDefiner definer = new StreamlinerConfigReader(SCHEMA_COMMAND_OUTPUT_PATH);
         StreamlinerCatalog catalog = definer.retrieveSchema();
@@ -184,7 +115,7 @@ public class MySQLTestContainerTest {
     }
 
     @Test
-    public void test5SchemaCommand_new() throws Exception {
+    public void test4SchemaCommand_new() throws Exception {
         String config = "src/test/resources/conf/ingest-configuration.yml";
         String outputPath = "src/test/output/";
         String dbPass = mysql.getPassword();
@@ -363,7 +294,7 @@ public class MySQLTestContainerTest {
     };
     testSchemaCommandOptionalParams(generatedConfigFile, schemaCommand1);
 
-    generatedConfigFile = "STREAMLINER_QUICKSTART_1/SANDBOX/conf/streamliner-configuration.yml";
+    generatedConfigFile = "output/STREAMLINER_QUICKSTART_1/SANDBOX/conf/streamliner-configuration.yml";
     // --output-path is optional
     String schemaCommand2[] = {
       "schema", "--config", config, "--database-password", mysql.getPassword()

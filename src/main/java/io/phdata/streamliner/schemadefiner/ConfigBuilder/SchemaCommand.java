@@ -3,13 +3,13 @@ package io.phdata.streamliner.schemadefiner.ConfigBuilder;
 import io.phdata.streamliner.schemadefiner.GlueCrawler;
 import io.phdata.streamliner.schemadefiner.JdbcCrawler;
 import io.phdata.streamliner.schemadefiner.SchemaDefiner;
-import io.phdata.streamliner.schemadefiner.model.Configuration;
-import io.phdata.streamliner.schemadefiner.model.GlueCatalog;
-import io.phdata.streamliner.schemadefiner.model.Jdbc;
+import io.phdata.streamliner.schemadefiner.model.*;
 import io.phdata.streamliner.schemadefiner.util.StreamlinerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schemacrawler.crawl.StreamlinerCatalog;
+
+import java.util.List;
 
 public class SchemaCommand {
     private static final Logger log = LoggerFactory.getLogger(SchemaCommand.class);
@@ -35,12 +35,58 @@ public class SchemaCommand {
             StreamlinerCatalog catalog = schemaDef.retrieveSchema();
             outputConfig = StreamlinerUtil.mapGlueCatalogToConfig(ingestConfig, catalog);
         }
-
+        checkConfiguration(outputConfig);
         StreamlinerUtil.writeConfigToYaml(outputConfig, outputDirectory, STREAMLINER_CONFIGURATION_NAME);
     }
 
+  private static void checkConfiguration(Configuration config) {
+    List<TableDefinition> tables = config.getTables();
+    if (tables != null) {
+      tables.stream()
+          .forEach(
+              table -> {
+                if (table instanceof HadoopTable) {
+                  if (config.getPipeline().equalsIgnoreCase("INCREMENTAL-WITH-KUDU")) {
+                    checkCheckColumn((HadoopTable) table);
+                    checkPrimaryKeys(table);
+                  } else if (config.getPipeline().equalsIgnoreCase("KUDU-TABLE-DDL")) {
+                    checkPrimaryKeys(table);
+                  }
+                  checkNumberOfMappers((HadoopTable) table);
+                } else if (table instanceof SnowflakeTable) {
+                  if (config.getPipeline().equalsIgnoreCase("SNOWFLAKE-INCREMENTAL-MERGE")) {
+                    checkPrimaryKeys(table);
+                  }
+                }
+              });
+    }
+  }
+
+  private static void checkNumberOfMappers(HadoopTable table) {
+    if (table.getNumberOfMappers() > 1) {
+      if (table.getSplitByColumn() == null || table.getSplitByColumn().isEmpty()) {
+        throw new RuntimeException(
+            String.format(
+                "Table: %s, has number of mappers greater than 1 with no splitByColumn defined Sqoop import will fail for this table",
+                table.getSourceName()));
+      }
+    }
+  }
+
+    private static void checkCheckColumn(HadoopTable table) {
+    if (table.getCheckColumn() == null || table.getCheckColumn().isEmpty()) {
+      log.warn("No check column is defined for table: {}", table.getSourceName());
+    }
+  }
+
+  private static void checkPrimaryKeys(TableDefinition table) {
+    if (table.getPrimaryKeys() == null || table.getPrimaryKeys().isEmpty()) {
+      log.warn("No primary keys are defined for table: {}", table.getSourceName());
+    }
+  }
+
     private static void writeDocs(Configuration ingestConfig, String password, String outputDir) throws Exception {
-        if (outputDir.equals("") || outputDir == null) {
+        if (outputDir == null || outputDir.equals("")) {
             outputDir = outputDir + "/" + ingestConfig.getName() + "/" + ingestConfig.getEnvironment() + "/docs";
         } else {
             outputDir = outputDir + "/docs";

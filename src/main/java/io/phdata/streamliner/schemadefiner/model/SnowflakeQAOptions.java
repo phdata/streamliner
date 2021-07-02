@@ -10,11 +10,11 @@ import lombok.ToString;
 @Getter
 @Setter
 public class SnowflakeQAOptions {
-  private String taskSchedule;
-  private Double minimumPercentage;
-  private Integer minimumCount;
-  private Integer minimumRuns;
-  private Double standardDeviations;
+  public String taskSchedule = "5 minutes";
+  public Double minimumPercentage;
+  public Integer minimumCount;
+  public Integer minimumRuns;
+  public Double standardDeviations;
 
   public SnowflakeQAOptions() {}
 }

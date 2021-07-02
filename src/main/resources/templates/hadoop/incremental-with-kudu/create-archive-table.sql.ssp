@@ -13,9 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --%>
-#import(io.phdata.streamliner.configuration.Hadoop)
-<%@ val configuration: io.phdata.streamliner.configuration.Configuration %>
-<%@ val table: io.phdata.streamliner.configuration.HadoopTable %>
+#import(io.phdata.streamliner.schemadefiner.model.Hadoop)
+<%@ val configuration: io.phdata.streamliner.schemadefiner.model.Configuration %>
+<%@ val table: io.phdata.streamliner.schemadefiner.model.HadoopTable %>
 <%@ val typeMapping: Map[String, Map[String, String]]%>
 #{
     val destination = configuration.destination.asInstanceOf[Hadoop]
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS `${destination.stagingDatabase.name}`.`arch_${table.d
 ${table.columnDDL(typeMapping, "PARQUET")}
 )
 PARTITIONED BY (ingest_date STRING)
-COMMENT '${table.comment.getOrElse("")}'
+COMMENT '${table.comment}'
 STORED AS AVRO
 LOCATION '${destination.stagingDatabase.path}/arch_${table.destinationName}'
 TBLPROPERTIES(

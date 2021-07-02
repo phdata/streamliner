@@ -27,6 +27,10 @@ public class ScriptCommand {
 
     Configuration configuration = StreamlinerUtil.readConfigFromPath(configurationFile);
     ConfigurationDiff configDiff = StreamlinerUtil.readConfigDiffFromPath(configurationDiffFile);
+    if (configuration == null && configDiff == null) {
+      throw new RuntimeException(
+          "No configuration file found (example: streamliner-configuration.yml or streamliner-configuration-diff.yml) ");
+    }
     Map<String, Map<String, String>> typeMapping =
         StreamlinerUtil.readTypeMappingFile(typeMappingFile);
     if (outputDirectory == null || outputDirectory.equals("")) {
@@ -44,10 +48,6 @@ public class ScriptCommand {
       String templateDirectory,
       String outputDirectory)
       throws IOException {
-    if (configuration == null && configDiff == null) {
-      throw new RuntimeException(
-          "No configuration file found (example: streamliner-configuration.yml or streamliner-configuration-diff.yml) ");
-    }
     String pipeline =
         configuration == null ? configDiff.getPipeline() : configuration.getPipeline();
     List<File> files =
@@ -78,6 +78,7 @@ public class ScriptCommand {
                           map.put("configuration", configuration);
                           map.put("table", table);
                           map.put("typeMapping", typeMapping);
+                          map.put("util", new StreamlinerUtil());
                           String rendered = JavaHelper.getLayout(templateFile.getPath(), map);
 
                           String replaced = rendered.replace("    ", "\t");
@@ -221,7 +222,7 @@ public class ScriptCommand {
           log.info("Rendering file: {}", templateFile);
           Map<String, Object> map = new LinkedHashMap<>();
           map.put("configuration", configuration);
-          map.put("tables", configuration.getTables());
+          map.put("tables", StreamlinerUtil.convertJavaListToScalaSeq(configuration.getTables()));
           map.put("typeMapping", typeMapping);
           String rendered = JavaHelper.getLayout(templateFile.getPath(), map);
           log.debug("Rendered file: {}", rendered);
