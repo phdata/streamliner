@@ -13,6 +13,8 @@ import io.phdata.streamliner.schemadefiner.model.*;
 import org.apache.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import scala.collection.JavaConverters;
+import scala.collection.Seq;
 import schemacrawler.crawl.StreamlinerCatalog;
 import schemacrawler.inclusionrule.RegularExpressionInclusionRule;
 import schemacrawler.schema.Schema;
@@ -30,14 +32,14 @@ import schemacrawler.tools.options.OutputOptions;
 import schemacrawler.tools.options.OutputOptionsBuilder;
 import us.fatehi.utility.LoggingConfig;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -45,6 +47,10 @@ public class StreamlinerUtil {
     private static final Logger log = LoggerFactory.getLogger(StreamlinerUtil.class);
 
     public static Configuration readConfigFromPath(String path) throws IOException {
+        if (path == null) return null;
+        if(!fileExists(path)){
+            throw new FileNotFoundException("Configuration File not found: " + path);
+        }
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         Configuration config = mapper.readValue(new File(path), Configuration.class);
@@ -69,6 +75,10 @@ public class StreamlinerUtil {
   }
 
     public static ConfigurationDiff readConfigDiffFromPath(String path) throws IOException {
+        if (path == null) return null;
+        if(!fileExists(path)){
+            throw new FileNotFoundException("Configuration File not found: " + path);
+        }
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         ConfigurationDiff config = mapper.readValue(new File(path), ConfigurationDiff.class);
@@ -106,9 +116,10 @@ public class StreamlinerUtil {
 
     public static void writeConfigToYaml(Configuration outputConfig, String outputDir, String fileName) throws IOException {
         if (outputDir == null || outputDir.equals("")) {
-            outputDir = outputConfig.getName() + "/" + outputConfig.getEnvironment() + "/conf";
+          outputDir =
+              String.format("output/%s/%s/conf", outputConfig.getName(), outputConfig.getEnvironment());
         } else {
-            outputDir = outputDir + "/conf";
+            outputDir = String.format("%s/conf", outputDir);
         }
         createDir(outputDir);
         outputDir = outputDir + "/" + fileName;
@@ -117,9 +128,11 @@ public class StreamlinerUtil {
 
     public static void writeConfigToYaml(ConfigurationDiff outputConfig, String outputDir) throws IOException {
         if (outputDir == null || outputDir.equals("")) {
-            outputDir = outputConfig.getName() + "/" + outputConfig.getEnvironment() + "/confDiff";
+          outputDir =
+              String.format(
+                  "output/%s/%s/confDiff", outputConfig.getName(), outputConfig.getEnvironment());
         } else {
-            outputDir = outputDir + "/confDiff";
+          outputDir = String.format("%s/confDiff", outputDir);
         }
         createDir(outputDir);
         outputDir = outputDir + "/streamliner-configuration-diff.yml";
@@ -245,4 +258,107 @@ public class StreamlinerUtil {
     }
     return directoryToBeDeleted.delete();
   }
+
+  public static boolean fileExists(String configPath) {
+    return Files.exists(Paths.get(configPath));
+  }
+
+  public static Map<String, Map<String, String>> readTypeMappingFile(String path)
+      throws IOException {
+    if (!fileExists(path)) {
+      throw new FileNotFoundException("Type mapping file not found: " + path);
+    }
+    ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+    Map<String, Map<String, String>> typeMappingFile = mapper.readValue(new File(path), Map.class);
+    return typeMappingFile;
+  }
+
+  public static List<File> listFilesInDir(String path) throws FileNotFoundException {
+    File d = new File(path);
+    if (d.exists() && d.isDirectory()) {
+      return Arrays.stream(d.listFiles())
+          .filter(file -> file.isFile())
+          .collect(Collectors.toList());
+    } else {
+      throw new FileNotFoundException("Directory path does not exist" + path);
+    }
+  }
+
+  public static void writeFile(String content, String fileName) {
+    log.info("Writing file: {}", fileName);
+    log.trace("File content: {}", content);
+
+    try (FileWriter fw = new FileWriter(fileName)) {
+      fw.write(content);
+    } catch (IOException e) {
+      log.error("Error writing file: {}", fileName);
+      throw new RuntimeException(e);
+    }
+  }
+
+  public static void isExecutable(String path) {
+    File file = new File(path);
+    log.debug("File: {}, executable flag: {}", path, file.canExecute());
+    if (file.canExecute()) {
+      setExecutable(path);
+    }
+  }
+
+  private static void setExecutable(String path) {
+    File f = new File(path);
+    f.setExecutable(true);
+  }
+
+  public static String readFile(String path) {
+    log.debug("Reading file: {}", path);
+    StringBuilder sb = new StringBuilder();
+    try (BufferedReader br = new BufferedReader(new FileReader(path))) {
+      while (br.ready()) {
+        sb.append(br.readLine());
+        sb.append("\n");
+      }
+    } catch (FileNotFoundException e) {
+      log.error("File not found : {}", path);
+      throw new RuntimeException(e);
+    } catch (IOException e) {
+      log.error("Error reading file: {}, error: {}", path, e.getMessage());
+      throw new RuntimeException(e);
+    }
+    return sb.toString();
+  }
+
+  private static final String IDENTIFIER_WITHOUT_SPECIAL_CHARS = "^[A-Za-z0-9_]+$";
+
+  public static String quoteIdentifierIfNeeded(String identifier) {
+    String str;
+    if (identifier.matches(IDENTIFIER_WITHOUT_SPECIAL_CHARS)) {
+      str = identifier;
+    } else {
+      str = "\"" + identifier + "\"";
+    }
+    return str;
+  }
+
+  public static String mapDataType(
+      String sourceDataType, Map<String, Map<String, String>> typeMapping, String targetFormat){
+      Map<String, String> dataTypeMap  = typeMapping.get(sourceDataType.toLowerCase());
+      if(dataTypeMap == null || dataTypeMap.isEmpty()){
+      throw new RuntimeException(
+          String.format(
+              "No type mapping found for data type: '%s' in provided type mapping file",
+              sourceDataType));
+      }
+      String dataType = dataTypeMap.get(targetFormat.toLowerCase());
+      if(dataType == null){
+      throw new RuntimeException(
+          String.format(
+              "No type mapping found for data type: '%s' and storage format: %s in provided type mapping",
+              dataType, targetFormat));
+      }
+      return dataType;
+  }
+
+    public static Seq<?> convertJavaListToScalaSeq(List<?> inputList) {
+        return JavaConverters.asScalaIteratorConverter(inputList.iterator()).asScala().toSeq();
+    }
 }

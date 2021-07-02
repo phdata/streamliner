@@ -23,7 +23,7 @@ import java.util.List;
 public class TableDefinition {
     private String type;
     private String sourceName;
-    private String destinationName;
+    public String destinationName;
     private List<String> primaryKeys;
     private List<ColumnDefinition> columns;
 

@@ -10,8 +10,8 @@ import lombok.ToString;
 @Getter
 @Setter
 public class SnowflakeDatabase {
-  private String name;
-  private String schema;
+  public String name;
+  public String schema;
 
   public SnowflakeDatabase() {}
 }

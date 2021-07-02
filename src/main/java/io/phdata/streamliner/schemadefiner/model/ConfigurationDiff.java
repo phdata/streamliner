@@ -16,7 +16,7 @@ public class ConfigurationDiff{
   private String environment;
   private String pipeline;
   private Destination previousDestination;
-  private Destination currentDestination;
+  public Destination currentDestination;
   private List<TableDiff> tableDiffs;
 
   public ConfigurationDiff() {}

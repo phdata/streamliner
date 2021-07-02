@@ -11,14 +11,14 @@ import lombok.ToString;
 @Setter
 public class Snowflake extends Destination {
   private String type;
-  private String snowSqlCommand;
+  public String snowSqlCommand;
   private String storagePath;
   private String storageIntegration;
   private String snsTopic;
   private String warehouse;
   private String taskSchedule;
   private SnowflakeQAOptions quality;
-  private SnowflakeDatabase stagingDatabase;
+  public SnowflakeDatabase stagingDatabase;
   private SnowflakeDatabase reportingDatabase;
 
   public Snowflake() {}

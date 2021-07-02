@@ -9,8 +9,6 @@ import schemacrawler.crawl.StreamlinerCatalog;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 public class StreamlinerConfigReader  implements SchemaDefiner{
     private static final Logger log = LoggerFactory.getLogger(StreamlinerConfigReader.class);
@@ -24,14 +22,12 @@ public class StreamlinerConfigReader  implements SchemaDefiner{
     @Override
     public StreamlinerCatalog retrieveSchema() throws IOException {
         log.info("Retrieving Schema from path: {}",configFilePath);
-        if(!configPathExists(configFilePath)){
+        if(!StreamlinerUtil.fileExists(configFilePath)){
             throw new FileNotFoundException("Configuration File not found: " + configFilePath);
         }
         Configuration config = StreamlinerUtil.readConfigFromPath(configFilePath);
         return SchemaDefinerHelper.mapTableDefToStreamlinerCatalog(config);
     }
 
-    private boolean configPathExists(String configPath) {
-        return Files.exists(Paths.get(configPath));
-    }
+
 }

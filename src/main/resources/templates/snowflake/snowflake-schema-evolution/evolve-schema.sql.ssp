@@ -1,0 +1,9 @@
+#import(io.phdata.streamliner.schemadefiner.model.Snowflake)
+<%@ val configurationDiff: io.phdata.streamliner.schemadefiner.model.ConfigurationDiff %>
+<%@ val tableDiff: io.phdata.streamliner.schemadefiner.model.TableDiff %>
+<%@ val templateContext: io.phdata.streamliner.schemadefiner.model.TemplateContext %>
+<%@ val typeMapping: Map[String, Map[String, String]]%>
+#{
+    val destination = configurationDiff.currentDestination.asInstanceOf[Snowflake]
+}#
+<% render("../shared/evolve-schema.ssp", Map("configurationDiff" -> configurationDiff, "tableDiff" -> tableDiff, "typeMapping" -> typeMapping, "templateContext" -> templateContext))%>
