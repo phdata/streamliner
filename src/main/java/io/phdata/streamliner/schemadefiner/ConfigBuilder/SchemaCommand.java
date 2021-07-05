@@ -13,18 +13,35 @@ import schemacrawler.crawl.StreamlinerCatalog;
 
 public class SchemaCommand {
     private static final Logger log = LoggerFactory.getLogger(SchemaCommand.class);
-    private static final String STREAMLINER_CONFIGURATION_NAME = "streamliner-configuration.yml";
 
-    public static void build(String configurationFile, String outputDirectory, String password, boolean createDocs) throws Exception {
+    public static void build(String configurationFile, String outputFile, String password, boolean createDocs, String previousOutputFile, String diffOutputFile) throws Exception {
+        log.debug(
+        "config: {}, output-file: {}, previous-output-file: {}, diff-output-file: {}, create-docs: {}",
+        configurationFile,
+        outputFile,
+        previousOutputFile,
+        diffOutputFile,
+        createDocs);
+    if ((previousOutputFile == null && diffOutputFile != null)
+        || previousOutputFile != null && diffOutputFile == null) {
+        log.error("Either previous-output-file or diff-output-file is not provided.");
+        throw new RuntimeException("Either previous-output-file or diff-output-file is not provided");
+    }
+        log.info("Starting Schema Crawling......");
         // read ingest-configuration.yml
         Configuration ingestConfig = StreamlinerUtil.readConfigFromPath(configurationFile);
         Configuration outputConfig = null;
+        if(outputFile.equals("") || !isConfigFile(outputFile)){
+            log.error("output-file should be a .yml/.yaml file.");
+            throw new RuntimeException("output-file should be a .yml/.yaml file.");
+        }
         if (ingestConfig.getSource() instanceof Jdbc) {
             if (password == null || password.equals("")) {
+                log.error("A databasePassword is required when crawling JDBC sources");
                 throw new RuntimeException("A databasePassword is required when crawling JDBC sources");
             }
             if(createDocs){
-                writeDocs(ingestConfig, password, outputDirectory);
+                writeDocs(ingestConfig, password, outputFile);
             }
             SchemaDefiner schemaDef = new JdbcCrawler((Jdbc) ingestConfig.getSource(), password);
             StreamlinerCatalog catalog = schemaDef.retrieveSchema();
@@ -36,17 +53,39 @@ public class SchemaCommand {
             outputConfig = StreamlinerUtil.mapGlueCatalogToConfig(ingestConfig, catalog);
         }
 
-        StreamlinerUtil.writeConfigToYaml(outputConfig, outputDirectory, STREAMLINER_CONFIGURATION_NAME);
+        StreamlinerUtil.writeConfigToYaml(outputConfig, StreamlinerUtil.getOutputDirectory(outputFile) ,outputFile);
+        log.info("Schema crawl is successful and configuration file is written to : {}", outputFile);
+
+    if (previousOutputFile != null && diffOutputFile != null) {
+      if (!isConfigFile(diffOutputFile)) {
+          log.error("diff-output-file should be a .yml/.yaml file");
+        throw new RuntimeException("diff-output-file should be a .yml/.yaml file");
+      }
+      if (!isConfigFile(previousOutputFile)) {
+          log.error("previous-output-file should be a .yml/.yaml file");
+        throw new RuntimeException("previous-output-file should be a .yml/.yaml file");
+      }
+      log.info("Calculating configuration differences....");
+      log.debug(
+          "previous-output-file: {},  current config: {}, diff-output-file: {} ",
+          previousOutputFile,
+          outputFile,
+          diffOutputFile);
+      SchemaEvolution.build(previousOutputFile, outputFile, diffOutputFile);
+    }
     }
 
-    private static void writeDocs(Configuration ingestConfig, String password, String outputDir) throws Exception {
-        if (outputDir.equals("") || outputDir == null) {
-            outputDir = outputDir + "/" + ingestConfig.getName() + "/" + ingestConfig.getEnvironment() + "/docs";
-        } else {
-            outputDir = outputDir + "/docs";
-        }
+    private static void writeDocs(Configuration ingestConfig, String password, String outputFile) throws Exception {
+        // finding the directory
+        String outputDir = StreamlinerUtil.getOutputDirectory(outputFile);
+        outputDir =  String.format("%s/docs", outputDir);
+
         Jdbc jdbc = (Jdbc) ingestConfig.getSource();
         StreamlinerUtil.getErdOutput(jdbc, password, outputDir);
         StreamlinerUtil.getHtmlOutput(jdbc, password, outputDir);
+    }
+
+    private static boolean isConfigFile(String file){
+        return file.endsWith(".yml") || file.endsWith(".yaml");
     }
 }

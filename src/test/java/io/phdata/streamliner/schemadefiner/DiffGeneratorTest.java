@@ -18,7 +18,7 @@ import static org.junit.Assert.*;
 
 public class DiffGeneratorTest {
   private static  String outputPath = "src/test/output/";
-  private String  outputConfig = "src/test/output/confDiff/streamliner-configuration-diff.yml";
+  private String outputFile = "src/test/output/configDiff/streamliner-configDiff.yml";
 
   @Before
   public void before() {
@@ -38,8 +38,8 @@ public class DiffGeneratorTest {
     Configuration currConfig =
         StreamlinerUtil.readYamlFile("src/test/resources/configDiff/addAllColumn/currConfig.yml");
     ConfigurationDiff diff = DiffGenerator.createConfigDiff(prevConfig, currConfig);
-    StreamlinerUtil.writeConfigToYaml(diff, outputPath);
-    ConfigurationDiff configDiff = StreamlinerUtil.readConfigDiffFromPath(outputConfig);
+    StreamlinerUtil.writeConfigToYaml(diff, outputFile);
+    ConfigurationDiff configDiff = StreamlinerUtil.readConfigDiffFromPath(outputFile);
 
     assertNotNull(configDiff);
     assertNull(configDiff.getPreviousDestination());
@@ -72,8 +72,8 @@ public class DiffGeneratorTest {
     Configuration currConfig =
         StreamlinerUtil.readYamlFile("src/test/resources/configDiff/addColumn/currConfig.yml");
     ConfigurationDiff diff = DiffGenerator.createConfigDiff(prevConfig, currConfig);
-    StreamlinerUtil.writeConfigToYaml(diff, outputPath);
-    ConfigurationDiff configDiff = StreamlinerUtil.readConfigDiffFromPath(outputConfig);
+    StreamlinerUtil.writeConfigToYaml(diff, outputFile);
+    ConfigurationDiff configDiff = StreamlinerUtil.readConfigDiffFromPath(outputFile);
     assertNotNull(configDiff);
     assertNotNull(configDiff.getPreviousDestination());
     assertNotNull(configDiff.getCurrentDestination());
@@ -105,8 +105,8 @@ public class DiffGeneratorTest {
     Configuration currConfig =
         StreamlinerUtil.readYamlFile("src/test/resources/configDiff/changeColumn/currConfig.yml");
     ConfigurationDiff diff = DiffGenerator.createConfigDiff(prevConfig, currConfig);
-    StreamlinerUtil.writeConfigToYaml(diff, outputPath);
-    ConfigurationDiff configDiff = StreamlinerUtil.readConfigDiffFromPath(outputConfig);
+    StreamlinerUtil.writeConfigToYaml(diff, outputFile);
+    ConfigurationDiff configDiff = StreamlinerUtil.readConfigDiffFromPath(outputFile);
     assertNotNull(configDiff);
     assertNotNull(configDiff.getPreviousDestination());
     assertNotNull(configDiff.getCurrentDestination());
@@ -142,8 +142,8 @@ public class DiffGeneratorTest {
     Configuration currConfig =
         StreamlinerUtil.readYamlFile("src/test/resources/configDiff/deleteColumn/currConfig.yml");
     ConfigurationDiff diff = DiffGenerator.createConfigDiff(prevConfig, currConfig);
-    StreamlinerUtil.writeConfigToYaml(diff, outputPath);
-    ConfigurationDiff configDiff = StreamlinerUtil.readConfigDiffFromPath(outputConfig);
+    StreamlinerUtil.writeConfigToYaml(diff, outputFile);
+    ConfigurationDiff configDiff = StreamlinerUtil.readConfigDiffFromPath(outputFile);
     assertNotNull(configDiff);
     assertNotNull(configDiff.getPreviousDestination());
     assertNotNull(configDiff.getCurrentDestination());
@@ -175,8 +175,8 @@ public class DiffGeneratorTest {
     Configuration currConfig =
         StreamlinerUtil.readYamlFile("src/test/resources/configDiff/hybridChanges/currConfig.yml");
     ConfigurationDiff diff = DiffGenerator.createConfigDiff(prevConfig, currConfig);
-    StreamlinerUtil.writeConfigToYaml(diff, outputPath);
-    ConfigurationDiff configDiff = StreamlinerUtil.readConfigDiffFromPath(outputConfig);
+    StreamlinerUtil.writeConfigToYaml(diff, outputFile);
+    ConfigurationDiff configDiff = StreamlinerUtil.readConfigDiffFromPath(outputFile);
     assertNotNull(configDiff);
     assertNotNull(configDiff.getPreviousDestination());
     assertNotNull(configDiff.getCurrentDestination());
@@ -245,8 +245,8 @@ public class DiffGeneratorTest {
     Configuration currConfig =
         StreamlinerUtil.readYamlFile("src/test/resources/configDiff/deleteTable/currConfig.yml");
     ConfigurationDiff diff = DiffGenerator.createConfigDiff(prevConfig, currConfig);
-    StreamlinerUtil.writeConfigToYaml(diff, outputPath);
-    ConfigurationDiff configDiff = StreamlinerUtil.readConfigDiffFromPath(outputConfig);
+    StreamlinerUtil.writeConfigToYaml(diff, outputFile);
+    ConfigurationDiff configDiff = StreamlinerUtil.readConfigDiffFromPath(outputFile);
 
     assertNotNull(configDiff);
     assertNotNull(configDiff.getPreviousDestination());
@@ -279,8 +279,8 @@ public class DiffGeneratorTest {
     Configuration currConfig =
             StreamlinerUtil.readYamlFile("src/test/resources/configDiff/addTable/currConfig.yml");
     ConfigurationDiff diff = DiffGenerator.createConfigDiff(prevConfig, currConfig);
-    StreamlinerUtil.writeConfigToYaml(diff, outputPath);
-    ConfigurationDiff configDiff = StreamlinerUtil.readConfigDiffFromPath(outputConfig);
+    StreamlinerUtil.writeConfigToYaml(diff, outputFile);
+    ConfigurationDiff configDiff = StreamlinerUtil.readConfigDiffFromPath(outputFile);
 
     assertNotNull(configDiff);
     assertNotNull(configDiff.getPreviousDestination());

@@ -18,7 +18,7 @@ import java.util.Arrays;
 import static org.junit.Assert.assertTrue;
 
 public class ScriptCommandTest {
-  private static String outputPath = "src/test/output/";
+  private static String outputPath = "src/test/output/confDiff/streamliner-configuration-diff.yml";
   String templateDirectory = "src/main/resources/templates/snowflake";
   String typeMapping = "src/main/resources/type-mapping.yml";
   String outputDir = "src/test/resources/results/scriptCommand";

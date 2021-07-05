@@ -114,29 +114,14 @@ public class StreamlinerUtil {
         return newConfig;
     }
 
-    public static void writeConfigToYaml(Configuration outputConfig, String outputDir, String fileName) throws IOException {
-        if (outputDir == null || outputDir.equals("")) {
-          outputDir =
-              String.format("output/%s/%s/conf", outputConfig.getName(), outputConfig.getEnvironment());
-        } else {
-            outputDir = String.format("%s/conf", outputDir);
-        }
+    public static void writeConfigToYaml(Configuration outputConfig, String outputDir ,String fileName) throws IOException {
         createDir(outputDir);
-        outputDir = outputDir + "/" + fileName;
-        writeYamlFile(outputConfig, outputDir);
+        writeYamlFile(outputConfig, fileName);
     }
 
-    public static void writeConfigToYaml(ConfigurationDiff outputConfig, String outputDir) throws IOException {
-        if (outputDir == null || outputDir.equals("")) {
-          outputDir =
-              String.format(
-                  "output/%s/%s/confDiff", outputConfig.getName(), outputConfig.getEnvironment());
-        } else {
-          outputDir = String.format("%s/confDiff", outputDir);
-        }
-        createDir(outputDir);
-        outputDir = outputDir + "/streamliner-configuration-diff.yml";
-        writeYamlFile(outputConfig, outputDir);
+    public static void writeConfigToYaml(ConfigurationDiff outputConfig, String outputFile) throws IOException {
+        createDir(getOutputDirectory(outputFile));
+        writeYamlFile(outputConfig, outputFile);
     }
 
   public static void writeYamlFile(Configuration outputConfig, String outputDir)
@@ -361,4 +346,10 @@ public class StreamlinerUtil {
     public static Seq<?> convertJavaListToScalaSeq(List<?> inputList) {
         return JavaConverters.asScalaIteratorConverter(inputList.iterator()).asScala().toSeq();
     }
+
+  public static String getOutputDirectory(String outputFile) {
+    int lastSlashIndex = outputFile.lastIndexOf("/");
+    String outputDir = outputFile.substring(0, lastSlashIndex);
+    return outputDir;
+  }
 }

@@ -12,10 +12,12 @@ object JavaHelper {
   engine.escapeMarkup = true;
 
   def getLayout(uri: String, attributes: java.util.Map[String, Object]): String = {
-    val typeMapping = attributes.get("typeMapping").asInstanceOf[util.Map[String, Map[String, String]]];
+    val typeMapping =
+      attributes.get("typeMapping").asInstanceOf[util.Map[String, Map[String, String]]];
     val keys = typeMapping.keySet()
     val temp = new util.LinkedHashMap[String, Map[String, String]]()
-    keys.forEach(k => temp.put(k, typeMapping.get(k).asInstanceOf[util.Map[String, String]].asScala.toMap))
+    keys.forEach(k =>
+      temp.put(k, typeMapping.get(k).asInstanceOf[util.Map[String, String]].asScala.toMap))
     val scalaTypeMapping = temp.asScala.toMap
     attributes.put("typeMapping", scalaTypeMapping)
     engine.layout(uri, attributes.asScala.toMap)
@@ -25,7 +27,8 @@ object JavaHelper {
     map.asScala.toMap
   }
 
-  def convertScalaMapToJavaMap(map: Map[String, Map[String, String]]): util.Map[String, util.Map[String, String]] = {
+  def convertScalaMapToJavaMap(
+      map: Map[String, Map[String, String]]): util.Map[String, util.Map[String, String]] = {
     val keys = map.keySet
     val newMap = new util.LinkedHashMap[String, util.Map[String, String]]()
     keys.foreach(k => {

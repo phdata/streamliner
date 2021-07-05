@@ -18,7 +18,6 @@ package io.phdata.streamliner
 
 import io.phdata.streamliner.pipeline.PipelineBuilder
 import io.phdata.streamliner.schemadefiner.ConfigBuilder.SchemaCommand
-import io.phdata.streamliner.schemadefiner.ConfigBuilder.SchemaEvolutionCommand
 import org.apache.log4j.LogManager
 
 object App {
@@ -31,9 +30,12 @@ object App {
       case Some(cli.schema) =>
         SchemaCommand.build(
           cli.schema.filePath(),
-          cli.schema.outputPath.getOrElse(""),
+          cli.schema.outputFile.getOrElse(""),
           cli.schema.databasePassword.getOrElse(""),
-          cli.schema.createDocs.getOrElse(false))
+          cli.schema.createDocs.getOrElse(false),
+          cli.schema.previousOutputFile.getOrElse(null),
+          cli.schema.diffOutputFile.getOrElse(null)
+        )
 
       case Some(cli.produceScripts) =>
         PipelineBuilder.build(
@@ -41,13 +43,6 @@ object App {
           cli.produceScripts.typeMappingFile(),
           cli.produceScripts.templateDirectory(),
           cli.produceScripts.outputPath.toOption)
-
-      case Some(cli.schemaEvolution) =>
-        SchemaEvolutionCommand.build(
-          cli.schemaEvolution.previousConfig.getOrElse(null),
-          cli.schemaEvolution.currentConfig(),
-          cli.schemaEvolution.outputPath.getOrElse(null)
-        )
 
       case None =>
         logger.error("Please provide a valid sub command options are `schema` and `scripts`")
