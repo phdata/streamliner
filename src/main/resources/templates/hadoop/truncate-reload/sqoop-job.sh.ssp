@@ -14,10 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --%>
 #!/usr/bin/env bash
-#import(io.phdata.streamliner.configuration.Hadoop)
-#import(io.phdata.streamliner.configuration.Jdbc)
-<%@ val configuration: io.phdata.streamliner.configuration.Configuration %>
-<%@ val table: io.phdata.streamliner.configuration.HadoopTable %>
+#import(io.phdata.streamliner.schemadefiner.model.Hadoop)
+#import(io.phdata.streamliner.schemadefiner.model.Jdbc)
+<%@ val configuration: io.phdata.streamliner.schemadefiner.model.Configuration %>
+<%@ val table: io.phdata.streamliner.schemadefiner.model.HadoopTable %>
 <%@ val typeMapping: Map[String, Map[String, String]]%>
 #{
     val source = configuration.source.asInstanceOf[Jdbc]
@@ -32,7 +32,7 @@ sqoop import \
     --connect '${source.url}' \\
     --username '${source.username}' \\
     --password-file '${source.passwordFile}' \\
-    --driver '${source.driverClass.get}' \\
+    --driver '${source.driverClass}' \\
     --delete-target-dir \\
     --target-dir '${destination.stagingDatabase.path}/stg_${table.destinationName}/' \\
     --temporary-rootdir '${destination.stagingDatabase.path}/stg_${table.destinationName}/' \\
@@ -40,12 +40,12 @@ sqoop import \
     --fetch-size 10000 \\
     --compress \\
     --compression-codec snappy \\
-    -m ${table.numberOfMappers.getOrElse(1)} \\
-#if (table.splitByColumn.isDefined)     --splitBy ${table.splitByColumn.get} \\
-#elseif (javaColumnMap.isDefined)
+    -m ${table.numberOfMappers} \\
+#if (table.splitByColumn != null)     --splitBy ${table.splitByColumn} \\
+#elseif (javaColumnMap != null)
     --map-column-java '${javaColumnMap}' \\
 #end
     --query 'SELECT
-${table.sourceColumns(source.driverClass.get)}
+${table.sourceColumns(source.driverClass)}
 FROM ${source.schema}.${table.sourceName}
 WHERE $CONDITIONS'

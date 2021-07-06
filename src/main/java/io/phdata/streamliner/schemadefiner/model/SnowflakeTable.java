@@ -18,15 +18,15 @@ import java.util.stream.Collectors;
 @Setter
 public class SnowflakeTable extends TableDefinition {
   private String type;
-  private String sourceName;
+  public String sourceName;
   public String destinationName;
-  private String comment;
+  public String comment = "";
   private List<String> primaryKeys;
   private String changeColumn;
   private String incrementalTimeStamp;
   private Map<String, String> metadata;
   private FileFormat fileFormat;
-  private List<ColumnDefinition> columns;
+  public List<ColumnDefinition> columns;
 
   public SnowflakeTable() {}
 
@@ -51,6 +51,27 @@ public class SnowflakeTable extends TableDefinition {
     this.columns = columns;
   }
 
+  // these setters are needed to set value to parent class. jackson is not setting the parent class value
+  public void setDestinationName(String destinationName) {
+    super.destinationName = destinationName;
+    this.destinationName = destinationName;
+  }
+
+  public void setSourceName(String sourceName) {
+    super.setSourceName(sourceName);
+    this.sourceName = sourceName;
+  }
+
+  public void setPrimaryKeys(List<String> primaryKeys) {
+    super.setPrimaryKeys(primaryKeys);
+    this.primaryKeys = primaryKeys;
+  }
+
+  public void setColumns(List<ColumnDefinition> columns) {
+    super.setColumns(columns);
+    this.columns = columns;
+  }
+
   public String pkList = StringUtils.join(primaryKeys, ",");
 
   public String columnDDL(
@@ -58,7 +79,7 @@ public class SnowflakeTable extends TableDefinition {
           typeMapping) {
     Map<String, Map<String, String>> javaTypeMap = JavaHelper.convertScalaMapToJavaMap(typeMapping);
 
-    List<String> list =
+    List<String> columnList =
         columns.stream()
             .map(
                 column ->
@@ -68,6 +89,23 @@ public class SnowflakeTable extends TableDefinition {
                         column.mapDataTypeSnowflake(javaTypeMap),
                         column.getComment()))
             .collect(Collectors.toList());
-    return StringUtils.join(list, ",\n");
+    return StringUtils.join(columnList, ",\n");
+  }
+
+  public String sourceColumnConversion(
+      scala.collection.immutable.Map<String, scala.collection.immutable.Map<String, String>>
+          typeMapping) {
+    Map<String, Map<String, String>> javaTypeMap = JavaHelper.convertScalaMapToJavaMap(typeMapping);
+    List<String> columnList =
+        columns.stream()
+            .map(
+                column ->
+                    String.format(
+                        "$1:%s::%s",
+                        StreamlinerUtil.quoteIdentifierIfNeeded(column.getSourceName()),
+                        column.mapDataTypeSnowflake(javaTypeMap)))
+            .collect(Collectors.toList());
+
+    return StringUtils.join(columnList, ",\n");
   }
 }

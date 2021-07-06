@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --%>
-<%@ val destination: io.phdata.streamliner.configuration.Snowflake %>
+<%@ val destination: io.phdata.streamliner.schemadefiner.model.Snowflake %>
 <%@ val stage: String %>
 CREATE STAGE IF NOT EXISTS ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${stage}
     URL = '${destination.storagePath}'

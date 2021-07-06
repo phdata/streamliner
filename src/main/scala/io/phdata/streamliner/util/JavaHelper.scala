@@ -1,6 +1,5 @@
 package io.phdata.streamliner.util
 
-import io.phdata.streamliner.schemadefiner.model.ColumnDefinition
 import org.fusesource.scalate.TemplateEngine
 
 import java.util

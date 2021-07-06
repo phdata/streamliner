@@ -13,9 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --%>
-#import(io.phdata.streamliner.configuration.Snowflake)
-<%@ val configuration: io.phdata.streamliner.configuration.Configuration %>
-<%@ val table: io.phdata.streamliner.configuration.SnowflakeTable %>
+#import(io.phdata.streamliner.schemadefiner.model.Snowflake)
+<%@ val configuration: io.phdata.streamliner.schemadefiner.model.Configuration %>
+<%@ val table: io.phdata.streamliner.schemadefiner.model.SnowflakeTable %>
 <%@ val typeMapping: Map[String, Map[String, String]]%>
 #{
     val destination = configuration.destination.asInstanceOf[Snowflake]
@@ -28,7 +28,7 @@ USE SCHEMA ${destination.stagingDatabase.schema};
 CREATE PIPE IF NOT EXISTS ${table.destinationName}_pipe
     AUTO_INGEST = true
     AS
-        COPY INTO ${table.destinationName} (${table.columnList()})
+        COPY INTO ${table.destinationName} (${table.columnList(null)})
             FROM ( SELECT ${sourceColumnStr}
                 FROM @${configuration.name}_stage/${table.sourceName})
         FILE_FORMAT = ( TYPE = PARQUET);

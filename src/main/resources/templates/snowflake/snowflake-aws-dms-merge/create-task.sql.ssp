@@ -13,25 +13,25 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --%>
-#import(io.phdata.streamliner.configuration.Snowflake)
-<%@ val configuration: io.phdata.streamliner.configuration.Configuration %>
-<%@ val table: io.phdata.streamliner.configuration.SnowflakeTable %>
+#import(io.phdata.streamliner.schemadefiner.model.Snowflake)
+<%@ val configuration: io.phdata.streamliner.schemadefiner.model.Configuration %>
+<%@ val table: io.phdata.streamliner.schemadefiner.model.SnowflakeTable %>
 #{
     val destination = configuration.destination.asInstanceOf[Snowflake]
 }#
 CREATE TASK IF NOT EXISTS ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName}_task
     WAREHOUSE = ${destination.warehouse}
-    SCHEDULE = '${destination.taskSchedule.getOrElse("5 minutes")}'
+    SCHEDULE = '${destination.taskSchedule}'
     WHEN SYSTEM$STREAM_HAS_DATA('${table.destinationName}_stg_stream')
     AS
     MERGE INTO ${destination.reportingDatabase.name}.${destination.reportingDatabase.schema}.${table.destinationName} t
-        USING ( SELECT ${table.columnList(Some("si"))}, si.dms_operation, i.max_dms_ts
+        USING ( SELECT ${table.columnList("si")}, si.dms_operation, i.max_dms_ts
                 FROM ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName}_stg_stream si
                 INNER JOIN ( SELECT ${table.pkList}, MAX(dms_ts) max_dms_ts
                              FROM ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName}_stg_stream
                              GROUP BY ${table.pkList} ) i
-                ON ${table.pkConstraint("i", "si")} AND i.max_dms_ts = si.dms_ts ) s
-    ON ${table.pkConstraint("t", "s")}
-        WHEN MATCHED AND s.dms_operation = 'U' THEN UPDATE SET ${table.columnConstraint(bAlias = "s", joinCondition = ", ")}, dms_operation = s.dms_operation, dms_ts = s.max_dms_ts
+                ON ${table.pkConstraint("i", "si", null)} AND i.max_dms_ts = si.dms_ts ) s
+    ON ${table.pkConstraint("t", "s", null)}
+        WHEN MATCHED AND s.dms_operation = 'U' THEN UPDATE SET ${table.columnConstraint(null, "s", ", ")}, dms_operation = s.dms_operation, dms_ts = s.max_dms_ts
         WHEN MATCHED AND s.dms_operation = 'D' THEN DELETE
-        WHEN NOT MATCHED AND s.dms_operation != 'D' OR s.dms_operation IS NULL THEN INSERT (${table.columnList()}, dms_operation, dms_ts) VALUES (${table.columnList(Some("s"))}, s.dms_operation, s.max_dms_ts);
+        WHEN NOT MATCHED AND s.dms_operation != 'D' OR s.dms_operation IS NULL THEN INSERT (${table.columnList(null)}, dms_operation, dms_ts) VALUES (${table.columnList("s")}, s.dms_operation, s.max_dms_ts);

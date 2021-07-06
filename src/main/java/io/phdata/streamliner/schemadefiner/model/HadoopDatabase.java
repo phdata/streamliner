@@ -10,8 +10,8 @@ import lombok.ToString;
 @Getter
 @Setter
 public class HadoopDatabase {
-  private String name;
-  private String path;
+  public String name;
+  public String path;
 
   public HadoopDatabase() {
   }

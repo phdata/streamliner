@@ -14,9 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --%>
 #!/usr/bin/env bash
-#import(io.phdata.streamliner.configuration.Hadoop)
-<%@ val configuration: io.phdata.streamliner.configuration.Configuration %>
-<%@ val table: io.phdata.streamliner.configuration.HadoopTable %>
+#import(io.phdata.streamliner.schemadefiner.model.Hadoop)
+<%@ val configuration: io.phdata.streamliner.schemadefiner.model.Configuration %>
+<%@ val table: io.phdata.streamliner.schemadefiner.model.HadoopTable %>
 #{
     val destination = configuration.destination.asInstanceOf[Hadoop]
 }#

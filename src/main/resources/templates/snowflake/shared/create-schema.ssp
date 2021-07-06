@@ -13,5 +13,5 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --%>
-<%@ val database: io.phdata.streamliner.configuration.SnowflakeDatabase %>
+<%@ val database: io.phdata.streamliner.schemadefiner.model.SnowflakeDatabase %>
 CREATE SCHEMA IF NOT EXISTS ${database.name}.${database.schema};

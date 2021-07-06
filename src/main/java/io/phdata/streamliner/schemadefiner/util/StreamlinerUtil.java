@@ -96,7 +96,9 @@ public class StreamlinerUtil {
         List<Schema> schema = catalog.getSchemas().stream()
                 .filter(db -> db.getCatalogName().equals(jdbc.getSchema())).collect(Collectors.toList());
         List<Table> tableList = (List<Table>) catalog.getTables(schema.get(0));
-
+        if(tableList == null || tableList.isEmpty()){
+            throw new RuntimeException(String.format("Schema: %s, does not exist in source system",jdbc.getSchema()));
+        }
         List<TableDefinition> tables = null;
         if (ingestConfig.getDestination() instanceof Snowflake) {
             tables = SnowflakeMapper.mapSchemaCrawlerTables(tableList, jdbc.getUserDefinedTable());
@@ -339,26 +341,13 @@ public class StreamlinerUtil {
     return str;
   }
 
-  public static String mapDataType(
-      String sourceDataType, Map<String, Map<String, String>> typeMapping, String targetFormat){
-      Map<String, String> dataTypeMap  = typeMapping.get(sourceDataType.toLowerCase());
-      if(dataTypeMap == null || dataTypeMap.isEmpty()){
-      throw new RuntimeException(
-          String.format(
-              "No type mapping found for data type: '%s' in provided type mapping file",
-              sourceDataType));
-      }
-      String dataType = dataTypeMap.get(targetFormat.toLowerCase());
-      if(dataType == null){
-      throw new RuntimeException(
-          String.format(
-              "No type mapping found for data type: '%s' and storage format: %s in provided type mapping",
-              dataType, targetFormat));
-      }
-      return dataType;
-  }
+
 
     public static Seq<?> convertJavaListToScalaSeq(List<?> inputList) {
+        return JavaConverters.asScalaIteratorConverter(inputList.iterator()).asScala().toSeq();
+    }
+
+    public Seq<ColumnDefinition> convertListToSeq(List<ColumnDefinition> inputList) {
         return JavaConverters.asScalaIteratorConverter(inputList.iterator()).asScala().toSeq();
     }
 }

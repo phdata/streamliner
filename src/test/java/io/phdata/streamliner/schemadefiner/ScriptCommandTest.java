@@ -1,5 +1,6 @@
 package io.phdata.streamliner.schemadefiner;
 
+import io.phdata.streamliner.App;
 import io.phdata.streamliner.schemadefiner.ConfigBuilder.DiffGenerator;
 import io.phdata.streamliner.schemadefiner.ConfigBuilder.ScriptCommand;
 import io.phdata.streamliner.schemadefiner.model.Configuration;
@@ -15,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class ScriptCommandTest {
@@ -102,5 +104,35 @@ public class ScriptCommandTest {
                       assertTrue(
                               file.getName().equals("evolve-schema.sql") || file.getName().equals("Makefile"));
                     });
+  }
+
+  @Test
+  public void testScriptCommandToGenerateScripts() throws IOException {
+    outputDir =
+            String.format("%s/%s", outputDir, "testScriptCommandToGenerateScripts");
+    StreamlinerUtil.createDir(outputDir);
+    ScriptCommand.build("src/test/resources/configDiff/addAllColumn/currConfig.yml", null, typeMapping, templateDirectory, outputDir);
+
+    File f = new File(String.format("%s/Employee", outputDir));
+    assertTrue(f.exists());
+    assertTrue(f.isDirectory());
+    assertEquals(10, f.list().length);
+  }
+
+  @Test
+  public void testScriptCommand_bothConfig_null() {
+    expectedEx.expect(RuntimeException.class);
+    expectedEx.expectMessage("No configuration file found");
+    outputDir = String.format("%s/%s", outputDir, "testScriptCommand_bothConfig_null");
+    String scriptCommand[] = {
+      "scripts",
+      "--output-path",
+      outputDir,
+      "--type-mapping",
+      typeMapping,
+      "--template-directory",
+      templateDirectory
+    };
+    App.main(scriptCommand);
   }
 }

@@ -13,9 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 --%>
-#import(io.phdata.streamliner.configuration.Snowflake)
-<%@ val configuration: io.phdata.streamliner.configuration.Configuration %>
-<%@ val table: io.phdata.streamliner.configuration.SnowflakeTable %>
+#import(io.phdata.streamliner.schemadefiner.model.Snowflake)
+<%@ val configuration: io.phdata.streamliner.schemadefiner.model.Configuration %>
+<%@ val table: io.phdata.streamliner.schemadefiner.model.SnowflakeTable %>
 <%@ val typeMapping: Map[String, Map[String, String]]%>
 #{
     val destination = configuration.destination.asInstanceOf[Snowflake]
@@ -27,11 +27,11 @@ USE SCHEMA ${destination.stagingDatabase.schema};
 
 CREATE PIPE IF NOT EXISTS ${table.destinationName}_pipe
     AUTO_INGEST = true
-#if (destination.snsTopic.isDefined)
-    AWS_SNS_TOPIC = '${destination.snsTopic.get}'
+#if (destination.snsTopic != null)
+    AWS_SNS_TOPIC = '${destination.snsTopic}'
 #end
     AS
-        COPY INTO ${table.destinationName}_stg (${table.columnList()}, dms_operation, dms_ts)
+        COPY INTO ${table.destinationName}_stg (${table.columnList(null)}, dms_operation, dms_ts)
             FROM ( SELECT ${unescape(sourceColumnStr)}, $1:Op::STRING, $1:ts::TIMESTAMP_LTZ
                    FROM @${configuration.name}_stage/${table.sourceName})
         FILE_FORMAT = ( TYPE = PARQUET);
