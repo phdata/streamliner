@@ -65,7 +65,7 @@ public class MySQLTestContainerTest {
     }
 
     @Test
-    public void test3JdbcCrawler() throws Exception {
+    public void test03JdbcCrawler(){
         List<String> tableTypes = new ArrayList<>();
         tableTypes.add("table");
         Jdbc jdbc = new Jdbc(mysql.getJdbcUrl(), mysql.getUsername(), mysql.getDatabaseName(), tableTypes);
@@ -93,7 +93,7 @@ public class MySQLTestContainerTest {
     }
 
     @Test
-    public void test5StreamlinerConfigReader() throws Exception {
+    public void test05StreamlinerConfigReader(){
         //reading config file generated after schema command and converting it to StreamlinerCatalog
         SchemaDefiner definer = new StreamlinerConfigReader(SCHEMA_COMMAND_OUTPUT_PATH);
         StreamlinerCatalog catalog = definer.retrieveSchema();
@@ -115,29 +115,25 @@ public class MySQLTestContainerTest {
     }
 
     @Test
-    public void test4SchemaCommand_new() throws Exception {
+    public void test04SchemaCommand_new() throws Exception {
         String config = "src/test/resources/conf/ingest-configuration.yml";
-        String outputPath = "src/test/output/";
+        String outputFile = "src/test/output/conf/streamliner-configuration.yml";
         String dbPass = mysql.getPassword();
         boolean createDocs = false;
 
-        File generatedOutputFolder = new File(outputPath);
+        File generatedOutputFolder = new File(outputFile);
         StreamlinerUtil.deleteDirectory(generatedOutputFolder);
 
         Map<String, Object> ingestConfigFile = updateSourceDetail(config);
 
         // schema command with new implementations
-        SchemaCommand.build(config,outputPath,dbPass,createDocs);
+        SchemaCommand.build(config,outputFile,dbPass,createDocs, null, null);
 
-        generatedOutputFolder = new File(outputPath + "conf");
-        assertTrue(generatedOutputFolder.exists());
-        assertTrue(generatedOutputFolder.isDirectory());
+        File f = new File(outputFile);
+        assertTrue(f.exists());
+        assertTrue(f.isFile());
 
-        File outputFile = new File(outputPath + "conf/streamliner-configuration.yml");
-        assertTrue(outputFile.exists());
-        assertTrue(outputFile.isFile());
-
-        InputStream inputStream = new FileInputStream(outputFile);
+        InputStream inputStream = new FileInputStream(f);
         Map<String, Object> outputConfigFile = yaml.load(inputStream);
 
         assertEquals(ingestConfigFile.get("name"), outputConfigFile.get("name"));
@@ -154,21 +150,9 @@ public class MySQLTestContainerTest {
         assertFalse(columnList.isEmpty());
     }
 
-    //@Test
-    public void testGlueCrawler_WIP() throws Exception {
-        String config = "src/test/resources/conf/ingest-configuration-glue.yml";
-        String outputPath = "src/test/output/";
-        String dbPass = mysql.getPassword();
-        boolean createDocs = false;
-
-        File generatedOutputFolder = new File(outputPath);
-        StreamlinerUtil.deleteDirectory(generatedOutputFolder);
-        SchemaCommand.build(config,outputPath,dbPass,createDocs);
-    }
-
   @Test
-  public void test6ConfigurationDiff_serialize() throws IOException {
-    String outputPath = "src/test/output/";
+  public void test06ConfigurationDiff_serialize()  {
+    String outputFile = "src/test/output/confDiff/streamliner-configuration-diff.yml";
     String configPath1 = "src/test/resources/conf/ingest-configuration.yml";
     String configPath2 = "src/test/resources/conf/ingest-configuration-glue.yml";
 
@@ -209,12 +193,12 @@ public class MySQLTestContainerTest {
             conf2.getDestination(),
             tableList);
 
-      StreamlinerUtil.deleteDirectory(new File(outputPath));
-    StreamlinerUtil.writeConfigToYaml(configDiff, outputPath);
+      StreamlinerUtil.deleteDirectory(new File("src/test/output"));
+    StreamlinerUtil.writeConfigToYaml(configDiff, outputFile);
   }
 
   @Test
-  public void test7ConfigurationDiff_deserialize() throws IOException{
+  public void test07ConfigurationDiff_deserialize(){
     String configDiffPath = "src/test/output/confDiff/streamliner-configuration-diff.yml";
     // reading config diff yaml file.
     ConfigurationDiff configDiff = StreamlinerUtil.readConfigDiffFromPath(configDiffPath);
@@ -250,7 +234,7 @@ public class MySQLTestContainerTest {
   }
 
   @Test
-  public void test8_deserialize_serialize() throws IOException {
+  public void test08_deserialize_serialize(){
     String[] configList = {
       "src/test/resources/scalaConf/glue/snowflake/ingest-configuration.yml",
       "src/test/resources/scalaConf/glue/snowflake/streamliner-configuration.yml",
@@ -277,9 +261,9 @@ public class MySQLTestContainerTest {
   }
 
   @Test
-  public void test9ScalaAppMainMethod_usingNewSchemaCommand_() throws Exception {
+  public void test09ScalaAppMainMethod_usingNewSchemaCommand_() throws Exception {
     String config = "src/test/resources/conf/ingest-configuration.yml";
-    String generatedConfigFile = "src/test/output/DEV_SDW/conf/streamliner-configuration.yml";
+    String generatedConfigFile = "src/test/output/conf/streamliner-configuration.yml";
     updateSourceDetail(config);
 
     // --create-docs is optional
@@ -287,20 +271,12 @@ public class MySQLTestContainerTest {
       "schema",
       "--config",
       config,
-      "--output-path",
-      "src/test/output/DEV_SDW/",
+      "--output-file",
+      "src/test/output/conf/streamliner-configuration.yml",
       "--database-password",
       mysql.getPassword()
     };
     testSchemaCommandOptionalParams(generatedConfigFile, schemaCommand1);
-
-    generatedConfigFile = "output/STREAMLINER_QUICKSTART_1/SANDBOX/conf/streamliner-configuration.yml";
-    // --output-path is optional
-    String schemaCommand2[] = {
-      "schema", "--config", config, "--database-password", mysql.getPassword()
-    };
-    testSchemaCommandOptionalParams(generatedConfigFile, schemaCommand2);
-      StreamlinerUtil.deleteDirectory(new File("STREAMLINER_QUICKSTART_1"));
   }
 
   @Test
@@ -310,10 +286,57 @@ public class MySQLTestContainerTest {
     expectedEx.expectMessage("A databasePassword is required when crawling JDBC source");
     String config = "src/test/resources/conf/ingest-configuration.yml";
     // --database-password is optional
-    String schemaCommand[] = {"schema", "--config", config};
+    String schemaCommand[] = {"schema", "--config", config, "--output-file", "src/test/output/conf/streamliner-configuration.yml"};
     // Scala App main method
     App.main(schemaCommand);
   }
+
+    @Test
+    public void test11SchemaCommandForSchemaEvolution() throws Exception {
+        String config = "src/test/resources/conf/ingest-configuration.yml";
+        String outputPath = "src/test/output/conf/streamliner-configuration.yml";
+        String dbPass = mysql.getPassword();
+        boolean createDocs = false;
+
+        File generatedOutputFolder = new File(outputPath);
+        StreamlinerUtil.deleteDirectory(generatedOutputFolder);
+
+        Map<String, Object> ingestConfigFile = updateSourceDetail(config);
+
+        // Schema comnmand
+        SchemaCommand.build(config,outputPath,dbPass,createDocs, null, null);
+
+        // added a column
+        performExecute(con, "ALTER TABLE Persons ADD Age VARCHAR(40) NOT NULL;");
+
+        String diffOutputFile = "src/test/output/configDiff/streamliner-configDiff.yml";
+        // schema command for schema evolution
+        SchemaCommand.build(config,"src/test/output/conf/streamliner-config2.yml",dbPass,createDocs, outputPath, diffOutputFile);
+
+        ConfigurationDiff diff = StreamlinerUtil.readConfigDiffFromPath(diffOutputFile);
+        assertNotNull(diff);
+        assertNotNull(diff.getTableDiffs());
+        assertEquals(1, diff.getTableDiffs().size());
+
+        TableDiff tableDiff = diff.getTableDiffs().get(0);
+        assertEquals("Persons", tableDiff.getDestinationName());
+        assertTrue(tableDiff.existsInDestination);
+        assertTrue(tableDiff.existsInSource);
+        assertNotNull(tableDiff.getColumnDiffs());
+        assertEquals(1, tableDiff.getColumnDiffs().size());
+
+        ColumnDiff colDiff = tableDiff.getColumnDiffs().get(0);
+        assertNull(colDiff.getPreviousColumnDef());
+        assertNotNull(colDiff.getCurrentColumnDef());
+
+        ColumnDefinition colDef = colDiff.getCurrentColumnDef();
+        assertEquals("Age", colDef.getSourceName());
+        assertEquals("VARCHAR", colDef.getDataType());
+
+        assertTrue(colDiff.getIsAdd());
+
+        StreamlinerUtil.deleteDirectory(new File("src/test/output"));
+    }
 
   private void testSchemaCommandOptionalParams(String generatedConfigFile, String[] schemaCommand1)
       throws Exception {
@@ -384,5 +407,10 @@ public class MySQLTestContainerTest {
         Statement statement = con.createStatement();
         int row = statement.executeUpdate(sql);
         return row;
+    }
+
+    private static void performExecute(Connection con, String sql) throws SQLException {
+        Statement statement = con.createStatement();
+        statement.execute(sql);
     }
 }

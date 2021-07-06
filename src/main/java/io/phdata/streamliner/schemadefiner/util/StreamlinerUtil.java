@@ -46,42 +46,63 @@ import java.util.stream.Collectors;
 public class StreamlinerUtil {
     private static final Logger log = LoggerFactory.getLogger(StreamlinerUtil.class);
 
-    public static Configuration readConfigFromPath(String path) throws IOException {
+    public static Configuration readConfigFromPath(String path){
         if (path == null) return null;
         if(!fileExists(path)){
-            throw new FileNotFoundException("Configuration File not found: " + path);
+            log.error("Configuration file not found: {}", path);
+            throw new RuntimeException(String.format("Configuration file not found: %s", path));
         }
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        Configuration config = mapper.readValue(new File(path), Configuration.class);
+        Configuration config = null;
+        try {
+            config = mapper.readValue(new File(path), Configuration.class);
+        } catch (IOException e) {
+            log.error("Error reading configuration file: {}", path);
+            throw new RuntimeException("Error reading configuration file", e);
+        }
         return config;
     }
 
-  // this method handles even if yaml file is empty. Through normal process jackson throws exception if
+  // this method handles even if yaml file is empty. Through normal process jackson throws exception
+  // if
   // yaml file is empty.
-  public static Configuration readYamlFile(String path) throws IOException {
+  public static Configuration readYamlFile(String path){
     if (path == null) return null;
     Path yamlFile = Paths.get(path);
     YAMLMapper yamlMapper = new YAMLMapper();
     JsonNode tree;
-    try (InputStream inputStream = Files.newInputStream(yamlFile)) {
-      tree = yamlMapper.readTree(inputStream);
+    try {
+      try (InputStream inputStream = Files.newInputStream(yamlFile)) {
+        tree = yamlMapper.readTree(inputStream);
+      }
+      if (tree.isEmpty()) {
+        return null;
+      }
+      ObjectMapper objectMapper = new ObjectMapper();
+      objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      return objectMapper.treeToValue(tree, Configuration.class);
+    } catch (IOException e) {
+        log.error("Error reading file: {}, error: {}", path, e.getMessage());
+        throw new RuntimeException("Error reading file.", e);
     }
-    if (tree.isEmpty()) {
-      return null;
-    }
-    ObjectMapper objectMapper = new ObjectMapper();
-    return objectMapper.treeToValue(tree, Configuration.class);
   }
 
-    public static ConfigurationDiff readConfigDiffFromPath(String path) throws IOException {
+    public static ConfigurationDiff readConfigDiffFromPath(String path){
         if (path == null) return null;
         if(!fileExists(path)){
-            throw new FileNotFoundException("Configuration File not found: " + path);
+            log.error("Configuration difference file not found: {}",path);
+            throw new RuntimeException(String.format("Configuration difference file not found: %s", path));
         }
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        ConfigurationDiff config = mapper.readValue(new File(path), ConfigurationDiff.class);
+        ConfigurationDiff config = null;
+        try {
+            config = mapper.readValue(new File(path), ConfigurationDiff.class);
+        } catch (IOException e) {
+            log.error("Error reading configuration diff file: {}", path);
+            throw new RuntimeException(String.format("Error reading configuration diff file: %s", path), e);
+        }
         return config;
     }
 
@@ -116,47 +137,46 @@ public class StreamlinerUtil {
         return newConfig;
     }
 
-    public static void writeConfigToYaml(Configuration outputConfig, String outputDir, String fileName) throws IOException {
-        if (outputDir == null || outputDir.equals("")) {
-          outputDir =
-              String.format("output/%s/%s/conf", outputConfig.getName(), outputConfig.getEnvironment());
-        } else {
-            outputDir = String.format("%s/conf", outputDir);
-        }
+    public static void writeConfigToYaml(Configuration outputConfig, String outputDir, String fileName){
         createDir(outputDir);
-        outputDir = outputDir + "/" + fileName;
-        writeYamlFile(outputConfig, outputDir);
+        writeYamlFile(outputConfig, fileName);
     }
 
-    public static void writeConfigToYaml(ConfigurationDiff outputConfig, String outputDir) throws IOException {
-        if (outputDir == null || outputDir.equals("")) {
-          outputDir =
-              String.format(
-                  "output/%s/%s/confDiff", outputConfig.getName(), outputConfig.getEnvironment());
-        } else {
-          outputDir = String.format("%s/confDiff", outputDir);
-        }
-        createDir(outputDir);
-        outputDir = outputDir + "/streamliner-configuration-diff.yml";
-        writeYamlFile(outputConfig, outputDir);
+    public static void writeConfigToYaml(ConfigurationDiff outputConfig, String outputFile){
+        createDir(getOutputDirectory(outputFile));
+        writeYamlFile(outputConfig, outputFile);
     }
 
-  public static void writeYamlFile(Configuration outputConfig, String outputDir)
-      throws IOException {
+  public static void writeYamlFile(Configuration outputConfig, String outputFile) {
     ObjectMapper mapper =
-        new ObjectMapper(new YAMLFactory().disable(Feature.WRITE_DOC_START_MARKER).disable(Feature.USE_NATIVE_TYPE_ID));
+        new ObjectMapper(
+            new YAMLFactory()
+                .disable(Feature.WRITE_DOC_START_MARKER)
+                .disable(Feature.USE_NATIVE_TYPE_ID));
     mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-    mapper.writeValue(new File(outputDir), outputConfig);
+    try {
+      mapper.writeValue(new File(outputFile), outputConfig);
+    } catch (IOException e) {
+      log.error("Error writing file: {}", outputFile);
+      throw new RuntimeException("Error writing file.", e);
+    }
   }
 
-    public static void writeYamlFile(ConfigurationDiff outputConfig, String outputDir)
-            throws IOException {
-        ObjectMapper mapper =
-                new ObjectMapper(new YAMLFactory().disable(Feature.WRITE_DOC_START_MARKER).disable(Feature.USE_NATIVE_TYPE_ID));
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+  public static void writeYamlFile(ConfigurationDiff outputConfig, String outputFile) {
+    ObjectMapper mapper =
+        new ObjectMapper(
+            new YAMLFactory()
+                .disable(Feature.WRITE_DOC_START_MARKER)
+                .disable(Feature.USE_NATIVE_TYPE_ID));
+    mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
-        mapper.writeValue(new File(outputDir), outputConfig);
+    try {
+      mapper.writeValue(new File(outputFile), outputConfig);
+    } catch (IOException e) {
+      log.error("Error writing file: {}", outputFile);
+      throw new RuntimeException("Error writing file.", e);
     }
+  }
 
     public static void createDir(String outputDir) {
         File f = new File(outputDir);
@@ -181,22 +201,27 @@ public class StreamlinerUtil {
         return ingestConfig;
     }
 
-    public static void getHtmlOutput(Jdbc jdbc, String password, String path) throws Exception {
+    public static void getHtmlOutput(Jdbc jdbc, String password, String path){
         execute(jdbc, password, TextOutputFormat.html, path, "schema.html");
     }
 
-    public static void getErdOutput(Jdbc jdbc, String password, String path) throws Exception {
+    public static void getErdOutput(Jdbc jdbc, String password, String path){
         execute(jdbc, password, DiagramOutputFormat.png, path, "schema.png");
     }
 
-    private static void execute(Jdbc jdbc, String password, OutputFormat outputFormat, String path, String fileName) throws Exception {
+    private static void execute(Jdbc jdbc, String password, OutputFormat outputFormat, String path, String fileName) {
         createDir(path);
         OutputOptions outputOptions = OutputOptionsBuilder.newOutputOptions(outputFormat, Paths.get(path + "/" + fileName));
         SchemaCrawlerExecutable executable = new SchemaCrawlerExecutable("schema");
         executable.setSchemaCrawlerOptions(getOptions(jdbc));
         executable.setOutputOptions(outputOptions);
         executable.setConnection(getConnection(jdbc.getUrl(), jdbc.getUsername(), password));
-        executable.execute();
+        try {
+            executable.execute();
+        } catch (Exception e) {
+            log.error("Error executing schema crawler. Error: {}", e.getMessage());
+            throw new RuntimeException("Error executing schema crawler.", e);
+        }
     }
 
     public static SchemaCrawlerOptions getOptions(Jdbc jdbc) {
@@ -265,24 +290,29 @@ public class StreamlinerUtil {
     return Files.exists(Paths.get(configPath));
   }
 
-  public static Map<String, Map<String, String>> readTypeMappingFile(String path)
-      throws IOException {
+  public static Map<String, Map<String, String>> readTypeMappingFile(String path) {
     if (!fileExists(path)) {
-      throw new FileNotFoundException("Type mapping file not found: " + path);
+      throw new RuntimeException(String.format("Type mapping file not found: %s", path));
     }
     ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-    Map<String, Map<String, String>> typeMappingFile = mapper.readValue(new File(path), Map.class);
+    Map<String, Map<String, String>> typeMappingFile = null;
+    try {
+      typeMappingFile = mapper.readValue(new File(path), Map.class);
+    } catch (IOException e) {
+      log.error("Error reading Type mapping file: {}", path);
+      throw new RuntimeException(String.format("Error reading Type mapping file: %s", path), e);
+    }
     return typeMappingFile;
   }
 
-  public static List<File> listFilesInDir(String path) throws FileNotFoundException {
+  public static List<File> listFilesInDir(String path){
     File d = new File(path);
     if (d.exists() && d.isDirectory()) {
       return Arrays.stream(d.listFiles())
           .filter(file -> file.isFile())
           .collect(Collectors.toList());
     } else {
-      throw new FileNotFoundException("Directory path does not exist" + path);
+      throw new RuntimeException(String.format("Directory path does not exist: %s", path));
     }
   }
 
@@ -349,5 +379,11 @@ public class StreamlinerUtil {
 
     public Seq<ColumnDefinition> convertListToSeq(List<ColumnDefinition> inputList) {
         return JavaConverters.asScalaIteratorConverter(inputList.iterator()).asScala().toSeq();
+    }
+
+    public static String getOutputDirectory(String outputFile) {
+        int lastSlashIndex = outputFile.lastIndexOf("/");
+        String outputDir = outputFile.substring(0, lastSlashIndex);
+        return outputDir;
     }
 }

@@ -7,12 +7,8 @@ import org.slf4j.LoggerFactory;
 import schemacrawler.crawl.SchemaDefinerHelper;
 import schemacrawler.crawl.StreamlinerCatalog;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
 public class StreamlinerConfigReader  implements SchemaDefiner{
     private static final Logger log = LoggerFactory.getLogger(StreamlinerConfigReader.class);
-    private String file;
     private String configFilePath;
 
     public StreamlinerConfigReader(String configPath) {
@@ -20,10 +16,10 @@ public class StreamlinerConfigReader  implements SchemaDefiner{
     }
 
     @Override
-    public StreamlinerCatalog retrieveSchema() throws IOException {
+    public StreamlinerCatalog retrieveSchema() {
         log.info("Retrieving Schema from path: {}",configFilePath);
         if(!StreamlinerUtil.fileExists(configFilePath)){
-            throw new FileNotFoundException("Configuration File not found: " + configFilePath);
+            throw new RuntimeException(String.format("Configuration File not found: %s", configFilePath));
         }
         Configuration config = StreamlinerUtil.readConfigFromPath(configFilePath);
         return SchemaDefinerHelper.mapTableDefToStreamlinerCatalog(config);

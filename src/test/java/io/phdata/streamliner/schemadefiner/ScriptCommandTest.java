@@ -13,18 +13,18 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class ScriptCommandTest {
-  private static String outputPath = "src/test/output/";
-  String templateDirectory = "src/main/resources/templates/snowflake";
-  String typeMapping = "src/main/resources/type-mapping.yml";
-  String outputDir = "src/test/resources/results/scriptCommand";
-  String configDiff = "src/test/output/confDiff/streamliner-configuration-diff.yml";
+  private static String outputPath = "src/test/output";
+  private String outputFile = "src/test/output/confDiff/streamliner-configuration-diff.yml";
+  private String templateDirectory = "src/main/resources/templates/snowflake";
+  private String typeMapping = "src/main/resources/type-mapping.yml";
+  private String outputDir = "src/test/resources/results/scriptCommand";
+  private String configDiff = "src/test/output/confDiff/streamliner-configuration-diff.yml";
 
   @Rule public ExpectedException expectedEx = ExpectedException.none();
 
@@ -40,13 +40,13 @@ public class ScriptCommandTest {
   }
 
   @Test
-  public void testScriptCommandForSchemaEvolution_Alter_Table_Add_column() throws IOException {
+  public void testScriptCommandForSchemaEvolution_Alter_Table_Add_column(){
     Configuration prevConfig =
         StreamlinerUtil.readYamlFile("src/test/resources/configDiff/addColumn/prevConfig.yml");
     Configuration currConfig =
         StreamlinerUtil.readYamlFile("src/test/resources/configDiff/addColumn/currConfig.yml");
     ConfigurationDiff diff = DiffGenerator.createConfigDiff(prevConfig, currConfig);
-    StreamlinerUtil.writeConfigToYaml(diff, outputPath);
+    StreamlinerUtil.writeConfigToYaml(diff, outputFile);
 
     outputDir =
         String.format("%s/%s", outputDir, "testScriptCommandForSchemaEvolution_Alter_Table_Add_column");
@@ -65,7 +65,7 @@ public class ScriptCommandTest {
   }
 
   @Test
-  public void testScriptCommandForSchemaEvolution_Alter_Table_Modify_column() throws IOException {
+  public void testScriptCommandForSchemaEvolution_Alter_Table_Modify_column() {
     expectedEx.expect(RuntimeException.class);
     expectedEx.expectMessage("require investigation");
     Configuration prevConfig =
@@ -73,7 +73,7 @@ public class ScriptCommandTest {
     Configuration currConfig =
         StreamlinerUtil.readYamlFile("src/test/resources/configDiff/changeColumn/currConfig.yml");
     ConfigurationDiff diff = DiffGenerator.createConfigDiff(prevConfig, currConfig);
-    StreamlinerUtil.writeConfigToYaml(diff, outputPath);
+    StreamlinerUtil.writeConfigToYaml(diff, outputFile);
 
     outputDir =
         String.format("%s/%s", outputDir, "testScriptCommandForSchemaEvolution_Alter_Table_Modify_column");
@@ -82,13 +82,13 @@ public class ScriptCommandTest {
   }
 
   @Test
-  public void testScriptCommandForSchemaEvolution_Create_Table() throws IOException {
+  public void testScriptCommandForSchemaEvolution_Create_Table(){
     Configuration prevConfig =
             StreamlinerUtil.readYamlFile("src/test/resources/configDiff/addTable/prevConfig.yml");
     Configuration currConfig =
             StreamlinerUtil.readYamlFile("src/test/resources/configDiff/addTable/currConfig.yml");
     ConfigurationDiff diff = DiffGenerator.createConfigDiff(prevConfig, currConfig);
-    StreamlinerUtil.writeConfigToYaml(diff, outputPath);
+    StreamlinerUtil.writeConfigToYaml(diff, outputFile);
 
     outputDir =
             String.format("%s/%s", outputDir, "testScriptCommandForSchemaEvolution_Create_Table");
@@ -107,7 +107,7 @@ public class ScriptCommandTest {
   }
 
   @Test
-  public void testScriptCommandToGenerateScripts() throws IOException {
+  public void testScriptCommandToGenerateScripts(){
     outputDir =
             String.format("%s/%s", outputDir, "testScriptCommandToGenerateScripts");
     StreamlinerUtil.createDir(outputDir);
