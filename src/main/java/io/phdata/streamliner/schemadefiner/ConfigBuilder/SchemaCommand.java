@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schemacrawler.crawl.StreamlinerCatalog;
 
+import java.io.File;
 import java.util.List;
 
 public class SchemaCommand {
@@ -28,10 +29,7 @@ public class SchemaCommand {
             throw new RuntimeException("Either previous-output-file or diff-output-file is not provided.");
         }
         log.info("Starting Schema Crawling......");
-        if(outputFile.equals("") || !isConfigFile(outputFile)){
-            log.error("output-file should be a .yml/.yaml file.");
-            throw new RuntimeException("output-file should be a .yml/.yaml file.");
-        }
+        isFile(outputFile, "--output-file");
         // read ingest-configuration.yml
         Configuration ingestConfig = StreamlinerUtil.readYamlFile(configurationFile);
         isConfigurationValid(ingestConfig);
@@ -51,20 +49,17 @@ public class SchemaCommand {
             SchemaDefiner schemaDef = new GlueCrawler(glue);
             StreamlinerCatalog catalog = schemaDef.retrieveSchema();
             outputConfig = StreamlinerUtil.mapGlueCatalogToConfig(ingestConfig, catalog);
+        } else {
+            log.error("Unknown Source provided: {}", ingestConfig.getSource().getType());
+            throw new RuntimeException(String.format("Unknown Source provided: %s", ingestConfig.getSource().getType()));
         }
         checkConfiguration(outputConfig);
         StreamlinerUtil.writeConfigToYaml(outputConfig, StreamlinerUtil.getOutputDirectory(outputFile) ,outputFile);
         log.info("Schema crawl is successful and configuration file is written to : {}", outputFile);
 
         if (previousOutputFile != null && diffOutputFile != null) {
-            if (!isConfigFile(diffOutputFile)) {
-                log.error("diff-output-file should be a .yml/.yaml file");
-                throw new RuntimeException("diff-output-file should be a .yml/.yaml file");
-            }
-            if (!isConfigFile(previousOutputFile)) {
-                log.error("previous-output-file should be a .yml/.yaml file");
-                throw new RuntimeException("previous-output-file should be a .yml/.yaml file");
-            }
+            isFile(previousOutputFile, "--previous-output-file");
+            isFile(diffOutputFile, "--diff-output-file");
             log.info("Calculating configuration differences....");
             log.debug(
                     "previous-output-file: {},  current config: {}, diff-output-file: {} ",
@@ -83,6 +78,10 @@ public class SchemaCommand {
         if(ingestConfig.getSource() == null){
             log.error("Source not provided in configuration.");
             throw new RuntimeException("Source not provided in configuration.");
+        }
+        if(ingestConfig.getDestination() == null){
+            log.error("Destination not provided in configuration.");
+            throw new RuntimeException("Destination not provided in configuration.");
         }
     }
 
@@ -104,6 +103,9 @@ public class SchemaCommand {
                   if (config.getPipeline().equalsIgnoreCase("SNOWFLAKE-INCREMENTAL-MERGE")) {
                     checkPrimaryKeys(table);
                   }
+                } else {
+                    log.error("Unknown Table found: {}", table.getType());
+                    throw new RuntimeException(String.format("Unknown Table found: %s", table.getType()));
                 }
               });
     }
@@ -142,7 +144,19 @@ public class SchemaCommand {
         StreamlinerUtil.getHtmlOutput(jdbc, password, outputDir);
     }
 
-    private static boolean isConfigFile(String file){
-        return file.endsWith(".yml") || file.endsWith(".yaml");
+  private static boolean isFile(String outputFile, String param) {
+    File f = new File(outputFile);
+    if (f.exists()) {
+      if (f.isDirectory()) {
+        log.error("{} is a Directory. Expecting a file: {}", param, outputFile);
+        throw new RuntimeException(
+            String.format("Arg: {}. Expected file. Found directory: {}", param, outputFile));
+      } else {
+        return true;
+      }
+    } else {
+      log.error("{} does not exists: {}", param, outputFile);
+      throw new RuntimeException(String.format("%s does not exists: %s", param, outputFile));
     }
+  }
 }

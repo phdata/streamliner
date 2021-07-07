@@ -125,7 +125,7 @@ public class MySQLTestContainerTest {
         StreamlinerUtil.deleteDirectory(generatedOutputFolder);
 
         Map<String, Object> ingestConfigFile = updateSourceDetail(config);
-
+        StreamlinerUtil.createFile(outputFile);
         // schema command with new implementations
         SchemaCommand.build(config,outputFile,dbPass,createDocs, null, null);
 
@@ -263,7 +263,7 @@ public class MySQLTestContainerTest {
   @Test
   public void test09ScalaAppMainMethod_usingNewSchemaCommand_() throws Exception {
     String config = "src/test/resources/conf/ingest-configuration.yml";
-    String generatedConfigFile = "src/test/output/conf/streamliner-configuration.yml";
+    String outputFile = "src/test/output/conf/streamliner-configuration.yml";
     updateSourceDetail(config);
 
     // --create-docs is optional
@@ -272,11 +272,13 @@ public class MySQLTestContainerTest {
       "--config",
       config,
       "--output-file",
-      "src/test/output/conf/streamliner-configuration.yml",
+      outputFile,
       "--database-password",
       mysql.getPassword()
     };
-    testSchemaCommandOptionalParams(generatedConfigFile, schemaCommand1);
+      StreamlinerUtil.createFile(outputFile);
+    testSchemaCommandOptionalParams(outputFile, schemaCommand1);
+      StreamlinerUtil.deleteDirectory(new File("src/test/output"));
   }
 
   @Test
@@ -285,16 +287,20 @@ public class MySQLTestContainerTest {
     expectedEx.expect(RuntimeException.class);
     expectedEx.expectMessage("A databasePassword is required when crawling JDBC source");
     String config = "src/test/resources/conf/ingest-configuration.yml";
+    String outputFile = "src/test/output/conf/streamliner-configuration.yml";
+      StreamlinerUtil.createFile(outputFile);
     // --database-password is optional
-    String schemaCommand[] = {"schema", "--config", config, "--output-file", "src/test/output/conf/streamliner-configuration.yml"};
+    String schemaCommand[] = {"schema", "--config", config, "--output-file", outputFile};
     // Scala App main method
     App.main(schemaCommand);
+      StreamlinerUtil.deleteDirectory(new File("src/test/output"));
   }
 
     @Test
     public void test11SchemaCommandForSchemaEvolution() throws Exception {
         String config = "src/test/resources/conf/ingest-configuration.yml";
         String outputPath = "src/test/output/conf/streamliner-configuration.yml";
+        String diffOutputFile = "src/test/output/configDiff/streamliner-configDiff.yml";
         String dbPass = mysql.getPassword();
         boolean createDocs = false;
 
@@ -303,13 +309,14 @@ public class MySQLTestContainerTest {
 
         Map<String, Object> ingestConfigFile = updateSourceDetail(config);
 
+        StreamlinerUtil.createFile(outputPath, "src/test/output/conf/streamliner-config2.yml", diffOutputFile);
+
         // Schema comnmand
         SchemaCommand.build(config,outputPath,dbPass,createDocs, null, null);
 
         // added a column
         performExecute(con, "ALTER TABLE Persons ADD Age VARCHAR(40) NOT NULL;");
 
-        String diffOutputFile = "src/test/output/configDiff/streamliner-configDiff.yml";
         // schema command for schema evolution
         SchemaCommand.build(config,"src/test/output/conf/streamliner-config2.yml",dbPass,createDocs, outputPath, diffOutputFile);
 
@@ -338,11 +345,7 @@ public class MySQLTestContainerTest {
         StreamlinerUtil.deleteDirectory(new File("src/test/output"));
     }
 
-  private void testSchemaCommandOptionalParams(String generatedConfigFile, String[] schemaCommand1)
-      throws Exception {
-    String outputPath = "src/test/output/";
-      StreamlinerUtil.deleteDirectory(new File(outputPath));
-
+  private void testSchemaCommandOptionalParams(String generatedConfigFile, String[] schemaCommand1) {
     // Scala App main method
     App.main(schemaCommand1);
 
