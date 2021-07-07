@@ -27,10 +27,22 @@ class Cli(args: Seq[String]) extends ScallopConf(args) {
     val filePath: ScallopOption[String] =
       opt[String]("config", descr = "Path to ingest configuration", required = true)
 
-    val outputPath: ScallopOption[String] = opt[String](
-      "output-path",
-      descr = "Directory path where Streamliner configuration should be written to",
+    val outputFile: ScallopOption[String] = opt[String](
+      "output-file",
+      descr = "File name with path where Streamliner configuration should be written to",
+      required = true)
+
+    val previousOutputFile: ScallopOption[String] = opt[String](
+      "previous-output-file",
+      descr = "Previous run file name with path where Streamliner configuration is written to",
       required = false)
+
+    val diffOutputFile: ScallopOption[String] =
+      opt[String](
+        "diff-output-file",
+        descr =
+          "File name with path where Streamliner configuration difference should be  written to",
+        required = false)
 
     val databasePassword: ScallopOption[String] = opt[String](
       "database-password",
@@ -69,31 +81,8 @@ class Cli(args: Seq[String]) extends ScallopConf(args) {
     )
   }
 
-  val schemaEvolution = new Subcommand("schema-evolution") {
-
-    val previousConfig: ScallopOption[String] =
-      opt[String](
-        "previous-config",
-        descr = "Path to streamliner previous configuration",
-        required = false)
-
-    val currentConfig: ScallopOption[String] = opt[String](
-      "current-config",
-      descr = "Path to streamliner current configuration",
-      required = true)
-
-    val outputPath: ScallopOption[String] =
-      opt[String](
-        "output-path",
-        descr =
-          "Directory path where Streamliner previous config, current config and configuration difference should be written to",
-        required = false
-      )
-  }
-
   addSubcommand(schema)
   addSubcommand(produceScripts)
-  addSubcommand(schemaEvolution)
 
   verify()
 }

@@ -1,14 +1,14 @@
 package io.phdata.streamliner.schemadefiner.ConfigBuilder;
 
-import io.phdata.streamliner.schemadefiner.model.*;
+import io.phdata.streamliner.schemadefiner.model.Configuration;
+import io.phdata.streamliner.schemadefiner.model.ConfigurationDiff;
+import io.phdata.streamliner.schemadefiner.model.TemplateContext;
 import io.phdata.streamliner.schemadefiner.util.StreamlinerUtil;
 import io.phdata.streamliner.util.JavaHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,8 +22,7 @@ public class ScriptCommand {
       String configurationDiffFile,
       String typeMappingFile,
       String templateDirectory,
-      String outputDirectory)
-      throws IOException {
+      String outputDirectory) {
 
     Configuration configuration = StreamlinerUtil.readConfigFromPath(configurationFile);
     ConfigurationDiff configDiff = StreamlinerUtil.readConfigDiffFromPath(configurationDiffFile);
@@ -46,8 +45,7 @@ public class ScriptCommand {
       ConfigurationDiff configDiff,
       Map<String, Map<String, String>> typeMapping,
       String templateDirectory,
-      String outputDirectory)
-      throws IOException {
+      String outputDirectory) {
     String pipeline =
         configuration == null ? configDiff.getPipeline() : configuration.getPipeline();
     List<File> files =
@@ -151,8 +149,7 @@ public class ScriptCommand {
       ConfigurationDiff configDiff,
       String templateDirectory,
       Map<String, Map<String, String>> typeMapping,
-      String outputDirectory)
-      throws FileNotFoundException {
+      String outputDirectory) {
     String makefile = String.format("%s/%s", templateDirectory, "Makefile.ssp");
     if (StreamlinerUtil.fileExists(makefile)) {
       log.info("Rendering schema-evolution Makefile: {} ", makefile);
@@ -193,8 +190,7 @@ public class ScriptCommand {
       Configuration configuration,
       Map<String, Map<String, String>> typeMapping,
       String templateDirectory,
-      String outputDirectory)
-      throws FileNotFoundException {
+      String outputDirectory) {
 
     // Makefile.ssp support left in for backwards compatibility
     String makefile = String.format("%s/%s", templateDirectory, "Makefile.ssp");
