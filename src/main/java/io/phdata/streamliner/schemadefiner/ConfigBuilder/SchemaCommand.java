@@ -28,8 +28,16 @@ public class SchemaCommand {
             log.error("Either previous-output-file or diff-output-file is not provided.");
             throw new RuntimeException("Either previous-output-file or diff-output-file is not provided.");
         }
-        log.info("Starting Schema Crawling......");
+        Boolean generateConfigDiff = false;
+    // first checking all the required conditions. Otherwise after executing half of the process if
+    // later it throws some error due to improper params then again it will consume time
         isFile(outputFile, "--output-file");
+        if (previousOutputFile != null && diffOutputFile != null) {
+          isFile(previousOutputFile, "--previous-output-file");
+          isFile(diffOutputFile, "--diff-output-file");
+          generateConfigDiff = true;
+        }
+        log.info("Starting Schema Crawling......");
         // read ingest-configuration.yml
         Configuration ingestConfig = StreamlinerUtil.readYamlFile(configurationFile);
         isConfigurationValid(ingestConfig);
@@ -57,9 +65,7 @@ public class SchemaCommand {
         StreamlinerUtil.writeConfigToYaml(outputConfig, StreamlinerUtil.getOutputDirectory(outputFile) ,outputFile);
         log.info("Schema crawl is successful and configuration file is written to : {}", outputFile);
 
-        if (previousOutputFile != null && diffOutputFile != null) {
-            isFile(previousOutputFile, "--previous-output-file");
-            isFile(diffOutputFile, "--diff-output-file");
+        if (generateConfigDiff) {
             log.info("Calculating configuration differences....");
             log.debug(
                     "previous-output-file: {},  current config: {}, diff-output-file: {} ",

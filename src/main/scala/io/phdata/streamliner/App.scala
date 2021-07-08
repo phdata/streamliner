@@ -16,7 +16,8 @@
 
 package io.phdata.streamliner
 
-import io.phdata.streamliner.schemadefiner.ConfigBuilder.{SchemaCommand, ScriptCommand}
+import io.phdata.streamliner.schemadefiner.ConfigBuilder.SchemaCommand
+import io.phdata.streamliner.schemadefiner.ConfigBuilder.ScriptCommand
 import org.apache.log4j.LogManager
 
 object App {
@@ -33,7 +34,8 @@ object App {
           cli.schema.databasePassword.getOrElse(""),
           cli.schema.createDocs.getOrElse(false),
           cli.schema.previousOutputFile.getOrElse(null),
-          cli.schema.diffOutputFile.getOrElse(null))
+          cli.schema.diffOutputFile.getOrElse(null)
+        )
 
       case Some(cli.produceScripts) =>
         ScriptCommand.build(
@@ -41,7 +43,8 @@ object App {
           cli.produceScripts.configDiffFilePath.getOrElse(null),
           cli.produceScripts.typeMappingFile(),
           cli.produceScripts.templateDirectory(),
-          cli.produceScripts.outputPath())
+          cli.produceScripts.outputPath.getOrElse(null)
+        )
 
       case None =>
         logger.error("Please provide a valid sub command options are `schema` and `scripts`")

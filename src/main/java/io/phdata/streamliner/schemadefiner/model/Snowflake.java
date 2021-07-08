@@ -20,6 +20,8 @@ public class Snowflake extends Destination {
   public SnowflakeQAOptions quality;
   public SnowflakeDatabase stagingDatabase;
   public SnowflakeDatabase reportingDatabase;
+  public String stageName;
+  public IngestFileFormat fileFormat;
 
   public Snowflake() {}
 }
