@@ -125,6 +125,9 @@ public class StreamlinerUtil {
             tables = SnowflakeMapper.mapSchemaCrawlerTables(tableList, jdbc.getUserDefinedTable());
         } else if (ingestConfig.getDestination() instanceof Hadoop) {
             tables = HadoopMapper.mapSchemaCrawlerTables(tableList, jdbc.getUserDefinedTable());
+        } else {
+            log.error("Unknown Destination provided: {}", ingestConfig.getDestination().getType());
+            throw new RuntimeException(String.format("Unknown Destination provided: %s", ingestConfig.getDestination().getType()));
         }
         jdbc.setDriverClass(catalog.getDriverClassName());
         Configuration newConfig = new Configuration(
@@ -197,6 +200,9 @@ public class StreamlinerUtil {
         } else if (ingestConfig.getDestination() instanceof Hadoop) {
             tableDefinitions = HadoopMapper.mapAWSGlueTables(tableList, source.getUserDefinedTable());
             ingestConfig.setTables(tableDefinitions);
+        } else {
+            log.error("Unknown Destination provided: {}", ingestConfig.getDestination().getType());
+            throw new RuntimeException(String.format("Unknown Destination provided: %s", ingestConfig.getDestination().getType()));
         }
         return ingestConfig;
     }
@@ -386,4 +392,20 @@ public class StreamlinerUtil {
         String outputDir = outputFile.substring(0, lastSlashIndex);
         return outputDir;
     }
+
+  public static void createFile(String... files) {
+    Arrays.asList(files).stream()
+        .forEach(
+            file -> {
+              String dir = getOutputDirectory(file);
+              createDir(dir);
+              File f = new File(file);
+              try {
+                f.createNewFile();
+              } catch (IOException e) {
+                log.error("Error creating file: {}", file);
+                throw new RuntimeException(String.format("Error creating file: {}", file));
+              }
+            });
+  }
 }
