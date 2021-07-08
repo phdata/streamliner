@@ -19,15 +19,15 @@ import java.util.stream.Collectors;
 public class HadoopTable extends TableDefinition {
   private String type;
   public String sourceName;
-  private String destinationName;
+  public String destinationName;
   public String checkColumn;
   public String comment = "";
-  public List<String> primaryKeys;
+  public List<String> primaryKeys = new ArrayList<>();
   public Map<String, String> metadata;
   public Integer numberOfMappers = 1;
   public String splitByColumn;
   public Integer numberOfPartitions = 2 ;
-  public List<ColumnDefinition> columns;
+  public List<ColumnDefinition> columns = new ArrayList<>();
 
   public HadoopTable() {}
 

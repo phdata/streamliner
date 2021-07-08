@@ -64,7 +64,10 @@ class Cli(args: Seq[String]) extends ScallopConf(args) {
       opt[String]("config", descr = "Path to streamliner configuration", required = false)
 
     val configDiffFilePath: ScallopOption[String] =
-      opt[String]("config-diff", descr = "Path to streamliner configuration difference", required = false)
+      opt[String](
+        "config-diff",
+        descr = "Path to streamliner configuration difference",
+        required = false)
 
     val outputPath: ScallopOption[String] = opt[String](
       "output-path",
@@ -72,7 +75,7 @@ class Cli(args: Seq[String]) extends ScallopConf(args) {
       required = false)
 
     val typeMappingFile: ScallopOption[String] =
-      opt[String]("type-mapping", descr = "Path to data type mapping file", required = false)
+      opt[String]("type-mapping", descr = "Path to data type mapping file", required = true)
 
     val templateDirectory: ScallopOption[String] = opt[String](
       "template-directory",

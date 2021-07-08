@@ -17,10 +17,10 @@ import java.util.Map;
 public class ColumnDefinition {
     public String sourceName;
     public String destinationName;
-    private String dataType;
+    public String dataType;
     public String comment = "";
-    private Integer precision;
-    private Integer scale;
+    public Integer precision;
+    public Integer scale;
 
     public ColumnDefinition() {
     }
