@@ -62,7 +62,7 @@ first-run:
     $(MAKE) create-snowpipe
     $(MAKE) create-qa-process
 
-clean:
+drop:
     $(MAKE) drop-table
     $(MAKE) drop-snowpipe
     $(MAKE) drop-qa-process
