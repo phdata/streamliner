@@ -1,7 +1,7 @@
 package io.phdata.streamliner.schemadefiner;
 
 import io.phdata.streamliner.App;
-import io.phdata.streamliner.schemadefiner.ConfigBuilder.SchemaCommand;
+import io.phdata.streamliner.schemadefiner.configbuilder.SchemaCommand;
 import io.phdata.streamliner.schemadefiner.model.*;
 import io.phdata.streamliner.schemadefiner.util.StreamlinerUtil;
 import org.junit.*;

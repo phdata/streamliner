@@ -1,4 +1,4 @@
-package io.phdata.streamliner.schemadefiner.ConfigBuilder;
+package io.phdata.streamliner.schemadefiner.configbuilder;
 
 import io.phdata.streamliner.schemadefiner.GlueCrawler;
 import io.phdata.streamliner.schemadefiner.JdbcCrawler;

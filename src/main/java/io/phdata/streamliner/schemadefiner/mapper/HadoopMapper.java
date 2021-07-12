@@ -1,4 +1,4 @@
-package io.phdata.streamliner.schemadefiner.Mapper;
+package io.phdata.streamliner.schemadefiner.mapper;
 
 import io.phdata.streamliner.schemadefiner.model.*;
 import schemacrawler.schema.Column;

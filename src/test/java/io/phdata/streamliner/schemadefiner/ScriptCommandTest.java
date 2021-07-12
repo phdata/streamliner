@@ -1,8 +1,8 @@
 package io.phdata.streamliner.schemadefiner;
 
 import io.phdata.streamliner.App;
-import io.phdata.streamliner.schemadefiner.ConfigBuilder.DiffGenerator;
-import io.phdata.streamliner.schemadefiner.ConfigBuilder.ScriptCommand;
+import io.phdata.streamliner.schemadefiner.configbuilder.DiffGenerator;
+import io.phdata.streamliner.schemadefiner.configbuilder.ScriptCommand;
 import io.phdata.streamliner.schemadefiner.model.Configuration;
 import io.phdata.streamliner.schemadefiner.model.ConfigurationDiff;
 import io.phdata.streamliner.schemadefiner.util.StreamlinerUtil;

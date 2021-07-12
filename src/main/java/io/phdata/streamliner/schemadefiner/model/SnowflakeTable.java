@@ -27,6 +27,7 @@ public class SnowflakeTable extends TableDefinition {
   private Map<String, String> metadata;
   private FileFormat fileFormat;
   public List<ColumnDefinition> columns;
+  public String pkList;
 
   public SnowflakeTable() {}
 
@@ -49,6 +50,8 @@ public class SnowflakeTable extends TableDefinition {
     this.metadata = metadata;
     this.fileFormat = fileFormat;
     this.columns = columns;
+    pkList = StringUtils.join(primaryKeys.stream().map(c -> StreamlinerUtil.quoteIdentifierIfNeeded(c))
+            .collect(Collectors.toList()), ",");
   }
 
   // these setters are needed to set value to parent class. jackson is not setting the parent class value
@@ -71,8 +74,6 @@ public class SnowflakeTable extends TableDefinition {
     super.setColumns(columns);
     this.columns = columns;
   }
-
-  public String pkList = StringUtils.join(primaryKeys, ",");
 
   public String columnDDL(
       scala.collection.immutable.Map<String, scala.collection.immutable.Map<String, String>>
