@@ -61,7 +61,7 @@ class Cli(args: Seq[String]) extends ScallopConf(args) {
   val produceScripts = new Subcommand("scripts") {
 
     val filePath: ScallopOption[String] =
-      opt[String]("config", descr = "Path to streamliner configuration", required = false)
+      opt[String]("config", descr = "Path to streamliner configuration", required = true)
 
     val configDiffFilePath: ScallopOption[String] =
       opt[String](

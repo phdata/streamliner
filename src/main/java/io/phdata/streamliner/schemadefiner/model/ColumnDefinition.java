@@ -93,7 +93,7 @@ public class ColumnDefinition {
       if (dataType.equalsIgnoreCase("varchar")) {
         return String.format("VARCHAR(%d)", p);
       } else if (dataType.equalsIgnoreCase("char")) {
-        return String.format("CHAR($d)", p);
+        return String.format("CHAR(%d)", p);
       } else {
         return dataType;
       }
