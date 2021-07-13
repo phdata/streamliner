@@ -109,7 +109,7 @@ run:
     $(MAKE) copy-staging-avro-schema
     $(MAKE) upsert
 
-clean:
+drop:
     $(MAKE) delete-sqoop-job
     $(MAKE) drop-archive-table
     $(MAKE) drop-report-table

@@ -99,7 +99,7 @@ run:
 stop:
     $(MAKE) alter-task-suspend
 
-clean:
+drop:
     $(MAKE) alter-task-suspend
     $(MAKE) drop-task
     $(MAKE) drop-snowpipe

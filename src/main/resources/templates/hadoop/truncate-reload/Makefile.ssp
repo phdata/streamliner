@@ -96,7 +96,7 @@ run:
     $(MAKE) compute-stats-report-table
     $(MAKE) validate-rowcount
 
-clean:
+drop:
     $(MAKE) drop-partitioned-table
     $(MAKE) drop-report-table
     $(MAKE) drop-staging-table

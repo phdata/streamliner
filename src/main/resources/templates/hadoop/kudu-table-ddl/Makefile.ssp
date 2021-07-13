@@ -37,7 +37,7 @@ first-run:
 run:
     $(MAKE) compute-stats-kudu
 
-clean:
+drop:
     $(MAKE) drop-kudu-table
 
 targets: ## Print out a list of available targets
