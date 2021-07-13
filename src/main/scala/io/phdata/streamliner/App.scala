@@ -16,8 +16,8 @@
 
 package io.phdata.streamliner
 
-import io.phdata.streamliner.schemadefiner.ConfigBuilder.SchemaCommand
-import io.phdata.streamliner.schemadefiner.ConfigBuilder.ScriptCommand
+import io.phdata.streamliner.schemadefiner.configbuilder.SchemaCommand
+import io.phdata.streamliner.schemadefiner.configbuilder.ScriptCommand
 import org.apache.log4j.LogManager
 
 object App {

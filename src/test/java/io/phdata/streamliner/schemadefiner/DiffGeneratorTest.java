@@ -1,6 +1,6 @@
 package io.phdata.streamliner.schemadefiner;
 
-import io.phdata.streamliner.schemadefiner.ConfigBuilder.DiffGenerator;
+import io.phdata.streamliner.schemadefiner.configbuilder.DiffGenerator;
 import io.phdata.streamliner.schemadefiner.model.ColumnDiff;
 import io.phdata.streamliner.schemadefiner.model.Configuration;
 import io.phdata.streamliner.schemadefiner.model.ConfigurationDiff;

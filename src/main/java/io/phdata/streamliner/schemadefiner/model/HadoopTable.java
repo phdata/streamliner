@@ -28,6 +28,11 @@ public class HadoopTable extends TableDefinition {
   public String splitByColumn;
   public Integer numberOfPartitions = 2 ;
   public List<ColumnDefinition> columns = new ArrayList<>();
+  public String pkList;
+  public String pkAsStringCommaSeparated;
+  public List<ColumnDefinition> pkColumnDefs;
+  public List<ColumnDefinition> nonPKColumnDefs;
+
 
   public HadoopTable() {}
 
@@ -52,6 +57,17 @@ public class HadoopTable extends TableDefinition {
     this.splitByColumn = splitByColumn;
     this.numberOfPartitions = numberOfPartitions;
     this.columns = columns;
+    pkList = StringUtils.join(
+            primaryKeys.stream().map(pk -> String.format("`%s`", pk)).collect(Collectors.toList()),
+            ",");
+    pkAsStringCommaSeparated = StringUtils.join(primaryKeys, ",");
+    pkColumnDefs = columns.stream()
+                    .filter(c -> primaryKeys.contains(c.getSourceName()))
+                    .collect(Collectors.toList());
+    nonPKColumnDefs = columns.stream()
+                    .filter(c -> !primaryKeys.contains(c.getSourceName()))
+                    .collect(Collectors.toList());
+
   }
 
   // these setters are needed to set value to parent class. jackson is not setting the parent class value
@@ -74,20 +90,6 @@ public class HadoopTable extends TableDefinition {
     super.setColumns(columns);
     this.columns = columns;
   }
-
-  public String pkList =
-      StringUtils.join(
-          primaryKeys.stream().map(pk -> String.format("`%s`", pk)).collect(Collectors.toList()),
-          ",");
-
-  public List<ColumnDefinition> pkColumnDefs =
-      columns.stream()
-          .filter(c -> primaryKeys.contains(c.getSourceName()))
-          .collect(Collectors.toList());
-  public List<ColumnDefinition> nonPKColumnDefs =
-      columns.stream()
-          .filter(c -> !primaryKeys.contains(c.getSourceName()))
-          .collect(Collectors.toList());
 
   public List<ColumnDefinition> orderColumnsPKsFirst() {
     pkColumnDefs.addAll(nonPKColumnDefs);
@@ -129,8 +131,6 @@ public class HadoopTable extends TableDefinition {
             .collect(Collectors.toList());
     return StringUtils.join(columnList, ",\n");
   }
-
-  public String pkAsStringCommaSeparated = StringUtils.join(primaryKeys, ",");
 
   public String tableMetadata() {
     List<String> metadataList = new ArrayList<>();
