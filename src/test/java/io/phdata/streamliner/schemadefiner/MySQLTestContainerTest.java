@@ -50,7 +50,7 @@ public class MySQLTestContainerTest {
         mysql.start();
         con = StreamlinerUtil.getConnection(mysql.getJdbcUrl(), mysql.getUsername(), mysql.getPassword());
         performExecuteUpdate(con, "CREATE TABLE Persons (\n" +
-                "    PersonID int,\n" +
+                "    PersonID int NOT NULL,\n" +
                 "    LastName varchar(255),\n" +
                 "    FirstName varchar(255),\n" +
                 "    Address varchar(255),\n" +
@@ -148,6 +148,9 @@ public class MySQLTestContainerTest {
 
         List<Map<String, Object>> columnList = ((List<Map<String, Object>>) table.get("columns"));
         assertFalse(columnList.isEmpty());
+
+        Map<String, Object> personID = columnList.stream().filter(c -> "PersonID".equalsIgnoreCase((String) c.get("sourceName"))).findFirst().get();
+        assertEquals(false, personID.get("nullable"));
     }
 
   @Test
@@ -161,14 +164,14 @@ public class MySQLTestContainerTest {
       // reading current destination config
     Configuration conf2 = StreamlinerUtil.readConfigFromPath(configPath2);
 
-    ColumnDefinition prevColDef1 = new ColumnDefinition("ID", "ID", "Number", "Emp Id", 255, 0);
-    ColumnDefinition currColDef1 = new ColumnDefinition("Emp_Id", "Emp_Id", "Number", "Employee Id", 255, 0);
+    ColumnDefinition prevColDef1 = new ColumnDefinition("ID", "ID", "Number", "Emp Id", 255, 0, true);
+    ColumnDefinition currColDef1 = new ColumnDefinition("Emp_Id", "Emp_Id", "Number", "Employee Id", 255, 0, true);
     ColumnDiff columnDiff1 = new ColumnDiff(prevColDef1, currColDef1, false, false, true);
 
     ColumnDefinition prevColDef2 =
-        new ColumnDefinition("Name", "Name", "Varchar2", "Emp Name", 255, 0);
+        new ColumnDefinition("Name", "Name", "Varchar2", "Emp Name", 255, 0, true);
     ColumnDefinition currColDef2 =
-        new ColumnDefinition("Emp_Name", "Emp_Name", "Varchar2", "Employee Name", 255, 0);
+        new ColumnDefinition("Emp_Name", "Emp_Name", "Varchar2", "Employee Name", 255, 0, true);
     ColumnDiff columnDiff2 = new ColumnDiff(prevColDef2, currColDef2, false, false, true);
 
     List<ColumnDiff> colList = new ArrayList<>();

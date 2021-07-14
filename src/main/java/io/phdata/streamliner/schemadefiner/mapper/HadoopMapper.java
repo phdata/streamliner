@@ -105,6 +105,7 @@ public class HadoopMapper {
                 column.getColumnDataType().getName(),
                 column.getRemarks(),
                 column.getSize(),
-                column.getDecimalDigits())).collect(Collectors.toList());
+                column.getDecimalDigits(),
+                column.isNullable())).collect(Collectors.toList());
     }
 }

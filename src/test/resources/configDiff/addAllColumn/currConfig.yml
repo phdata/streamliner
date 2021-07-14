@@ -40,4 +40,4 @@ tables:
     comment: ""
     precision: 38
     scale: 0
-
+    nullable: false
