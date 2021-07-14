@@ -37,7 +37,7 @@ first-run:
 	$(MAKE) copy-into
 	$(MAKE) create-snowpipe
 
-clean:
+drop:
 	$(MAKE) drop-table
 	$(MAKE) drop-snowpipe
 

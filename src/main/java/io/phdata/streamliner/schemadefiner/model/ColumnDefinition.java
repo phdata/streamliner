@@ -21,17 +21,20 @@ public class ColumnDefinition {
     public String comment = "";
     public Integer precision;
     public Integer scale;
+    public boolean nullable = true;
 
     public ColumnDefinition() {
     }
 
-    public ColumnDefinition(String sourceName, String destinationName, String dataType, String comment, Integer precision, Integer scale) {
+    public ColumnDefinition(String sourceName, String destinationName, String dataType, String comment,
+                            Integer precision, Integer scale, boolean nullable) {
         this.sourceName = sourceName;
         this.destinationName = destinationName;
         this.dataType = dataType;
         this.comment = comment;
         this.precision = precision;
         this.scale = scale;
+        this.nullable = nullable;
     }
 
     public ColumnDefinition(String sourceName, String destinationName, String dataType, String comment) {

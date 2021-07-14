@@ -100,6 +100,9 @@ public class StreamlinerSchemaCrawler {
                 Integer decimalDigits = castToInteger(row.get("DECIMAL_DIGITS"), 0);
                 Integer ordinalPosition = castToInteger(row.get("ORDINAL_POSITION"), Integer.MAX_VALUE);
                 String remarks = trimIfNotNull((String) row.get("REMARKS"));
+                // from oracle-schema-crawler-columns.sql:
+                // DECODE (COLUMNS.NULLABLE, 'N', 0, 1) AS NULLABLE, => means 0 is NO and 1 is YES
+                boolean nullable = castToInteger(row.get("NULLABLE"), 1) == 1;
                 MutableTable table = tables.get(tableName);
                 if (table != null) {
                     MutableColumn column = new MutableColumn(table, columnName);
@@ -108,6 +111,7 @@ public class StreamlinerSchemaCrawler {
                     column.setDecimalDigits(decimalDigits);
                     column.setRemarks(remarks);
                     column.setOrdinalPosition(ordinalPosition);
+                    column.setNullable(nullable);
                     table.addColumn(column);
                 }
             }

@@ -8,6 +8,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -85,9 +86,10 @@ public class SnowflakeTable extends TableDefinition {
             .map(
                 column ->
                     String.format(
-                        "%s %s COMMENT '%s'",
+                        "%s %s %s COMMENT '%s'",
                         StreamlinerUtil.quoteIdentifierIfNeeded(column.getDestinationName()),
                         column.mapDataTypeSnowflake(javaTypeMap),
+                        column.isNullable() ? "" : "NOT NULL",
                         column.getComment()))
             .collect(Collectors.toList());
     return StringUtils.join(columnList, ",\n");

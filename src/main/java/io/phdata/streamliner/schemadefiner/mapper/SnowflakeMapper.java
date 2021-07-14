@@ -76,7 +76,8 @@ public class SnowflakeMapper {
                 column.getColumnDataType().getName(),
                 column.getRemarks(),
                 column.getSize(),
-                column.getDecimalDigits())).collect(Collectors.toList());
+                column.getDecimalDigits(),
+                column.isNullable())).collect(Collectors.toList());
     }
 
     public static List<TableDefinition> mapAWSGlueTables(List<Table> glueTables, List<UserDefinedTable> userDefinedTables){
