@@ -1,5 +1,6 @@
 
-run-all: run-Employee
+
+    run-all: run-Employee
 
 run-Employee:
 	$(MAKE) run -C Employee

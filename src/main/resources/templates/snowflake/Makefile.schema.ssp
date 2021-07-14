@@ -14,11 +14,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --%>
 <%@ val tables: Seq[io.phdata.streamliner.schemadefiner.model.TableDefinition] %>
-<%
-	val firstRunTables = tables.map(t => s"first-run-${t.destinationName}").mkString(" ")
-	val runTables = tables.map(t => s"run-${t.destinationName}").mkString(" ")
-	val cleanTables = tables.map(t => s"clean-${t.destinationName}").mkString(" ")
-%>
+<%@ val tableDiffs: Seq[io.phdata.streamliner.schemadefiner.model.TableDiff] %>
+#if (!tableDiffs.isEmpty)
+    <%
+        val runTables = tableDiffs.map(t => s"run-${t.destinationName}").mkString(" ")
+    %>
+run-all: ${runTables}
+
+#for (table <- tableDiffs)
+run-${table.destinationName}:
+	$(MAKE) run -C ${table.destinationName}
+
+#end
+#elseif (tables != null)
+    <%
+        val firstRunTables = tables.map(t => s"first-run-${t.destinationName}").mkString(" ")
+        val runTables = tables.map(t => s"run-${t.destinationName}").mkString(" ")
+        val cleanTables = tables.map(t => s"clean-${t.destinationName}").mkString(" ")
+    %>
 
 first-run-all: ${firstRunTables}
 
@@ -36,4 +49,5 @@ run-${table.destinationName}:
 clean-${table.destinationName}:
 	$(MAKE) clean -C ${table.destinationName}
 
+#end
 #end

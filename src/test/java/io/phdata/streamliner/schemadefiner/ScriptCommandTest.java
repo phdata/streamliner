@@ -1,6 +1,5 @@
 package io.phdata.streamliner.schemadefiner;
 
-import io.phdata.streamliner.App;
 import io.phdata.streamliner.schemadefiner.configbuilder.DiffGenerator;
 import io.phdata.streamliner.schemadefiner.configbuilder.ScriptCommand;
 import io.phdata.streamliner.schemadefiner.model.Configuration;
@@ -51,7 +50,7 @@ public class ScriptCommandTest {
     outputDir =
         String.format("%s/%s", outputDir, "testScriptCommandForSchemaEvolution_Alter_Table_Add_column");
     StreamlinerUtil.createDir(outputDir);
-    ScriptCommand.build(null, configDiff, typeMapping, templateDirectory, outputDir);
+    ScriptCommand.build("src/test/resources/configDiff/addColumn/currConfig.yml", configDiff, typeMapping, templateDirectory, outputDir);
     File f = new File(String.format("%s/Employee", outputDir));
     assertTrue(f.exists());
     assertTrue(f.isDirectory());
@@ -60,7 +59,7 @@ public class ScriptCommandTest {
         .forEach(
             file -> {
               assertTrue(
-                  file.getName().equals("evolve-schema.sql") || file.getName().equals("Makefile"));
+                  file.getName().equals("evolve-schema.sql") || file.getName().equals("Makefile") || file.getName().equals("copy-into.sql"));
             });
   }
 
@@ -78,7 +77,7 @@ public class ScriptCommandTest {
     outputDir =
         String.format("%s/%s", outputDir, "testScriptCommandForSchemaEvolution_Alter_Table_Modify_column");
     StreamlinerUtil.createDir(outputDir);
-    ScriptCommand.build(null, configDiff, typeMapping, templateDirectory, outputDir);
+    ScriptCommand.build("src/test/resources/configDiff/changeColumn/currConfig.yml", configDiff, typeMapping, templateDirectory, outputDir);
   }
 
   @Test
@@ -93,7 +92,7 @@ public class ScriptCommandTest {
     outputDir =
             String.format("%s/%s", outputDir, "testScriptCommandForSchemaEvolution_Create_Table");
     StreamlinerUtil.createDir(outputDir);
-    ScriptCommand.build(null, configDiff, typeMapping, templateDirectory, outputDir);
+    ScriptCommand.build("src/test/resources/configDiff/addTable/currConfig.yml", configDiff, typeMapping, templateDirectory, outputDir);
     File f = new File(String.format("%s/Department", outputDir));
     assertTrue(f.exists());
     assertTrue(f.isDirectory());
@@ -102,7 +101,7 @@ public class ScriptCommandTest {
             .forEach(
                     file -> {
                       assertTrue(
-                              file.getName().equals("evolve-schema.sql") || file.getName().equals("Makefile"));
+                              file.getName().equals("evolve-schema.sql") || file.getName().equals("Makefile") || file.getName().equals("copy-into.sql"));
                     });
   }
 
@@ -120,19 +119,19 @@ public class ScriptCommandTest {
   }
 
   @Test
-  public void testScriptCommand_bothConfig_null() {
+  public void testScriptCommand_mandatory_config() {
     expectedEx.expect(RuntimeException.class);
-    expectedEx.expectMessage("No configuration file found");
-    outputDir = String.format("%s/%s", outputDir, "testScriptCommand_bothConfig_null");
-    String scriptCommand[] = {
-      "scripts",
-      "--output-path",
-      outputDir,
-      "--type-mapping",
-      typeMapping,
-      "--template-directory",
-      templateDirectory
-    };
-    App.main(scriptCommand);
+    expectedEx.expectMessage("--config is mandatory");
+    Configuration prevConfig =
+            StreamlinerUtil.readYamlFile("src/test/resources/configDiff/changeColumn/prevConfig.yml");
+    Configuration currConfig =
+            StreamlinerUtil.readYamlFile("src/test/resources/configDiff/changeColumn/currConfig.yml");
+    ConfigurationDiff diff = DiffGenerator.createConfigDiff(prevConfig, currConfig);
+    StreamlinerUtil.writeConfigToYaml(diff, outputFile);
+
+    outputDir =
+            String.format("%s/%s", outputDir, "testScriptCommand_mandatory_config");
+    StreamlinerUtil.createDir(outputDir);
+    ScriptCommand.build(null, configDiff, typeMapping, templateDirectory, outputDir);
   }
 }

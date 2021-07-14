@@ -25,13 +25,7 @@ USE DATABASE ${destination.stagingDatabase.name};
 
 USE SCHEMA ${destination.stagingDatabase.schema};
 
-CREATE PIPE IF NOT EXISTS ${table.destinationName}_pipe
-    AUTO_INGEST = true
-#if (destination.snsTopic != null)
-    AWS_SNS_TOPIC = '${destination.snsTopic}'
-#end
-    AS
-        COPY INTO ${table.destinationName} (${unescape(table.columnList(null))})
-            FROM ( SELECT ${unescape(sourceColumnStr)}
-                FROM @${configuration.name}_stage/${table.sourceName})
-        FILE_FORMAT = ( TYPE = PARQUET);
+COPY INTO ${table.destinationName} (${unescape(table.columnList(null))})
+FROM ( SELECT ${unescape(sourceColumnStr)}
+FROM @${configuration.name}_stage/${table.sourceName})
+FILE_FORMAT = ( TYPE = PARQUET);
