@@ -31,7 +31,7 @@ public class SnowflakeMapper {
                         if (userTable.getFileFormat() != null) {
                             table.setFileFormat(userTable.getFileFormat());
                         }
-                        if (!userTable.getPrimaryKeys().isEmpty()) {
+                        if (userTable.getPrimaryKeys() != null && !userTable.getPrimaryKeys().isEmpty()) {
                             table.setPrimaryKeys(userTable.getPrimaryKeys());
                         }
                     }
