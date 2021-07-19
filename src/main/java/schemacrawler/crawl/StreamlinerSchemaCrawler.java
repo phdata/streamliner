@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class StreamlinerSchemaCrawler {
     private static final Logger log = Logger.getLogger(StreamlinerSchemaCrawler.class);
@@ -65,7 +66,7 @@ public class StreamlinerSchemaCrawler {
     }
 
     protected static StreamlinerCatalog getOracleCatalog(QueryHandler queryHandler, String schemaName,
-                                                       List<String> tableTypes) throws SQLException, InterruptedException {
+                                                       List<String> tableTypes, List<String> tableWhitelist) throws SQLException, InterruptedException {
         Map<String, MutableTable> tables = new TreeMap<>();
         Schema schema = new SchemaReference(schemaName, schemaName);
         boolean findTables = tableTypes.contains("table");
@@ -152,18 +153,26 @@ public class StreamlinerSchemaCrawler {
             }
         }
         Map<Schema, List<Table>> result = new HashMap<>();
-        result.put(schema, new ArrayList<>(tables.values()));
+    if (tableWhitelist != null) {
+      List<Table> tableFiltered =
+          tables.values().stream()
+              .filter(table -> tableWhitelist.contains(table.getName()))
+              .collect(Collectors.toList());
+      result.put(schema, tableFiltered);
+    } else {
+      result.put(schema, new ArrayList<>(tables.values()));
+    }
         return new StreamlinerCatalog("oracle.jdbc.OracleDriver", Arrays.asList(schema),
                 result);
     }
 
     public static StreamlinerCatalog getCatalog(String schemaName, String jdbcUrl,
             final Supplier<Connection> connectionSupplier, final SchemaCrawlerOptions schemaCrawlerOptions,
-            List<String> tableTypes)
+            List<String> tableTypes, List<String> tableWhitelist)
             throws Exception {
         if (jdbcUrl.startsWith("jdbc:oracle")) {
             StopWatch retrieveTablesTimer = StopWatch.createStarted();
-            StreamlinerCatalog catalog = getOracleCatalog(new QueryHandler(connectionSupplier), schemaName, tableTypes);
+            StreamlinerCatalog catalog = getOracleCatalog(new QueryHandler(connectionSupplier), schemaName, tableTypes, tableWhitelist);
             retrieveTablesTimer.stop();
             log.info(String.format("Retrieve Tables took %s", retrieveTablesTimer.formatTime()));
             return catalog;

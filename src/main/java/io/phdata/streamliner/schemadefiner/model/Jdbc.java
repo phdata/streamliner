@@ -22,8 +22,11 @@ public class Jdbc extends Source {
   private String keystoreAlias;
   public String schema;
   private List<String> tableTypes;
+  // override to the metadata
   private List<UserDefinedTable> userDefinedTable;
   private Map<String, String> metadata;
+  // for table whitelisting
+  private List<String> tables;
 
   public Jdbc() {}
 

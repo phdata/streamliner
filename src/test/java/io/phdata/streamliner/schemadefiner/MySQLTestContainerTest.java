@@ -348,6 +348,41 @@ public class MySQLTestContainerTest {
         StreamlinerUtil.deleteDirectory(new File("src/test/output"));
     }
 
+    @Test
+    public void test12TableWhiteListingTest() throws SQLException, FileNotFoundException {
+        performExecuteUpdate(con, "CREATE TABLE Person2 (\n" +
+                "    PersonID int NOT NULL,\n" +
+                "    LastName varchar(255),\n" +
+                "    FirstName varchar(255),\n" +
+                "    Address varchar(255),\n" +
+                "    City varchar(255)\n" +
+                ");");
+        String config = "src/test/resources/conf/ingest-configuration-tableWhitelisting.yml";
+        String outputPath = "src/test/output/conf/streamliner-configuration.yml";
+        String dbPass = mysql.getPassword();
+        boolean createDocs = false;
+
+        File generatedOutputFolder = new File(outputPath);
+        StreamlinerUtil.deleteDirectory(generatedOutputFolder);
+
+        updateSourceDetail(config);
+
+        StreamlinerUtil.createFile(outputPath);
+
+        // Schema comnmand
+        SchemaCommand.build(config,outputPath,dbPass,createDocs, null, null);
+
+        Configuration outputConfig = StreamlinerUtil.readYamlFile(outputPath);
+
+        assertNotNull(outputConfig.getTables());
+        assertEquals(1, outputConfig.getTables().size());
+        assertNotNull(outputConfig.getTables().get(0).getPrimaryKeys());
+        assertEquals(2, outputConfig.getTables().get(0).getPrimaryKeys().size());
+        assertEquals("Persons", outputConfig.getTables().get(0).getSourceName());
+
+        StreamlinerUtil.deleteDirectory(new File("src/test/output"));
+    }
+
   private void testSchemaCommandOptionalParams(String generatedConfigFile, String[] schemaCommand1) {
     // Scala App main method
     App.main(schemaCommand1);

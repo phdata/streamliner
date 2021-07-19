@@ -24,7 +24,7 @@ public class StreamlinerSchemaCrawlerTest {
     @Test
     public void testEmpty() throws Exception {
         StreamlinerCatalog catalog = StreamlinerSchemaCrawler.getOracleCatalog(new TestQueryHandler(), SCHEMA,
-                Collections.singletonList("table"));
+                Collections.singletonList("table"), null);
         Assert.assertEquals(SCHEMA, catalog.getSchemas().iterator().next().getName());
         Assert.assertEquals(Collections.emptyList(), catalog.getTables(new SchemaReference(null, SCHEMA)));
     }
@@ -61,8 +61,8 @@ public class StreamlinerSchemaCrawlerTest {
         resultSet.put(ORACLE_CONSTRAINTS_TEMPLATE, Arrays.asList(constraint));
         resultSet.put(ORACLE_UNIQUE_INDEXES_TEMPLATE, Arrays.asList(index));
         StreamlinerCatalog catalog = StreamlinerSchemaCrawler.getOracleCatalog(new TestQueryHandler(), SCHEMA,
-                Arrays.asList("table", "view"));
-        List<Table> result = new ArrayList<>(catalog.getTables(new SchemaReference(null, SCHEMA)));
+                Arrays.asList("table", "view"), null);
+        List<Table> result = new ArrayList<>(catalog.getTables(new SchemaReference(SCHEMA, SCHEMA)));
         Assert.assertEquals("t1", result.get(0).getName());
         Assert.assertEquals("v1", result.get(1).getName());
         Assert.assertEquals("c1", result.get(0).getColumns().get(0).getName());
