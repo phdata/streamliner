@@ -236,18 +236,21 @@ public class StreamlinerUtil {
         SchemaCrawlerOptions options = SchemaCrawlerOptionsBuilder.newSchemaCrawlerOptions();
         LimitOptionsBuilder limitOptionsBuilder = LimitOptionsBuilder.builder();
 
-        limitOptionsBuilder.includeSchemas(new RegularExpressionInclusionRule(".*" + jdbc.getSchema() + ".*"))
-                .tableTypes(mapTableTypes(jdbc.getTableTypes()));
-        if (jdbc.getUserDefinedTable() != null) {
-            List<String> list = jdbc.getUserDefinedTable().stream()
-                    .map(table -> ".*" + jdbc.getSchema() + ".*\\." + table.getName()).collect(Collectors.toList());
+        limitOptionsBuilder
+            .includeSchemas(
+                new RegularExpressionInclusionRule(String.format(".*%s.*", jdbc.getSchema())))
+            .tableTypes(mapTableTypes(jdbc.getTableTypes()));
+        // table whitelisting
+        if (jdbc.getTables() != null) {
+            List<String> list = jdbc.getTables().stream()
+                    .map(table -> String.format(".*%s.*\\.%s", jdbc.getSchema(), table)).collect(Collectors.toList());
             String tableList = String.join("|", list);
-            limitOptionsBuilder.includeTables(new RegularExpressionInclusionRule(tableList));
+            limitOptionsBuilder.includeTables(new RegularExpressionInclusionRule(String.format("(%s)",tableList)));
         }
         return options.withLimitOptions(limitOptionsBuilder.toOptions());
     }
 
-    private static List<String> mapTableTypes(List<String> tableTypes) {
+    public static List<String> mapTableTypes(List<String> tableTypes) {
         return tableTypes.stream().map(tableType -> {
             if (tableType.equals("tables")) {
                 return "table";

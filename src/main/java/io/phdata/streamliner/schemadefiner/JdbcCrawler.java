@@ -30,13 +30,15 @@ public class JdbcCrawler implements SchemaDefiner {
           return StreamlinerUtil.getConnection(jdbcUrl, user, password);
         }
       };
+    private Jdbc jdbc;
 
     public JdbcCrawler(Jdbc jdbc, String password) {
+        this.jdbc = jdbc;
         this.jdbcUrl = jdbc.getUrl();
         this.user = jdbc.getUsername();
         this.password = password;
         this.schemaName = jdbc.getSchema();
-        this.tableTypes = jdbc.getTableTypes();
+        this.tableTypes = StreamlinerUtil.mapTableTypes(jdbc.getTableTypes());
         this.connectionSupplier = conSupplier;
         this.schemaCrawlerOptions = StreamlinerUtil.getOptions(jdbc);
 
@@ -45,7 +47,7 @@ public class JdbcCrawler implements SchemaDefiner {
     @Override
     public StreamlinerCatalog retrieveSchema() {
         try {
-            return StreamlinerSchemaCrawler.getCatalog(schemaName, jdbcUrl, connectionSupplier, schemaCrawlerOptions, tableTypes);
+            return StreamlinerSchemaCrawler.getCatalog(schemaName, jdbcUrl, connectionSupplier, schemaCrawlerOptions, tableTypes, jdbc.getTables());
         } catch (Exception e) {
             log.error("Error in JdbcCrawler: {}", e.getMessage());
             throw new RuntimeException("Error in JdbcCrawler: {}", e);
