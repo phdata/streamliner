@@ -27,6 +27,8 @@ package object configuration {
   // so in the hadoop case we'll always hit the else
   val IDENTIFIER_WITHOUT_SPECIAL_CHARS = "^[A-Za-z0-9_]+$";
 
+  val SNOWFLAKE_MAX_LENGTH = 16777216
+
   def quoteIdentifierIfNeeded(identifier: String): String = {
     if (identifier.matches(IDENTIFIER_WITHOUT_SPECIAL_CHARS)) {
       identifier
@@ -289,8 +291,12 @@ package object configuration {
 
     def mapDataTypeSnowflake(typeMapping: TypeMapping): String = {
       val cleanDataType = cleanseDataType
-      val p = precision.getOrElse(0)
+      var p = precision.getOrElse(0)
       val s = scale.getOrElse(0)
+
+      if (p > SNOWFLAKE_MAX_LENGTH) {
+        p = SNOWFLAKE_MAX_LENGTH;
+      }
 
       // Oracle specific type mapping
       if (cleanDataType.equalsIgnoreCase("NUMBER")) {
