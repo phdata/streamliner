@@ -14,6 +14,28 @@ Streamliner uses [SBT](https://www.scala-sbt.org/) as a dependency management an
 2. Copy zip from `target/universal/streamliner-<version>.zip` to intended install directory
 3. Unzip streamliner
 
+### Releasing
+
+Install tools if required:
+
+```shell script
+$ virtualenv -p python3 venv
+$ source venv/bin/activate
+$ pip install --upgrade cloudsmith-cli
+```
+
+Login to Cloudsmith:
+
+```shell script
+$ cloudsmith token
+```
+
+Publish:
+
+```shell script
+$ build-support/publish-zip-to-artifactory.sh
+```
+
 ## Running Integration Tests
 
 ```shell script
