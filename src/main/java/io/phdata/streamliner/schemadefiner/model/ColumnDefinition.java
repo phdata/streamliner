@@ -5,6 +5,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
 import java.util.List;
@@ -14,7 +15,9 @@ import java.util.Map;
 @ToString
 @Getter
 @Setter
+@Slf4j
 public class ColumnDefinition {
+    public static final int SNOWFLAKE_MAX_LENGTH = 16_777_216;
     public String sourceName;
     public String destinationName;
     public String dataType;
@@ -57,26 +60,7 @@ public class ColumnDefinition {
       scala.collection.immutable.Map<String, scala.collection.immutable.Map<String, String>>
           typeMapping) {
     Map<String, Map<String, String>> javaTypeMap = JavaHelper.convertScalaMapToJavaMap(typeMapping);
-    String cleanDataType = cleanseDataType(dataType);
-    Integer p = precision == null ? 0 : precision;
-    Integer s = scale == null ? 0 : scale;
-
-    if (cleanDataType.equalsIgnoreCase("NUMBER")) {
-      if (p == 0 && (s == -127 || s == 0)) {
-        return "NUMBER(38, 8)";
-      } else {
-        return String.format("NUMBER(%d, %d)", p, s);
-      }
-    } else {
-      String dataType = mapDataType(cleanDataType, javaTypeMap, "SNOWFLAKE");
-      if (dataType.equalsIgnoreCase("varchar")) {
-        return String.format("VARCHAR(%d)", p);
-      } else if (dataType.equalsIgnoreCase("char")) {
-        return String.format("CHAR($d)", p);
-      } else {
-        return dataType;
-      }
-    }
+    return mapDataTypeSnowflake(javaTypeMap);
   }
 
   public String mapDataTypeSnowflake(Map<String, Map<String, String>> typeMapping) {
@@ -84,7 +68,13 @@ public class ColumnDefinition {
     Integer p = precision == null ? 0 : precision;
     Integer s = scale == null ? 0 : scale;
 
-    // Oracle specific type mapping
+    if (p > SNOWFLAKE_MAX_LENGTH) {
+        log.warn("Truncating column {} (source name) from {} to Snowflakes max of {}",sourceName, p,
+                SNOWFLAKE_MAX_LENGTH);
+      p = SNOWFLAKE_MAX_LENGTH;
+    }
+
+      // Oracle specific type mapping
     if (cleanDataType.equalsIgnoreCase("NUMBER")) {
       if (p == 0 && (s == -127 || s == 0)) {
         return "NUMBER(38, 8)";
