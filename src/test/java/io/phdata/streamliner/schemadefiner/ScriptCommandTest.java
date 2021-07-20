@@ -59,7 +59,10 @@ public class ScriptCommandTest {
         .forEach(
             file -> {
               assertTrue(
-                  file.getName().equals("evolve-schema.sql") || file.getName().equals("Makefile") || file.getName().equals("copy-into.sql"));
+                  file.getName().equals("create-table-evolve-schema.sql")
+                      || file.getName().equals("Makefile")
+                      || file.getName().equals("copy-into.sql")
+                      || file.getName().equals("create-pipe-evolve-schema.sql"));
             });
   }
 
@@ -98,11 +101,14 @@ public class ScriptCommandTest {
     assertTrue(f.isDirectory());
 
     Arrays.stream(f.listFiles())
-            .forEach(
-                    file -> {
-                      assertTrue(
-                              file.getName().equals("evolve-schema.sql") || file.getName().equals("Makefile") || file.getName().equals("copy-into.sql"));
-                    });
+        .forEach(
+            file -> {
+              assertTrue(
+                  file.getName().equals("create-table-evolve-schema.sql")
+                      || file.getName().equals("Makefile")
+                      || file.getName().equals("copy-into.sql")
+                      || file.getName().equals("create-pipe-evolve-schema.sql"));
+            });
   }
 
   @Test

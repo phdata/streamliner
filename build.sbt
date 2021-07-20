@@ -118,6 +118,13 @@ mappings in Universal ++= {
     }
 }
 
+mappings in Universal ++= {
+  ((sourceDirectory in Compile).value / "resources" / "templates" / "snowflake" / "snowflake-schema-evolution" * "*").get
+    .map { f =>
+      f -> s"templates/snowflake/snowflake-schema-evolution/${f.name}"
+    }
+}
+
 enablePlugins(JavaServerAppPackaging, UniversalDeployPlugin, RpmArtifactoryDeployPlugin)
 
 mainClass in Compile := Some("io.phdata.streamliner.App")

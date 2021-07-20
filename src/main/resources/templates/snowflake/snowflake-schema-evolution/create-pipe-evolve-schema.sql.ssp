@@ -1,0 +1,79 @@
+#import(io.phdata.streamliner.schemadefiner.model.Snowflake)
+<%@ val configuration: io.phdata.streamliner.schemadefiner.model.Configuration %>
+<%@ val table: io.phdata.streamliner.schemadefiner.model.SnowflakeTable %>
+<%@ val tableDiff: io.phdata.streamliner.schemadefiner.model.TableDiff %>
+<%@ val typeMapping: Map[String, Map[String, String]]%>
+#{
+    val destination = configuration.destination.asInstanceOf[Snowflake]
+    val sourceColumnStr = table.sourceColumnConversion(typeMapping)
+}#
+
+#if (tableDiff.existsInDestination && tableDiff.existsInSource)
+    #if (tableDiff.allChangesAreCompatible())
+        USE DATABASE ${destination.stagingDatabase.name};
+
+        USE SCHEMA ${destination.stagingDatabase.schema};
+
+        CREATE OR REPLACE PROCEDURE streamliner_recreate_pipe(pipeName string)
+        RETURNS string
+        LANGUAGE JAVASCRIPT
+        AS
+        $$
+        try_until_max("Pause pipe", 600, function() {
+        pause();
+        var status = pipe_status();
+        return status && status.executionState === "PAUSED" && status.pendingFileCount === 0;
+        });
+
+        var pipeRedefinition_sql = `CREATE OR REPLACE PIPE ${table.destinationName}_pipe
+        AUTO_INGEST = true
+        #if (destination.snsTopic != null)
+            AWS_SNS_TOPIC = '${destination.snsTopic}'
+        #end
+        AS
+        COPY INTO ${table.destinationName} (${unescape(table.columnList(null))})
+        FROM ( SELECT ${unescape(sourceColumnStr)}
+        FROM @${configuration.name}_stage/${table.sourceName})
+        FILE_FORMAT = ( TYPE = PARQUET);`;
+
+        snowflake.execute({sqlText: pipeRedefinition_sql});
+
+        return JSON.stringify(pipe_status());
+
+        function try_until_max(desc, attempts, f) {
+        for (var i = 0; i < attempts; i++) {
+        var result = f();
+        if (result) return result;
+        sleepFor(1000);
+        }
+        throw new Error("Timed out waiting for " + desc);
+        }
+        function sleepFor(sleepDuration){
+        var now = new Date().getTime();
+        while(new Date().getTime() < now + sleepDuration){ /* Do nothing */ }
+        }
+        function pause() {
+        snowflake.execute({sqlText: "ALTER PIPE " + PIPENAME + " SET PIPE_EXECUTION_PAUSED = TRUE"});
+        }
+        function pipe_status() {
+        var s = snowflake.createStatement( {sqlText: "SELECT SYSTEM$PIPE_STATUS('" + PIPENAME + "');"} );
+        var rs = s.execute();
+        if (rs.next()) {
+        var status = rs.getColumnValue(1);
+        if (status) {
+        return JSON.parse(status);
+        }
+        }
+        return null;
+        }
+        $$
+        ;
+
+        CALL streamliner_recreate_pipe('${table.destinationName}_pipe');
+
+        DROP PROCEDURE streamliner_recreate_pipe(string);
+    #end
+#elseif (tableDiff.existsInSource && !tableDiff.existsInDestination)
+    <% render("../shared/create-snowpipe.ssp", Map("configuration" -> configuration, "table" -> table, "typeMapping" -> typeMapping))%>
+#end
+
