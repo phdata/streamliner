@@ -6,3 +6,4 @@ integration-tests/pipewrench
 **/*.log
 .DS_Store*
 build-support/artifactory.env
+venv
