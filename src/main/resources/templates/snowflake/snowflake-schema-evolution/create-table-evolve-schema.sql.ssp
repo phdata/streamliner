@@ -6,4 +6,4 @@
 #{
     val destination = configurationDiff.currentDestination.asInstanceOf[Snowflake]
 }#
-<% render("../shared/evolve-schema.ssp", Map("configurationDiff" -> configurationDiff, "tableDiff" -> tableDiff, "typeMapping" -> typeMapping, "templateContext" -> templateContext))%>
+<% render("../shared/create-table-evolve-schema.ssp", Map("configurationDiff" -> configurationDiff, "tableDiff" -> tableDiff, "typeMapping" -> typeMapping, "templateContext" -> templateContext))%>

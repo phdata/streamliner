@@ -5,14 +5,18 @@
 }#
 snowsql-cmd=${destination.snowSqlCommand} -f
 
-evolve-schema: evolve-schema.sql
-    $(snowsql-cmd) evolve-schema.sql
+create-table-evolve-schema: create-table-evolve-schema.sql
+    $(snowsql-cmd) create-table-evolve-schema.sql
 
 copy-into: copy-into.sql
     $(snowsql-cmd) copy-into.sql
 
+create-pipe-evolve-schema: create-pipe-evolve-schema.sql
+    $(snowsql-cmd) create-pipe-evolve-schema.sql
+
 run:
-    $(MAKE) evolve-schema
+    $(MAKE) create-table-evolve-schema
+    $(MAKE) create-pipe-evolve-schema
     $(MAKE) copy-into
 
 
