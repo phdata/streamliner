@@ -72,8 +72,26 @@
         CALL streamliner_recreate_pipe('${table.destinationName}_pipe');
 
         DROP PROCEDURE streamliner_recreate_pipe(string);
+    #else
+        <%
+            templateContext.addError(s"Incompatible change in table ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${tableDiff.destinationName} which will be ignored")
+        %>
     #end
 #elseif (tableDiff.existsInSource && !tableDiff.existsInDestination)
-    <% render("../shared/create-snowpipe.ssp", Map("configuration" -> configuration, "table" -> table, "typeMapping" -> typeMapping))%>
-#end
 
+USE DATABASE ${destination.stagingDatabase.name};
+
+USE SCHEMA ${destination.stagingDatabase.schema};
+
+CREATE PIPE IF NOT EXISTS ${table.destinationName}_pipe
+    AUTO_INGEST = true
+#if (destination.snsTopic != null)
+    AWS_SNS_TOPIC = '${destination.snsTopic}'
+#end
+    AS
+	COPY INTO ${table.destinationName} (${unescape(table.columnList(null))})
+	    FROM ( SELECT ${unescape(sourceColumnStr)}
+		FROM @${configuration.name}_stage/${table.sourceName})
+	FILE_FORMAT = ( TYPE = PARQUET);
+
+#end

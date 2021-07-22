@@ -11,13 +11,17 @@ create-table-evolve-schema: create-table-evolve-schema.sql
 copy-into: copy-into.sql
     $(snowsql-cmd) copy-into.sql
 
-create-pipe-evolve-schema: create-pipe-evolve-schema.sql
-    $(snowsql-cmd) create-pipe-evolve-schema.sql
+create-snowpipe-evolve-schema: create-snowpipe-evolve-schema.sql
+    $(snowsql-cmd) create-snowpipe-evolve-schema.sql
+
+first-run:
+    $(MAKE) create-table-evolve-schema
+    $(MAKE) create-snowpipe-evolve-schema
+    $(MAKE) copy-into
 
 run:
     $(MAKE) create-table-evolve-schema
-    $(MAKE) create-pipe-evolve-schema
-    $(MAKE) copy-into
+    $(MAKE) create-snowpipe-evolve-schema
 
 
 
