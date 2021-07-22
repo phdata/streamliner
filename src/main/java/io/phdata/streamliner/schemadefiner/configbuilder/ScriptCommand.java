@@ -84,6 +84,7 @@ public class ScriptCommand {
                           map.put("tableDiff", tableDiff);
                           map.put("typeMapping", typeMapping);
                           map.put("templateContext", templateContext);
+                          map.put("util", new StreamlinerUtil());
                           String rendered = JavaHelper.getLayout(templateFile.getPath(), map);
                           String replaced = rendered.replace("    ", "\t");
                           log.debug(replaced);
@@ -111,6 +112,8 @@ public class ScriptCommand {
         throw new RuntimeException(
             "Tables section is not found. Check the configuration (example: streamliner-configuration.yml) file");
       }
+
+      TemplateContext templateContext = new TemplateContext();
       configuration.getTables().stream()
           .forEach(
               table -> {
@@ -126,6 +129,7 @@ public class ScriptCommand {
                           map.put("configuration", configuration);
                           map.put("table", table);
                           map.put("typeMapping", typeMapping);
+                          map.put("templateContext", templateContext);
                           map.put("util", new StreamlinerUtil());
                           String rendered = JavaHelper.getLayout(templateFile.getPath(), map);
 
@@ -150,6 +154,14 @@ public class ScriptCommand {
               });
       writeSchemaMakeFile(
           configuration, null, typeMapping, templateDirectory, outputDirectory);
+      if (templateContext.hasErrors()) {
+        List<String> errors = templateContext.getErrors();
+        String msg =
+            String.format("There are %d errors which require investigation.", errors.size());
+        log.error(msg);
+        errors.stream().forEach(error -> log.error(error));
+        throw new RuntimeException(msg);
+      }
     }
   }
 
