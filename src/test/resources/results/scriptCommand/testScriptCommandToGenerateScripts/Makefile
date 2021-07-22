@@ -4,7 +4,7 @@ first-run-all: first-run-Employee
 
 run-all: run-Employee
 
-clean-all: clean-Employee
+drop-all: drop-Employee
 
 first-run-Employee:
 	$(MAKE) first-run -C Employee
@@ -12,6 +12,6 @@ first-run-Employee:
 run-Employee:
 	$(MAKE) run -C Employee
 
-clean-Employee:
-	$(MAKE) clean -C Employee
+drop-Employee:
+	$(MAKE) drop -C Employee
 

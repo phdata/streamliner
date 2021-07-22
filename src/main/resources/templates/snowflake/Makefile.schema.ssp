@@ -17,11 +17,16 @@ limitations under the License.
 <%@ val tableDiffs: Seq[io.phdata.streamliner.schemadefiner.model.TableDiff] %>
 #if (!tableDiffs.isEmpty)
     <%
+        val firstRunTables = tableDiffs.map(t => s"first-run-${t.destinationName}").mkString(" ")
         val runTables = tableDiffs.map(t => s"run-${t.destinationName}").mkString(" ")
     %>
+first-run-all: ${firstRunTables}
 run-all: ${runTables}
 
 #for (table <- tableDiffs)
+first-run-${table.destinationName}:
+	$(MAKE) first-run -C ${table.destinationName}
+
 run-${table.destinationName}:
 	$(MAKE) run -C ${table.destinationName}
 
@@ -30,14 +35,14 @@ run-${table.destinationName}:
     <%
         val firstRunTables = tables.map(t => s"first-run-${t.destinationName}").mkString(" ")
         val runTables = tables.map(t => s"run-${t.destinationName}").mkString(" ")
-        val cleanTables = tables.map(t => s"clean-${t.destinationName}").mkString(" ")
+        val dropTables = tables.map(t => s"drop-${t.destinationName}").mkString(" ")
     %>
 
 first-run-all: ${firstRunTables}
 
 run-all: ${runTables}
 
-clean-all: ${cleanTables}
+drop-all: ${dropTables}
 
 #for (table <- tables)
 first-run-${table.destinationName}:
@@ -46,8 +51,8 @@ first-run-${table.destinationName}:
 run-${table.destinationName}:
 	$(MAKE) run -C ${table.destinationName}
 
-clean-${table.destinationName}:
-	$(MAKE) clean -C ${table.destinationName}
+drop-${table.destinationName}:
+	$(MAKE) drop -C ${table.destinationName}
 
 #end
 #end

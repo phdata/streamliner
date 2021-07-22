@@ -1,15 +1,19 @@
 snowsql-cmd=snowsql -c connection -f
 
-evolve-schema: evolve-schema.sql
-	$(snowsql-cmd) evolve-schema.sql
+create-table-evolve-schema: create-table-evolve-schema.sql
+	$(snowsql-cmd) create-table-evolve-schema.sql
 
 copy-into: copy-into.sql
 	$(snowsql-cmd) copy-into.sql
 
-snowpipe-redefinition: snowpipe-redefinition.sql
-	$(snowsql-cmd) snowpipe-redefinition.sql
+create-snowpipe-evolve-schema: create-snowpipe-evolve-schema.sql
+	$(snowsql-cmd) create-snowpipe-evolve-schema.sql
+
+first-run:
+	$(MAKE) create-table-evolve-schema
+	$(MAKE) create-snowpipe-evolve-schema
+	$(MAKE) copy-into
 
 run:
-	$(MAKE) evolve-schema
-	$(MAKE) snowpipe-redefinition
-	$(MAKE) copy-into
+	$(MAKE) create-table-evolve-schema
+	$(MAKE) create-snowpipe-evolve-schema
