@@ -7,3 +7,4 @@ integration-tests/pipewrench
 .DS_Store*
 build-support/artifactory.env
 venv
+*.swp

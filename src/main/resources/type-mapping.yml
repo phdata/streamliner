@@ -81,8 +81,20 @@ date:
   impala: bigint
   parquet: timestamp
   avro: bigint
-  snowflake: date
+  snowflake: datetime
 timestamp:
+  kudu: bigint
+  impala: timestamp
+  parquet: timestamp
+  avro: bigint
+  snowflake: timestamp_ntz
+timestamp(0):
+  kudu: bigint
+  impala: timestamp
+  parquet: timestamp
+  avro: bigint
+  snowflake: timestamp_ntz
+timestamp(3):
   kudu: bigint
   impala: timestamp
   parquet: timestamp
@@ -239,6 +251,24 @@ boolean:
   avro: boolean
   snowflake: boolean
 enum:
+  kudu: string
+  impala: string
+  parquet: string
+  avro: string
+  snowflake: string
+raw:
+  kudu: string
+  impala: string
+  parquet: string
+  avro: string
+  snowflake: string
+long raw:
+  kudu: string
+  impala: string
+  parquet: string
+  avro: string
+  snowflake: string
+nvarchar2:
   kudu: string
   impala: string
   parquet: string
