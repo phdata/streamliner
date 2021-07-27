@@ -37,9 +37,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -411,4 +409,11 @@ public class StreamlinerUtil {
               }
             });
   }
+
+  public static final Set<String> snowflakeStringDataType =
+      new HashSet<>(
+          Arrays.asList(
+              new String[] {
+                "VARCHAR", "CHAR", "CHARACTER", "STRING", "TEXT", "BINARY", "VARBINARY"
+              }));
 }

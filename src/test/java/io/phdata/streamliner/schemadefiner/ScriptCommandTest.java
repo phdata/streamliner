@@ -140,4 +140,19 @@ public class ScriptCommandTest {
     StreamlinerUtil.createDir(outputDir);
     ScriptCommand.build(null, configDiff, typeMapping, templateDirectory, outputDir);
   }
+
+  @Test
+  public void testScriptCommandForSchemaEvolution_column_size_increased() {
+    Configuration prevConfig =
+            StreamlinerUtil.readYamlFile("src/test/resources/configDiff/columnSizeChanged/prevConfig.yml");
+    Configuration currConfig =
+            StreamlinerUtil.readYamlFile("src/test/resources/configDiff/columnSizeChanged/currConfig.yml");
+    ConfigurationDiff diff = DiffGenerator.createConfigDiff(prevConfig, currConfig);
+    StreamlinerUtil.writeConfigToYaml(diff, outputFile);
+
+    outputDir =
+            String.format("%s/%s", outputDir, "testScriptCommandForSchemaEvolution_column_size_increased");
+    StreamlinerUtil.createDir(outputDir);
+    ScriptCommand.build("src/test/resources/configDiff/columnSizeChanged/currConfig.yml", configDiff, typeMapping, templateDirectory, outputDir);
+  }
 }

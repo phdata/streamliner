@@ -10,7 +10,7 @@
 }#
 
 #if (tableDiff.existsInDestination && tableDiff.existsInSource)
-    #if (tableDiff.allChangesAreCompatible())
+    #if (tableDiff.allChangesAreCompatible(typeMapping))
         USE DATABASE ${destination.stagingDatabase.name};
 
         USE SCHEMA ${destination.stagingDatabase.schema};
@@ -73,7 +73,7 @@
         CALL streamliner_recreate_pipe('${table.destinationName}_pipe');
 
         DROP PROCEDURE streamliner_recreate_pipe(string);
-    #elseif (!tableDiff.allChangesAreCompatible())
+    #elseif (!tableDiff.allChangesAreCompatible(typeMapping))
         <%
             templateContext.addError(s"Incompatible change in table ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${tableDiff.destinationName} which will be ignored")
         %>
