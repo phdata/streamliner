@@ -1,3 +1,16 @@
+## 5.0
+*Please note that migration of templates is required from Strealiner 4.x to 5.0*
+- Support Schema Evolution
+- Rename `clean` to `drop`
+- Map date to datetime by default and include additional types for oracle
+- Support `NOT NULL`
+- Ensure primary keys are "quote if needed" like columns
+- [Download](https://repo.phdata.io/public/streamliner/raw/versions/5.0/streamliner-5.0.zip)
+
+## 4.3
+- Truncate max length to 16,777,216 when required
+- [Download](https://repo.phdata.io/public/streamliner/raw/files/streamliner-4.3.zip)
+
 ## 4.2
 - Support tables without a primary key, but have a unique index.
 - [Download](https://repository.phdata.io/artifactory/binary/phdata/streamliner/streamliner-4.2.zip)
