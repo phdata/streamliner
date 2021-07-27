@@ -1,8 +1,4 @@
-- [Introduction](#introduction)
-- [Order of Operations](#order-of-operations)
-- [Commands](#commands)
-
-# Introduction
+## Introduction
 
 Streamliner 5+ supports schema evolution. At the current time it only supports adding columns to tables but will support backwards compatible expansion of columns in the future.
 
@@ -10,7 +6,7 @@ This supports customers the following use case:
 
 ![Schema Evolution Diagram](../images/schema-evolution.png)
 
-# Order of Operations
+## Order of Operations
 
 When performing schema evolution, careful ordering of operations is important to ensure that no data is lost in the schema evolution process.
 
@@ -73,7 +69,7 @@ Therefore the correct order of operations is as follows:
 
 Note that it's also important for a PIPE to be empty when it's redefined. Therefore, Streamliner takes care to PAUSE and then wait for it to empty before redefining it. You can see this in the create-snowpipe-schema-evolution template file.
 
-# Commands
+## Commands
 
 Let's say we have tables t1, t2 and t3 where t1 have column c1 and c2 in oracle and we want to get the metadata of these tables and generates scripts that
 can be executed in Snowflake to create these tables. To achieve this below commands should be executed sequentially.
