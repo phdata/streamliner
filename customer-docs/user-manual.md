@@ -36,6 +36,7 @@
   * [Executing Streamliner](#executing-streamliner)
     + [Schema Parsing](#schema-parsing)
     + [Script Generation](#script-generation)
+  * [Migrating Templates from Streamliner 4.x to 5.0](#template-migration)
 
 # Introduction
 Streamliner is a Data Pipeline Automation tool that simplifies the process of ingesting data onto a new platform. It is not a data ingestion tool in and of itself; rather, it automates other commonly used tools that ingest and manipulate data on platforms like Snowflake, Amazon Redshift, Cloudera, and Databricks.
@@ -451,4 +452,94 @@ CLI Arguments:
 | template-directory | String | True | Location of the templates |
 
 CMD : `<install directory>/bin/streamliner scripts --config output/<pipeline name>/<environment>/conf/streamliner-configuration.yml --type-mapping <install-directory>/conf/type-mapping.yml  --template-directory <install directory>/templates/<snowflake | hadoop>`
- 
+
+## Migrating Templates from Streamliner 4.x to 5.0
+1. Replace the imports and variables to use new Java POJO classes.
+   
+   Example : 
+   
+   Streamliner 4.x: 
+   
+   `#import(io.phdata.streamliner.configuration.Snowflake)`
+   
+   `<%@ val configuration: io.phdata.streamliner.configuration.Configuration %>`
+   
+   Streamliner 5.0:
+
+   `#import(io.phdata.streamliner.schemadefiner.model.Snowflake)`
+   
+   `<%@ val configuration: io.phdata.streamliner.schemadefiner.model.Configuration %>`
+2. Replace the old scala POJO class methods with equivalent new POJO class method definition. Pass the arguments correctly if needed.
+   
+   Example:
+   
+   Streamliner 4.x:
+   
+   ```
+    CREATE TASK IF NOT EXISTS ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName}_task
+    WAREHOUSE = ${destination.warehouse}
+    SCHEDULE = '${destination.taskSchedule.getOrElse("5 minutes")}'
+    WHEN SYSTEM$STREAM_HAS_DATA('${table.destinationName}_stg_stream')
+    AS
+    MERGE INTO ${destination.reportingDatabase.name}.${destination.reportingDatabase.schema}.${table.destinationName} t
+        USING ( SELECT ${table.columnList(Some("si"))}, si.dms_operation, i.max_dms_ts
+                FROM ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName}_stg_stream si
+                INNER JOIN ( SELECT ${table.pkList}, MAX(dms_ts) max_dms_ts
+                             FROM ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName}_stg_stream
+                             GROUP BY ${table.pkList} ) i
+                ON ${table.pkConstraint("i", "si")} AND i.max_dms_ts = si.dms_ts ) s
+    ON ${table.pkConstraint("t", "s")}
+        WHEN MATCHED AND s.dms_operation = 'U' THEN UPDATE SET ${table.columnConstraint(bAlias = "s", joinCondition = ", ")}, dms_operation = s.dms_operation, dms_ts = s.max_dms_ts
+        WHEN MATCHED AND s.dms_operation = 'D' THEN DELETE
+        WHEN NOT MATCHED AND s.dms_operation != 'D' OR s.dms_operation IS NULL THEN INSERT (${table.columnList()}, dms_operation, dms_ts) VALUES (${table.columnList(Some("s"))}, s.dms_operation, s.max_dms_ts);
+   ```
+   
+   Streamliner 5.0:
+
+   ```
+    CREATE TASK IF NOT EXISTS ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName}_task
+    WAREHOUSE = ${destination.warehouse}
+    SCHEDULE = '${destination.taskSchedule}'
+    WHEN SYSTEM$STREAM_HAS_DATA('${table.destinationName}_stg_stream')
+    AS
+    MERGE INTO ${destination.reportingDatabase.name}.${destination.reportingDatabase.schema}.${table.destinationName} t
+        USING ( SELECT ${table.columnList("si")}, si.dms_operation, i.max_dms_ts
+                FROM ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName}_stg_stream si
+                INNER JOIN ( SELECT ${table.pkList}, MAX(dms_ts) max_dms_ts
+                             FROM ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName}_stg_stream
+                             GROUP BY ${table.pkList} ) i
+                ON ${table.pkConstraint("i", "si", null)} AND i.max_dms_ts = si.dms_ts ) s
+    ON ${table.pkConstraint("t", "s", null)}
+        WHEN MATCHED AND s.dms_operation = 'U' THEN UPDATE SET ${table.columnConstraint(null, "s", ", ")}, dms_operation = s.dms_operation, dms_ts = s.max_dms_ts
+        WHEN MATCHED AND s.dms_operation = 'D' THEN DELETE
+        WHEN NOT MATCHED AND s.dms_operation != 'D' OR s.dms_operation IS NULL THEN INSERT (${table.columnList(null)}, dms_operation, dms_ts) VALUES (${table.columnList("s")}, s.dms_operation, s.max_dms_ts);
+   ```
+3. Since Streamliner 5.0 is written in JAVA, we might have to convert few Java code into Scala to support in SSP template. For example we converted Java List to Scala Seq to use few scala methods in SSP template.
+
+   Example:
+
+   Streamliner 4.x:
+
+   ```
+    CREATE TABLE IF NOT EXISTS ${destination.reportingDatabase.name}.${destination.reportingDatabase.schema}.${table.destinationName} (
+    #for (column <- table.columns)
+    ${unescape(column.destinationName)} ${column.mapDataTypeSnowflake(typeMapping)} COMMENT '${column.comment.getOrElse("")}',
+    #end
+    dms_operation CHAR COMMENT 'AWS DMS Operation type',
+    dms_ts TIMESTAMP_LTZ COMMENT 'AWS DMS timestamp'
+    )
+    COMMENT = '${table.comment.getOrElse("")}';
+   ```
+
+   Streamliner 5.0:
+
+   ```
+    CREATE TABLE IF NOT EXISTS ${destination.reportingDatabase.name}.${destination.reportingDatabase.schema}.${table.destinationName} (
+    #for (column <- util.convertListToSeq(table.columns))
+    ${unescape(column.destinationName)} ${column.mapDataTypeSnowflake(typeMapping)} COMMENT '${column.comment}',
+    #end
+    dms_operation CHAR COMMENT 'AWS DMS Operation type',
+    dms_ts TIMESTAMP_LTZ COMMENT 'AWS DMS timestamp'
+    )
+    COMMENT = '${table.comment}';
+   ```
