@@ -8,9 +8,15 @@
 }#
 
 #if (tableDiff.existsInDestination && tableDiff.existsInSource)
-    #if (tableDiff.allChangesAreCompatible())
-        ALTER TABLE ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${tableDiff.destinationName} ADD COLUMN ${unescape(tableDiff.columnDDL(typeMapping))};
-    #elseif (!tableDiff.allChangesAreCompatible())
+    #if (tableDiff.allChangesAreCompatible(typeMapping))
+        #if (tableDiff.isColumnAdded())
+            ALTER TABLE ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${tableDiff.destinationName} ADD COLUMN ${unescape(tableDiff.columnDDL(typeMapping))};
+        #end
+        #if (tableDiff.isColumnSizeChanged(typeMapping))
+            ALTER TABLE ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${tableDiff.destinationName} ALTER ${unescape(tableDiff.alterColumnDDL(typeMapping))};
+        #end
+        
+    #elseif (!tableDiff.allChangesAreCompatible(typeMapping))
         <%
             templateContext.addError(s"Incompatible change in table ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${tableDiff.destinationName} which will be ignored")
         %>

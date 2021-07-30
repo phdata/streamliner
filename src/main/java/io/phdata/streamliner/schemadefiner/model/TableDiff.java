@@ -38,8 +38,62 @@ public class TableDiff {
     this.existsInSource = existsInSource;
   }
 
-  public boolean allChangesAreCompatible(){
-    return columnDiffs.stream().allMatch(c -> c.getIsAdd());
+  public boolean allChangesAreCompatible(
+      scala.collection.immutable.Map<String, scala.collection.immutable.Map<String, String>>
+          typeMapping) {
+    Map<String, Map<String, String>> javaTypeMap = JavaHelper.convertScalaMapToJavaMap(typeMapping);
+
+    for (ColumnDiff colDiff : columnDiffs) {
+      if (colDiff.getIsDeleted()) {
+        return false;
+      } else if (colDiff.getIsUpdate()) {
+        ColumnDefinition currDef = colDiff.getCurrentColumnDef();
+        ColumnDefinition prevDef = colDiff.getPreviousColumnDef();
+        if (!currDef.getDataType().equalsIgnoreCase(prevDef.getDataType())) {
+          return false;
+        } else if (!isSnowflakeStringDataType(javaTypeMap, currDef)
+            || currDef.getPrecision() == prevDef.getPrecision()) {
+          /* currently datatype increase is implemented only for snowflake string data type
+          * ColumnDiff isUpdate becomes true if any variable of the ColumnDefinition changes.
+          * Since we are checking increment of column length only, precision is being checked here. */
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  private boolean isSnowflakeStringDataType(
+      Map<String, Map<String, String>> javaTypeMap, ColumnDefinition currDef) {
+    return StreamlinerUtil.snowflakeStringDataType.contains(
+        currDef.mapDataType(currDef.getDataType(), javaTypeMap, "SNOWFLAKE").toUpperCase());
+  }
+
+  public boolean isColumnAdded(){
+    return columnDiffs.stream().anyMatch(c -> c.getIsAdd());
+  }
+
+  public boolean isColumnSizeChanged(
+      scala.collection.immutable.Map<String, scala.collection.immutable.Map<String, String>>
+          typeMapping) {
+    Map<String, Map<String, String>> javaTypeMap = JavaHelper.convertScalaMapToJavaMap(typeMapping);
+    return columnDiffs.stream()
+        .anyMatch(c -> isColumnSizeChanged(c.getCurrentColumnDef(), c.getPreviousColumnDef(), javaTypeMap));
+  }
+
+  private boolean isColumnSizeChanged(
+      ColumnDefinition currDef,
+      ColumnDefinition prevDef,
+      Map<String, Map<String, String>> typeMapping) {
+    if (currDef == null || prevDef == null) {
+      return false;
+    } else if (isSnowflakeStringDataType(typeMapping, currDef)
+        && currDef.getPrecision() > prevDef.getPrecision()
+        && currDef.getPrecision() <= ColumnDefinition.SNOWFLAKE_MAX_LENGTH) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   public String columnDDL(
@@ -76,6 +130,27 @@ public class TableDiff {
                             column.getCurrentColumnDef().getDestinationName()),
                         column.getCurrentColumnDef().mapDataTypeSnowflake(javaTypeMap),
                         column.getCurrentColumnDef().getComment()))
+            .collect(Collectors.toList());
+    return StringUtils.join(list, ",\n");
+  }
+
+  public String alterColumnDDL(
+      scala.collection.immutable.Map<String, scala.collection.immutable.Map<String, String>>
+          typeMapping) {
+    Map<String, Map<String, String>> javaTypeMap = JavaHelper.convertScalaMapToJavaMap(typeMapping);
+
+    List<String> list =
+        columnDiffs.stream()
+            .filter(
+                c ->
+                    isColumnSizeChanged(
+                        c.getCurrentColumnDef(), c.getPreviousColumnDef(), javaTypeMap))
+            .map(
+                col ->
+                    String.format(
+                        "COLUMN %s SET DATA TYPE %s",
+                        col.getCurrentColumnDef().getDestinationName(),
+                        col.getCurrentColumnDef().mapDataTypeSnowflake(javaTypeMap)))
             .collect(Collectors.toList());
     return StringUtils.join(list, ",\n");
   }
