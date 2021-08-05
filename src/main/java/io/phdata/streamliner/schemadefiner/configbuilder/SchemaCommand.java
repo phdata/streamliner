@@ -161,8 +161,10 @@ public class SchemaCommand {
         return true;
       }
     } else {
-      log.error("{} does not exists: {}", param, outputFile);
-      throw new RuntimeException(String.format("%s does not exists: %s", param, outputFile));
+      log.info("{} does not exists.", param);
+      StreamlinerUtil.createFile(outputFile);
+      log.debug("{} file created. Path: {}", param, outputFile);
+      return true;
     }
   }
 }
