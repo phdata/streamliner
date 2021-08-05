@@ -125,7 +125,6 @@ public class MySQLTestContainerTest {
         StreamlinerUtil.deleteDirectory(generatedOutputFolder);
 
         Map<String, Object> ingestConfigFile = updateSourceDetail(config);
-        StreamlinerUtil.createFile(outputFile);
         // schema command with new implementations
         SchemaCommand.build(config,outputFile,dbPass,createDocs, null, null);
 
@@ -279,7 +278,6 @@ public class MySQLTestContainerTest {
       "--database-password",
       mysql.getPassword()
     };
-      StreamlinerUtil.createFile(outputFile);
     testSchemaCommandOptionalParams(outputFile, schemaCommand1);
       StreamlinerUtil.deleteDirectory(new File("src/test/output"));
   }
@@ -291,7 +289,6 @@ public class MySQLTestContainerTest {
     expectedEx.expectMessage("A databasePassword is required when crawling JDBC source");
     String config = "src/test/resources/conf/ingest-configuration.yml";
     String outputFile = "src/test/output/conf/streamliner-configuration.yml";
-      StreamlinerUtil.createFile(outputFile);
     // --database-password is optional
     String schemaCommand[] = {"schema", "--config", config, "--output-file", outputFile};
     // Scala App main method
@@ -311,8 +308,6 @@ public class MySQLTestContainerTest {
         StreamlinerUtil.deleteDirectory(generatedOutputFolder);
 
         Map<String, Object> ingestConfigFile = updateSourceDetail(config);
-
-        StreamlinerUtil.createFile(outputPath, "src/test/output/conf/streamliner-config2.yml", diffOutputFile);
 
         // Schema comnmand
         SchemaCommand.build(config,outputPath,dbPass,createDocs, null, null);
@@ -366,8 +361,6 @@ public class MySQLTestContainerTest {
         StreamlinerUtil.deleteDirectory(generatedOutputFolder);
 
         updateSourceDetail(config);
-
-        StreamlinerUtil.createFile(outputPath);
 
         // Schema comnmand
         SchemaCommand.build(config,outputPath,dbPass,createDocs, null, null);
