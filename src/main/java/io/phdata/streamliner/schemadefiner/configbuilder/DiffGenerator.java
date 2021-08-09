@@ -55,6 +55,10 @@ public class DiffGenerator {
     markNewTablesAdded(tableDiffList, currTableDefMap, addedTables);
     markTablesDeleted(tableDiffList, prevTableDefMap, deletedTables);
 
+    if(tableDiffList.isEmpty()){
+        log.warn("TableDiff is empty. No schema difference found.");
+    }
+
     return tableDiffList;
   }
 
@@ -264,6 +268,9 @@ public class DiffGenerator {
                       true);
               tableDiffList.add(tableDiff);
             });
+    if(tableDiffList.isEmpty()){
+        log.warn("TableDiff is empty. No schema difference found.");
+    }
     return tableDiffList;
   }
 }

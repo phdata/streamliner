@@ -8,6 +8,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -49,18 +50,29 @@ public class TableDiff {
       } else if (colDiff.getIsUpdate()) {
         ColumnDefinition currDef = colDiff.getCurrentColumnDef();
         ColumnDefinition prevDef = colDiff.getPreviousColumnDef();
-        if (!currDef.getDataType().equalsIgnoreCase(prevDef.getDataType())) {
+        if (!isDataTypeSame(currDef, prevDef)) {
           return false;
+        } else if (!isColumnCommentSame(currDef, prevDef)
+            || !isColumnNullableSame(currDef, prevDef)) {
+          return true;
         } else if (!isSnowflakeStringDataType(javaTypeMap, currDef)
             || currDef.getPrecision() == prevDef.getPrecision()) {
           /* currently datatype increase is implemented only for snowflake string data type
-          * ColumnDiff isUpdate becomes true if any variable of the ColumnDefinition changes.
-          * Since we are checking increment of column length only, precision is being checked here. */
+           * ColumnDiff isUpdate becomes true if any variable of the ColumnDefinition changes.
+           * Since we are checking increment of column length only, precision is being checked here. */
           return false;
         }
       }
     }
     return true;
+  }
+
+  private boolean isDataTypeSame(ColumnDefinition currDef, ColumnDefinition prevDef) {
+    return currDef.getDataType().equalsIgnoreCase(prevDef.getDataType());
+  }
+
+  private boolean isColumnNullableSame(ColumnDefinition currDef, ColumnDefinition prevDef) {
+    return currDef.isNullable() == prevDef.isNullable();
   }
 
   private boolean isSnowflakeStringDataType(
@@ -73,24 +85,39 @@ public class TableDiff {
     return columnDiffs.stream().anyMatch(c -> c.getIsAdd());
   }
 
-  public boolean isColumnSizeChanged(
+  public boolean isColumnModified(
       scala.collection.immutable.Map<String, scala.collection.immutable.Map<String, String>>
           typeMapping) {
     Map<String, Map<String, String>> javaTypeMap = JavaHelper.convertScalaMapToJavaMap(typeMapping);
     return columnDiffs.stream()
-        .anyMatch(c -> isColumnSizeChanged(c.getCurrentColumnDef(), c.getPreviousColumnDef(), javaTypeMap));
+        .anyMatch(c -> isColumnModified(c.getCurrentColumnDef(), c.getPreviousColumnDef(), javaTypeMap));
   }
 
-  private boolean isColumnSizeChanged(
+  private boolean isColumnModified(
       ColumnDefinition currDef,
       ColumnDefinition prevDef,
       Map<String, Map<String, String>> typeMapping) {
     if (currDef == null || prevDef == null) {
       return false;
-    } else if (isSnowflakeStringDataType(typeMapping, currDef)
-        && currDef.getPrecision() > prevDef.getPrecision()
-        && currDef.getPrecision() <= ColumnDefinition.SNOWFLAKE_MAX_LENGTH) {
+    } else if (isPrecisionChangeValid(currDef, prevDef, typeMapping)
+        || (!isColumnCommentSame(currDef, prevDef) || !isColumnNullableSame(currDef, prevDef))) {
       return true;
+    } else {
+      return false;
+    }
+  }
+
+  private boolean isColumnCommentSame(ColumnDefinition currDef, ColumnDefinition prevDef) {
+    return currDef.getComment().equals(prevDef.getComment());
+  }
+
+  private boolean isPrecisionChangeValid(
+      ColumnDefinition currDef,
+      ColumnDefinition prevDef,
+      Map<String, Map<String, String>> typeMapping) {
+    if (currDef.getPrecision() > prevDef.getPrecision()
+        && currDef.getPrecision() <= ColumnDefinition.SNOWFLAKE_MAX_LENGTH) {
+      return isSnowflakeStringDataType(typeMapping, currDef);
     } else {
       return false;
     }
@@ -138,20 +165,37 @@ public class TableDiff {
       scala.collection.immutable.Map<String, scala.collection.immutable.Map<String, String>>
           typeMapping) {
     Map<String, Map<String, String>> javaTypeMap = JavaHelper.convertScalaMapToJavaMap(typeMapping);
+    List<String> alterColumnDDL = new ArrayList<>();
 
-    List<String> list =
-        columnDiffs.stream()
-            .filter(
-                c ->
-                    isColumnSizeChanged(
-                        c.getCurrentColumnDef(), c.getPreviousColumnDef(), javaTypeMap))
-            .map(
-                col ->
+    columnDiffs.stream()
+        .filter(
+            c -> isColumnModified(c.getCurrentColumnDef(), c.getPreviousColumnDef(), javaTypeMap))
+        .forEach(
+            col -> {
+              ColumnDefinition currDef = col.getCurrentColumnDef();
+              ColumnDefinition prevDef = col.getPreviousColumnDef();
+              if (isPrecisionChangeValid(currDef, prevDef, javaTypeMap)) {
+                alterColumnDDL.add(
                     String.format(
                         "COLUMN %s SET DATA TYPE %s",
-                        col.getCurrentColumnDef().getDestinationName(),
-                        col.getCurrentColumnDef().mapDataTypeSnowflake(javaTypeMap)))
-            .collect(Collectors.toList());
-    return StringUtils.join(list, ",\n");
+                        currDef.getDestinationName(), currDef.mapDataTypeSnowflake(javaTypeMap)));
+              }
+              if (!isColumnCommentSame(currDef, prevDef)) {
+                alterColumnDDL.add(
+                    String.format(
+                        "COLUMN %s COMMENT '%s'",
+                        currDef.getDestinationName(), currDef.getComment()));
+              }
+              if (!isColumnNullableSame(currDef, prevDef)) {
+                if (currDef.isNullable() == true) {
+                  alterColumnDDL.add(
+                      String.format("COLUMN %s DROP NOT NULL", currDef.getDestinationName()));
+                } else {
+                  alterColumnDDL.add(
+                      String.format("COLUMN %s SET NOT NULL", currDef.getDestinationName()));
+                }
+              }
+            });
+    return StringUtils.join(alterColumnDDL, ",\n");
   }
 }
