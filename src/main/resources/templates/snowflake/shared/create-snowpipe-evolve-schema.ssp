@@ -75,7 +75,7 @@
         DROP PROCEDURE streamliner_recreate_pipe(string);
     #elseif (!tableDiff.allChangesAreCompatible(typeMapping))
         <%
-            templateContext.addError(s"Incompatible change in table ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${tableDiff.destinationName} which will be ignored")
+            templateContext.addError(s"Incompatible change in table ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${tableDiff.destinationName} which will be ignored. Template: create-snowpipe-evolve-schema.ssp")
         %>
     #end
 #elseif (tableDiff.existsInSource && !tableDiff.existsInDestination)

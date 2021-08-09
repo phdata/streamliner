@@ -80,7 +80,7 @@ can be executed in Snowflake to create these tables. To achieve this below comma
 ./bin/streamliner schema --config conf/ingest-configuration.yml --output-file output/streamliner-configuration1.yml --database-password <db_pass>
 ```
 
-Note : Before executing above command make sure output-file is a file that exists and should not be a directory.
+Note : Before executing above command make sure output-file is not a directory.
 
 Output of this command is streamliner-configuration1.yml that contains tables t1, t2, t3 and columns details of oracle schema.
 
@@ -102,7 +102,7 @@ As time passes a new table t4 is created in oracle schema. Also a new column c3 
 ./bin/streamliner schema --config conf/ingest-configuration.yml --output-file output/streamliner-configuration2.yml --previous-output-file output/streamliner-configuration1.yml --diff-output-file output/configDiff/streamliner-configDiff.yml --database-password <db_pass>
 ```
 
-Note : Before executing above command make sure output-file, previous-output-file and diff-output-file is a file that exists and should not be a directory.
+Note : Before executing above command make sure output-file, previous-output-file and diff-output-file is not a directory.
 
 Output of step 1 streamliner-configuration1.yml is passed as previous-output-file in this command to calculate difference.
 
