@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --%>
 #import(io.phdata.streamliner.schemadefiner.model.Snowflake)
-#import(io.phdata.streamliner.configuration.SnowflakeQAOptions)
+#import(io.phdata.streamliner.schemadefiner.model.SnowflakeQAOptions)
 <%@ val configuration: io.phdata.streamliner.schemadefiner.model.Configuration %>
 <%@ val table: io.phdata.streamliner.schemadefiner.model.SnowflakeTable %>
 #{
