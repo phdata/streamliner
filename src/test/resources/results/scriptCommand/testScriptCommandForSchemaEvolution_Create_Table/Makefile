@@ -1,6 +1,10 @@
 
 
-    first-run-all: first-run-Department
+
+
+
+    
+        first-run-all: first-run-Department
 run-all: run-Department
 
 first-run-Department:
@@ -9,3 +13,4 @@ first-run-Department:
 run-Department:
 	$(MAKE) run -C Department
 
+    
