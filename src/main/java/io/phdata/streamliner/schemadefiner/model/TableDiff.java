@@ -85,6 +85,12 @@ public class TableDiff {
     return columnDiffs.stream().anyMatch(c -> c.getIsAdd());
   }
 
+  public boolean areThereAnyChanges(
+          scala.collection.immutable.Map<String, scala.collection.immutable.Map<String, String>>
+                  typeMapping) {
+    return isColumnModified(typeMapping) || isColumnAdded();
+  }
+
   public boolean isColumnModified(
       scala.collection.immutable.Map<String, scala.collection.immutable.Map<String, String>>
           typeMapping) {

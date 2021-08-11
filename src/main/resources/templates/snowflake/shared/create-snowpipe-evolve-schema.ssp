@@ -10,7 +10,9 @@
 }#
 
 #if (tableDiff.existsInDestination && tableDiff.existsInSource)
-    #if (tableDiff.allChangesAreCompatible(typeMapping))
+    #if !(tableDiff.areThereAnyChanges(typeMapping))
+        SELECT 'NO CHANGES in ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName}';
+    #elseif (tableDiff.allChangesAreCompatible(typeMapping))
         USE DATABASE ${destination.stagingDatabase.name};
 
         USE SCHEMA ${destination.stagingDatabase.schema};
