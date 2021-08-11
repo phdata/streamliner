@@ -170,4 +170,20 @@ public class ScriptCommandTest {
     StreamlinerUtil.createDir(outputDir);
     ScriptCommand.build("src/test/resources/configDiff/columnCommentAndNullable/currConfig.yml", configDiff, typeMapping, templateDirectory, outputDir);
   }
+
+  @Test
+  public void testScriptCommandForSchemaEvolution_no_schema_changes() {
+    Configuration prevConfig =
+            StreamlinerUtil.readYamlFile("src/test/resources/configDiff/noSchemaChanges/prevConfig.yml");
+    Configuration currConfig =
+            StreamlinerUtil.readYamlFile("src/test/resources/configDiff/noSchemaChanges/currConfig.yml");
+    ConfigurationDiff diff = DiffGenerator.createConfigDiff(prevConfig, currConfig);
+    StreamlinerUtil.writeConfigToYaml(diff, outputFile);
+
+    outputDir =
+            String.format("%s/%s", outputDir, "testScriptCommandForSchemaEvolution_no_schema_changes");
+    StreamlinerUtil.createDir(outputDir);
+    ScriptCommand.build("src/test/resources/configDiff/noSchemaChanges/currConfig.yml", configDiff, typeMapping, templateDirectory, outputDir);
+  }
+
 }

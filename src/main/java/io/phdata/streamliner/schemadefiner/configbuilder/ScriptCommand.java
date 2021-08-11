@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -220,16 +219,15 @@ public class ScriptCommand {
           Map<String, Object> map = new LinkedHashMap<>();
           map.put("configuration", configuration);
           map.put("tables", StreamlinerUtil.convertJavaListToScalaSeq(configuration.getTables()));
-          map.put(
-              "tableDiffs",
-              StreamlinerUtil.convertJavaListToScalaSeq(
-                  configDiff != null ? configDiff.getTableDiffs() : new ArrayList<>()));
+          map.put("configDiff", configDiff != null ? configDiff : new ConfigurationDiff());
+          map.put("util", new StreamlinerUtil());
           map.put("typeMapping", typeMapping);
           String rendered = JavaHelper.getLayout(templateFile.getPath(), map);
           log.debug("Rendered file: {}", rendered);
           String templateFileName =
               templateFile.getName().replace(".ssp", "").replace(".schema", "");
           String fileName = String.format("%s/%s", outputDirectory, templateFileName);
+          StreamlinerUtil.createDir(outputDirectory);
           StreamlinerUtil.writeFile(rendered, fileName);
           StreamlinerUtil.isExecutable(fileName);
         });

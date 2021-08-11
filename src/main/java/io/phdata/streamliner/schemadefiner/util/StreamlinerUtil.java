@@ -388,6 +388,13 @@ public class StreamlinerUtil {
         return JavaConverters.asScalaIteratorConverter(inputList.iterator()).asScala().toSeq();
     }
 
+  public Seq<TableDiff> convertTableDefinitionListToSeq(List<TableDiff> inputList) {
+    if (inputList == null) {
+      return null;
+    }
+    return JavaConverters.asScalaIteratorConverter(inputList.iterator()).asScala().toSeq();
+  }
+
     public static String getOutputDirectory(String outputFile) {
         int lastSlashIndex = outputFile.lastIndexOf("/");
         String outputDir = outputFile.substring(0, lastSlashIndex);

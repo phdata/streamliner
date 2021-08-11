@@ -14,12 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --%>
 <%@ val tables: Seq[io.phdata.streamliner.schemadefiner.model.TableDefinition] %>
-<%@ val tableDiffs: Seq[io.phdata.streamliner.schemadefiner.model.TableDiff] %>
-#if (!tableDiffs.isEmpty)
-    <%
-        val firstRunTables = tableDiffs.map(t => s"first-run-${t.destinationName}").mkString(" ")
-        val runTables = tableDiffs.map(t => s"run-${t.destinationName}").mkString(" ")
-    %>
+<%@ val configDiff: io.phdata.streamliner.schemadefiner.model.ConfigurationDiff %>
+<%@ val util: io.phdata.streamliner.schemadefiner.util.StreamlinerUtil%>
+
+#{
+    val tableDiffs = util.convertTableDefinitionListToSeq(configDiff.getTableDiffs())
+}#
+
+#if (tableDiffs != null)
+    #if (!tableDiffs.isEmpty)
+        <%
+            val firstRunTables = tableDiffs.map(t => s"first-run-${t.destinationName}").mkString(" ")
+            val runTables = tableDiffs.map(t => s"run-${t.destinationName}").mkString(" ")
+        %>
 first-run-all: ${firstRunTables}
 run-all: ${runTables}
 
@@ -31,6 +38,11 @@ run-${table.destinationName}:
 	$(MAKE) run -C ${table.destinationName}
 
 #end
+    #elseif (tableDiffs.isEmpty)
+        first-run-all:
+        run-all:
+    #end
+
 #elseif (tables != null)
     <%
         val firstRunTables = tables.map(t => s"first-run-${t.destinationName}").mkString(" ")
