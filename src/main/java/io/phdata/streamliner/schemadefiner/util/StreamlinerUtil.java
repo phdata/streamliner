@@ -1,15 +1,22 @@
 package io.phdata.streamliner.schemadefiner.util;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.deser.std.StdScalarDeserializer;
+import com.fasterxml.jackson.databind.deser.std.StringDeserializer;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import io.phdata.streamliner.schemadefiner.mapper.HadoopMapper;
 import io.phdata.streamliner.schemadefiner.mapper.SnowflakeMapper;
 import io.phdata.streamliner.schemadefiner.model.*;
+import org.apache.commons.text.StringSubstitutor;
 import org.apache.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +54,6 @@ public class StreamlinerUtil {
     public static Configuration readConfigFromPath(String path){
         if (path == null) return null;
         if(!fileExists(path)){
-            log.error("Configuration file not found: {}", path);
             throw new RuntimeException(String.format("Configuration file not found: %s", path));
         }
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
@@ -56,18 +62,32 @@ public class StreamlinerUtil {
         try {
             config = mapper.readValue(new File(path), Configuration.class);
         } catch (IOException e) {
-            log.error("Error reading configuration file: {}", path);
-            throw new RuntimeException("Error reading configuration file", e);
+            throw new RuntimeException(String.format("Error reading configuration file %s", path), e);
         }
         return config;
     }
 
-  // this method handles even if yaml file is empty. Through normal process jackson throws exception
-  // if
-  // yaml file is empty.
+    private static class EnvSubstStringDeserializer extends StdScalarDeserializer<String> {
+        private final StringDeserializer delegate;
+
+        protected EnvSubstStringDeserializer() {
+            super(String.class);
+            delegate = new StringDeserializer();
+        }
+
+        @Override
+        public String deserialize(JsonParser p, DeserializationContext ctxt)
+                throws IOException, JsonProcessingException {
+            String result = delegate.deserialize(p, ctxt);
+            return StringSubstitutor.replace(result, System.getenv(), "${env:", "}");
+        }
+    }
+
   public static Configuration readYamlFile(String path){
     if (path == null) return null;
     Path yamlFile = Paths.get(path);
+    // this method handles even if yaml file is empty. Through normal process jackson throws exception
+    // if yaml file is empty.
     YAMLMapper yamlMapper = new YAMLMapper();
     JsonNode tree;
     try {
@@ -78,18 +98,19 @@ public class StreamlinerUtil {
         return null;
       }
       ObjectMapper objectMapper = new ObjectMapper();
+      SimpleModule module = new SimpleModule();
+      module.addDeserializer(String.class, new EnvSubstStringDeserializer());
+      objectMapper.registerModule(module);
       objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
       return objectMapper.treeToValue(tree, Configuration.class);
     } catch (IOException e) {
-        log.error("Error reading file: {}, error: {}", path, e.getMessage());
-        throw new RuntimeException("Error reading file.", e);
+        throw new RuntimeException("Error reading file: " + path, e);
     }
   }
 
     public static ConfigurationDiff readConfigDiffFromPath(String path){
         if (path == null) return null;
         if(!fileExists(path)){
-            log.error("Configuration difference file not found: {}",path);
             throw new RuntimeException(String.format("Configuration difference file not found: %s", path));
         }
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
@@ -98,7 +119,6 @@ public class StreamlinerUtil {
         try {
             config = mapper.readValue(new File(path), ConfigurationDiff.class);
         } catch (IOException e) {
-            log.error("Error reading configuration diff file: {}", path);
             throw new RuntimeException(String.format("Error reading configuration diff file: %s", path), e);
         }
         return config;
@@ -124,7 +144,6 @@ public class StreamlinerUtil {
         } else if (ingestConfig.getDestination() instanceof Hadoop) {
             tables = HadoopMapper.mapSchemaCrawlerTables(tableList, jdbc.getUserDefinedTable());
         } else {
-            log.error("Unknown Destination provided: {}", ingestConfig.getDestination().getType());
             throw new RuntimeException(String.format("Unknown Destination provided: %s", ingestConfig.getDestination().getType()));
         }
         jdbc.setDriverClass(catalog.getDriverClassName());
@@ -158,8 +177,7 @@ public class StreamlinerUtil {
     try {
       mapper.writeValue(new File(outputFile), outputConfig);
     } catch (IOException e) {
-      log.error("Error writing file: {}", outputFile);
-      throw new RuntimeException("Error writing file.", e);
+      throw new RuntimeException("Error writing file: " + outputFile, e);
     }
   }
 
@@ -174,8 +192,7 @@ public class StreamlinerUtil {
     try {
       mapper.writeValue(new File(outputFile), outputConfig);
     } catch (IOException e) {
-      log.error("Error writing file: {}", outputFile);
-      throw new RuntimeException("Error writing file.", e);
+      throw new RuntimeException("Error writing file: " + outputFile, e);
     }
   }
 
@@ -199,7 +216,6 @@ public class StreamlinerUtil {
             tableDefinitions = HadoopMapper.mapAWSGlueTables(tableList, source.getUserDefinedTable());
             ingestConfig.setTables(tableDefinitions);
         } else {
-            log.error("Unknown Destination provided: {}", ingestConfig.getDestination().getType());
             throw new RuntimeException(String.format("Unknown Destination provided: %s", ingestConfig.getDestination().getType()));
         }
         return ingestConfig;
@@ -306,7 +322,6 @@ public class StreamlinerUtil {
     try {
       typeMappingFile = mapper.readValue(new File(path), Map.class);
     } catch (IOException e) {
-      log.error("Error reading Type mapping file: {}", path);
       throw new RuntimeException(String.format("Error reading Type mapping file: %s", path), e);
     }
     return typeMappingFile;
@@ -330,8 +345,7 @@ public class StreamlinerUtil {
     try (FileWriter fw = new FileWriter(fileName)) {
       fw.write(content);
     } catch (IOException e) {
-      log.error("Error writing file: {}", fileName);
-      throw new RuntimeException(e);
+      throw new RuntimeException(String.format("Error writing file: %s", fileName), e);
     }
   }
 
@@ -411,8 +425,7 @@ public class StreamlinerUtil {
               try {
                 f.createNewFile();
               } catch (IOException e) {
-                log.error("Error creating file: {}", file);
-                throw new RuntimeException(String.format("Error creating file: {}", file));
+                throw new RuntimeException(String.format("Error creating file: %s", file));
               }
             });
   }
