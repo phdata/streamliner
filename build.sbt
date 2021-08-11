@@ -37,6 +37,7 @@ lazy val root = (project in file("."))
       "guru.nidi" % "graphviz-java" % "0.8.1",
       "org.scalatra.scalate" %% "scalate-core" % "1.9.0",
       "net.snowflake" % "snowflake-jdbc" % "3.13.6",
+      "org.apache.commons" % "commons-text" % "1.9",
       "com.amazonaws" % "aws-java-sdk-glue" % "1.11.774",
       "org.scalatest" %% "scalatest" % "3.0.5" % "it,test",
       "junit" % "junit" % "4.13.2" % "it,test",
