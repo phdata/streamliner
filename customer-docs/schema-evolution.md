@@ -121,3 +121,51 @@ Output of step 3 streamliner-configuration2.yml is passed as config and streamli
 Output of this command is scripts that can be executed in snowflake to create table 4 and alter table t1 to add column c3.
 
 Note: In all the commands above any name can be provided to the configuration files.   
+
+## Exception Handling Process
+
+Streamliner handles the following changes:
+
+* New columns
+* Compatible extension of columns such as extending a string type
+* Modifying comments
+* Modifying nullability
+
+Streamliner is unable to handle column renames or column deletes. These will need to be handled via an exception process.
+
+The risks and process associated with handling exceptions varies by data format. Snowflake loads CSV data positionally and therefore more likely to be corrupt. **Snowflake loads Parquet data by source column name. Parquet makes this exception process significantly easier and therefore is strongly recommended.**
+
+### Column Renames
+
+The safest solution is to drop and reload the table.
+
+#### Parquet
+
+If no data has been loaded since the column rename, then the new data will show up with the new column name, and it's safe to follow the following process:
+
+1. Rename column on the Snowflake side.
+2. Re-define the PIPE object to use the new column name.
+
+#### CSV
+
+There are no guarantees about the ordinal position of the column. The table should be reloaded.
+
+### Column Deletes
+
+Column deletes are simpler to handle, especially with Parquet.
+
+#### Parquet
+
+Column deletes are handled gracefully. If the column has yet to be deleted in Snowflake, it'll be populated with null. Therefore, you simply need to:
+
+1. Drop column on the Snowflake side.
+2. Re-define the PIPE object to remove the use of the deleted column
+
+#### CSV
+
+CSV is complicated as Snowflake uses ordinal position to identify column. However, if no data has been loaded since the user deleted the column, you can:
+
+1. Drop column on the Snowflake side.
+2. Re-define the PIPE object to remove the use of the deleted column
+
+If data has been loaded without the column, then the ordering is wrong and corrupt data has been loaded. The table should be reloaded.
