@@ -414,6 +414,9 @@ public class StreamlinerUtil {
 
     public static String getOutputDirectory(String outputFile) {
         int lastSlashIndex = outputFile.lastIndexOf("/");
+        if (lastSlashIndex == -1) {
+            throw new IllegalArgumentException("Output file must be inside a directory");
+        }
         String outputDir = outputFile.substring(0, lastSlashIndex);
         return outputDir;
     }
