@@ -134,6 +134,9 @@ public class StreamlinerUtil {
         Jdbc jdbc = (Jdbc) ingestConfig.getSource();
         List<Schema> schema = catalog.getSchemas().stream()
                 .filter(db -> db.getCatalogName().equals(jdbc.getSchema())).collect(Collectors.toList());
+        if (schema.isEmpty()) {
+            throw new IllegalStateException(String.format("No result found for %s", jdbc.getSchema()));
+        }
         List<Table> tableList = (List<Table>) catalog.getTables(schema.get(0));
         if(tableList == null || tableList.isEmpty()){
             throw new RuntimeException(String.format("Schema: %s, does not exist in source system",jdbc.getSchema()));
