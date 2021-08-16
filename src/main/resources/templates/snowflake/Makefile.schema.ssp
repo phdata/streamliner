@@ -24,23 +24,20 @@ limitations under the License.
 #if (tableDiffs != null)
     #if (!tableDiffs.isEmpty)
         <%
-            val firstRunTables = tableDiffs.map(t => s"first-run-${t.destinationName}").mkString(" ")
-            val runTables = tableDiffs.map(t => s"run-${t.destinationName}").mkString(" ")
+            val evolveSchemaTables = tableDiffs.map(t => s"evolve-schema-${t.destinationName}").mkString(" ")
         %>
-first-run-all: ${firstRunTables}
-run-all: ${runTables}
+
+evolve-schema-all: ${evolveSchemaTables}
 
 #for (table <- tableDiffs)
-first-run-${table.destinationName}:
-	$(MAKE) first-run -C ${table.destinationName}
 
-run-${table.destinationName}:
+evolve-schema-${table.destinationName}:
 	$(MAKE) run -C ${table.destinationName}
 
 #end
     #elseif (tableDiffs.isEmpty)
         first-run-all:
-        run-all:
+        evolve-schema-all:
     #end
 
 #elseif (tables != null)

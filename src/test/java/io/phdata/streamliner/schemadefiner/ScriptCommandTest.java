@@ -62,7 +62,9 @@ public class ScriptCommandTest {
                   file.getName().equals("create-table-evolve-schema.sql")
                       || file.getName().equals("Makefile")
                       || file.getName().equals("copy-into.sql")
-                      || file.getName().equals("create-snowpipe-evolve-schema.sql"));
+                      || file.getName().equals("create-snowpipe.sql")
+                      || file.getName().equals("alter-snowpipe.sql")
+                      || file.getName().equals("no-change.sql"));
             });
   }
 
@@ -107,7 +109,9 @@ public class ScriptCommandTest {
                   file.getName().equals("create-table-evolve-schema.sql")
                       || file.getName().equals("Makefile")
                       || file.getName().equals("copy-into.sql")
-                      || file.getName().equals("create-snowpipe-evolve-schema.sql"));
+                      || file.getName().equals("create-snowpipe.sql")
+                      || file.getName().equals("alter-snowpipe.sql")
+                      || file.getName().equals("no-change.sql"));
             });
   }
 
