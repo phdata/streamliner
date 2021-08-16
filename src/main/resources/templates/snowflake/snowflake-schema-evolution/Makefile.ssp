@@ -1,5 +1,9 @@
 #import(io.phdata.streamliner.schemadefiner.model.Snowflake)
 <%@ val configurationDiff: io.phdata.streamliner.schemadefiner.model.ConfigurationDiff %>
+<%@ val tableDiff: io.phdata.streamliner.schemadefiner.model.TableDiff %>
+<%@ val typeMapping: Map[String, Map[String, String]]%>
+<%@ val templateContext: io.phdata.streamliner.schemadefiner.model.TemplateContext %>
+
 #{
     val destination = configurationDiff.currentDestination.asInstanceOf[Snowflake]
 }#
@@ -11,17 +15,34 @@ create-table-evolve-schema: create-table-evolve-schema.sql
 copy-into: copy-into.sql
     $(snowsql-cmd) copy-into.sql
 
-create-snowpipe-evolve-schema: create-snowpipe-evolve-schema.sql
-    $(snowsql-cmd) create-snowpipe-evolve-schema.sql
+create-snowpipe: create-snowpipe.sql
+    $(snowsql-cmd) create-snowpipe.sql
 
-first-run:
+alter-snowpipe: alter-snowpipe.sql
+    $(snowsql-cmd) alter-snowpipe.sql
+
+no-change: no-change.sql
+    $(snowsql-cmd) no-change.sql
+
+evolve-schema:
     $(MAKE) create-table-evolve-schema
-    $(MAKE) create-snowpipe-evolve-schema
-    $(MAKE) copy-into
 
-run:
-    $(MAKE) create-table-evolve-schema
-    $(MAKE) create-snowpipe-evolve-schema
+#if (tableDiff.existsInDestination && tableDiff.existsInSource)
+    #if (!tableDiff.areThereAnyChanges(typeMapping))
+	$(MAKE) no-change
 
+    #elseif (tableDiff.allChangesAreCompatible(typeMapping))
+	$(MAKE) alter-snowpipe
+	$(MAKE) copy-into
+
+    #elseif (!tableDiff.allChangesAreCompatible(typeMapping))
+        <%
+            templateContext.addError(s"Incompatible change in table ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${tableDiff.destinationName} which will be ignored. Template: create-snowpipe-evolve-schema.ssp")
+        %>
+    #end
+#elseif (tableDiff.existsInSource && !tableDiff.existsInDestination)
+	$(MAKE) create-snowpipe
+	$(MAKE) copy-into
+#end
 
 

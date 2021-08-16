@@ -4,13 +4,11 @@
 
 
     
-        first-run-all: first-run-Employee
-run-all: run-Employee
+        
+evolve-schema-all: evolve-schema-Employee
 
-first-run-Employee:
-	$(MAKE) first-run -C Employee
 
-run-Employee:
+evolve-schema-Employee:
 	$(MAKE) run -C Employee
 
     

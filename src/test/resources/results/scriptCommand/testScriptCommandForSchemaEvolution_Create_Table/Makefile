@@ -4,13 +4,11 @@
 
 
     
-        first-run-all: first-run-Department
-run-all: run-Department
+        
+evolve-schema-all: evolve-schema-Department
 
-first-run-Department:
-	$(MAKE) first-run -C Department
 
-run-Department:
+evolve-schema-Department:
 	$(MAKE) run -C Department
 
     
