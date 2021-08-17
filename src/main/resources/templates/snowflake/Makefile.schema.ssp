@@ -32,11 +32,10 @@ evolve-schema-all: ${evolveSchemaTables}
 #for (table <- tableDiffs)
 
 evolve-schema-${table.destinationName}:
-	$(MAKE) run -C ${table.destinationName}
+	$(MAKE) evolve-schema -C ${table.destinationName}
 
 #end
     #elseif (tableDiffs.isEmpty)
-        first-run-all:
         evolve-schema-all:
     #end
 
