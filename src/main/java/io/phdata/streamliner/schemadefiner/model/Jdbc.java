@@ -27,6 +27,7 @@ public class Jdbc extends Source {
   private Map<String, String> metadata;
   // for table whitelisting
   private List<String> tables;
+  private int batchTableCount;
 
   public Jdbc() {}
 

@@ -45,6 +45,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -132,14 +133,15 @@ public class StreamlinerUtil {
 
     public static Configuration mapJdbcCatalogToConfig(Configuration ingestConfig, StreamlinerCatalog catalog) {
         Jdbc jdbc = (Jdbc) ingestConfig.getSource();
+        // here filtering of schema will be valid if catalog will come from schema crawler library.
         List<Schema> schema = catalog.getSchemas().stream()
-                .filter(db -> db.getCatalogName().equals(jdbc.getSchema())).collect(Collectors.toList());
+                .filter(matchDatabaseOrSchema(jdbc)).collect(Collectors.toList());
         if (schema.isEmpty()) {
             throw new IllegalStateException(String.format("No result found for %s", jdbc.getSchema()));
         }
         List<Table> tableList = (List<Table>) catalog.getTables(schema.get(0));
         if(tableList == null || tableList.isEmpty()){
-            throw new RuntimeException(String.format("Schema: %s, does not exist in source system",jdbc.getSchema()));
+            throw new RuntimeException(String.format("%s schema does not  have %s in source system",jdbc.getSchema(), jdbc.getTableTypes().toString()));
         }
         List<TableDefinition> tables = null;
         if (ingestConfig.getDestination() instanceof Snowflake) {
@@ -159,6 +161,16 @@ public class StreamlinerUtil {
                 tables);
         return newConfig;
     }
+
+  private static Predicate<Schema> matchDatabaseOrSchema(Jdbc jdbc) {
+        // In mysql database & schema are synonym. Hence matching config file Schema name with mysql database name.
+      // https://dev.mysql.com/doc/refman/8.0/en/create-database.html
+    if (jdbc.getUrl().startsWith("jdbc:mysql")) {
+      return db -> db.getCatalogName().equals(jdbc.getSchema());
+    } else {
+      return db -> db.getName().equals(jdbc.getSchema());
+    }
+  }
 
     public static void writeConfigToYaml(Configuration outputConfig, String outputDir, String fileName){
         createDir(outputDir);
