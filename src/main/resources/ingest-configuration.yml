@@ -9,7 +9,13 @@ source:
   schema: "" # JDBC Schema / database name
   tableTypes: # Controls the types of tables included in the configuration output
     - table
+# OPTIONAL: used to fetch snowflake tables details in batch of value provide. Default value is 10.
+#  batchTableCount: 11
 # OPTIONAL: table whitelisting
+#  tables:
+#    - table1
+#    - table2
+# OPTIONAL: override metadata
 #  userDefinedTable:
 #    - name: table1
 #      type: Snowflake

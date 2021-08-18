@@ -16,28 +16,22 @@ public class JdbcCrawler implements SchemaDefiner {
 
     private static final Logger log = LoggerFactory.getLogger(JdbcCrawler.class);
 
-    private String user;
     private String password;
-    private String jdbcUrl;
     private final Supplier<Connection> connectionSupplier;
     private final SchemaCrawlerOptions schemaCrawlerOptions;
-    private String schemaName;
     private List<String> tableTypes;
     private Supplier<Connection> conSupplier =
       new Supplier<Connection>() {
         @Override
         public Connection get() {
-          return StreamlinerUtil.getConnection(jdbcUrl, user, password);
+          return StreamlinerUtil.getConnection(jdbc.getUrl(), jdbc.getUsername(), password);
         }
       };
     private Jdbc jdbc;
 
     public JdbcCrawler(Jdbc jdbc, String password) {
         this.jdbc = jdbc;
-        this.jdbcUrl = jdbc.getUrl();
-        this.user = jdbc.getUsername();
         this.password = password;
-        this.schemaName = jdbc.getSchema();
         this.tableTypes = StreamlinerUtil.mapTableTypes(jdbc.getTableTypes());
         this.connectionSupplier = conSupplier;
         this.schemaCrawlerOptions = StreamlinerUtil.getOptions(jdbc);
@@ -47,7 +41,7 @@ public class JdbcCrawler implements SchemaDefiner {
     @Override
     public StreamlinerCatalog retrieveSchema() {
         try {
-            return StreamlinerSchemaCrawler.getCatalog(schemaName, jdbcUrl, connectionSupplier, schemaCrawlerOptions, tableTypes, jdbc.getTables());
+            return StreamlinerSchemaCrawler.getCatalog(jdbc, connectionSupplier, schemaCrawlerOptions, tableTypes);
         } catch (Exception e) {
             log.error("Error in JdbcCrawler: {}", e.getMessage());
             throw new RuntimeException("Error in JdbcCrawler: {}", e);

@@ -1,6 +1,8 @@
 package schemacrawler.crawl;
 
+import io.phdata.streamliner.schemadefiner.model.Jdbc;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.apache.log4j.Logger;
 import schemacrawler.schema.Catalog;
@@ -34,6 +36,13 @@ public class StreamlinerSchemaCrawler {
     protected static final String ORACLE_COLUMNS_TEMPLATE;
     protected static final String ORACLE_CONSTRAINTS_TEMPLATE;
     protected static final String ORACLE_UNIQUE_INDEXES_TEMPLATE;
+    private static final String SNOWFLAKE_TABLES = "snowflake-schema-crawler-tables.sql";
+    private static final String SNOWFLAKE_COLUMNS = "snowflake-schema-crawler-columns.sql";
+    private static final String SNOWFLAKE_SCHEMAS = "snowflake-schema-crawler-schemas.sql";
+    protected static final String SNOWFLAKE_TABLES_TEMPLATE;
+    protected static final String SNOWFLAKE_COLUMNS_TEMPLATE;
+    protected static final String SNOWFLAKE_SCHEMAS_TEMPLATE;
+
 
     private static String find(String name) {
         try (InputStream is = StreamlinerSchemaCrawler.class.getClassLoader().getResourceAsStream(name)) {
@@ -48,6 +57,9 @@ public class StreamlinerSchemaCrawler {
         ORACLE_COLUMNS_TEMPLATE = find(ORACLE_COLUMNS);
         ORACLE_CONSTRAINTS_TEMPLATE = find(ORACLE_CONSTRAINTS);
         ORACLE_UNIQUE_INDEXES_TEMPLATE = find(ORACLE_UNIQUE_INDEXES);
+        SNOWFLAKE_TABLES_TEMPLATE = find(SNOWFLAKE_TABLES);
+        SNOWFLAKE_COLUMNS_TEMPLATE = find(SNOWFLAKE_COLUMNS);
+        SNOWFLAKE_SCHEMAS_TEMPLATE = find(SNOWFLAKE_SCHEMAS);
     }
 
     private static String trimIfNotNull(String s) {
@@ -166,13 +178,26 @@ public class StreamlinerSchemaCrawler {
                 result);
     }
 
-    public static StreamlinerCatalog getCatalog(String schemaName, String jdbcUrl,
-            final Supplier<Connection> connectionSupplier, final SchemaCrawlerOptions schemaCrawlerOptions,
-            List<String> tableTypes, List<String> tableWhitelist)
-            throws Exception {
+  public static StreamlinerCatalog getCatalog(
+      Jdbc jdbc,
+      final Supplier<Connection> connectionSupplier,
+      final SchemaCrawlerOptions schemaCrawlerOptions,
+      List<String> tableTypes)
+      throws Exception {
+        String jdbcUrl = jdbc.getUrl();
+        String schemaName = jdbc.getSchema();
+        List<String> tableWhitelist = jdbc.getTables();
+
         if (jdbcUrl.startsWith("jdbc:oracle")) {
             StopWatch retrieveTablesTimer = StopWatch.createStarted();
             StreamlinerCatalog catalog = getOracleCatalog(new QueryHandler(connectionSupplier), schemaName, tableTypes, tableWhitelist);
+            retrieveTablesTimer.stop();
+            log.info(String.format("Retrieve Tables took %s", retrieveTablesTimer.formatTime()));
+            return catalog;
+        }
+        else if (jdbcUrl.startsWith("jdbc:snowflake")){
+            StopWatch retrieveTablesTimer = StopWatch.createStarted();
+            StreamlinerCatalog catalog = getSnowflakeCatalog(new SnowflakeQueryHandler(connectionSupplier), schemaName, tableTypes, tableWhitelist, jdbc.getBatchTableCount());
             retrieveTablesTimer.stop();
             log.info(String.format("Retrieve Tables took %s", retrieveTablesTimer.formatTime()));
             return catalog;
@@ -192,6 +217,110 @@ public class StreamlinerSchemaCrawler {
                     new ArrayList<>(catalog.getSchemas()), schemaTableMap);
         }
     }
+
+  private static StreamlinerCatalog getSnowflakeCatalog(
+          SnowflakeQueryHandler queryHandler,
+          String schemaName,
+          List<String> tableTypes,
+          List<String> tableWhitelist, int batchTableCount) throws SQLException {
+    String database = queryHandler.connectionSupplier.get().getCatalog();
+    Map<String, MutableTable> tables = new TreeMap<>();
+    Schema schema = new SchemaReference(database, schemaName);
+    boolean findTables = tableTypes.contains("table");
+    boolean findViews = tableTypes.contains("view");
+
+    // default value for batch query count is 10.
+    batchTableCount = batchTableCount == 0 ? 10 : batchTableCount;
+    String snowflakeSchemaName = "";
+    List<String> tableList = new ArrayList<>();
+
+    // This will check if schema name provided in config is valid or not.
+    {
+      List<Map<String, Object>> schemas =
+          queryHandler.queryToList(SNOWFLAKE_SCHEMAS_TEMPLATE, "", "");
+      boolean isSchemaValid =
+          schemas.stream()
+              .anyMatch(
+                  row -> {
+                    if (((String) row.get("SCHEMA_NAME")).equalsIgnoreCase(schemaName)) {
+                      return true;
+                    } else {
+                      return false;
+                    }
+                  });
+      if (!isSchemaValid) {
+        throw new IllegalStateException(
+            String.format("%s database does not have %s schema.", database, schemaName));
+      }
+    }
+
+    {
+      for (Map<String, Object> row :
+          queryHandler.queryToList(SNOWFLAKE_TABLES_TEMPLATE, schemaName, "")) {
+        snowflakeSchemaName = (String) row.get("TABLE_SCHEMA");
+        String tableName = (String) row.get("TABLE_NAME");
+        tableList.add(String.format("'%s'", tableName));
+        if (tables.containsKey(tableName)) {
+          throw new IllegalStateException(String.format("Found table %s twice", tableName));
+        }
+        String comment = trimIfNotNull((String) row.get("COMMENT"));
+        String tableType = (String) row.get("TABLE_TYPE");
+        if (tableType.contains("VIEW")) {
+          if (findViews) {
+            MutableView table = new MutableView(schema, tableName);
+            table.setRemarks(comment);
+            tables.put(tableName, table);
+          }
+        } else if (findTables) {
+          MutableTable table = new MutableTable(schema, tableName);
+          table.setRemarks(comment);
+          tables.put(tableName, table);
+        }
+      }
+    }
+    {
+      int snowflakeTablesCount = tableList.size();
+      for (int i = 0; i < snowflakeTablesCount; i = i + batchTableCount) {
+        List<String> subTableList = tableList.subList(i, Math.min(snowflakeTablesCount, i + batchTableCount));
+
+        for (Map<String, Object> row :
+            queryHandler.queryToList(
+                SNOWFLAKE_COLUMNS_TEMPLATE, snowflakeSchemaName, StringUtils.join(subTableList, ","))) {
+          String tableName = (String) row.get("TABLE_NAME");
+          String columnName = (String) row.get("COLUMN_NAME");
+          String dataType = (String) row.get("DATA_TYPE");
+          Integer columnSize = castToInteger(row.get("PRECISION"), 0);
+          Integer decimalDigits = castToInteger(row.get("SCALE"), 0);
+          Integer ordinalPosition = castToInteger(row.get("ORDINAL_POSITION"), Integer.MAX_VALUE);
+          String comment = trimIfNotNull((String) row.get("COMMENT"));
+          boolean nullable = row.get("IS_NULLABLE").equals("YES");
+          MutableTable table = tables.get(tableName);
+          if (table != null) {
+            MutableColumn column = new MutableColumn(table, columnName);
+            column.setColumnDataType(new MutableColumnDataType(schema, dataType));
+            column.setSize(columnSize);
+            column.setDecimalDigits(decimalDigits);
+            column.setRemarks(comment);
+            column.setOrdinalPosition(ordinalPosition);
+            column.setNullable(nullable);
+            table.addColumn(column);
+          }
+        }
+      }
+    }
+    Map<Schema, List<Table>> result = new HashMap<>();
+    if (tableWhitelist != null) {
+      List<Table> tableFiltered =
+          tables.values().stream()
+              .filter(table -> tableWhitelist.contains(table.getName()))
+              .collect(Collectors.toList());
+      result.put(schema, tableFiltered);
+    } else {
+      result.put(schema, new ArrayList<>(tables.values()));
+    }
+    return new StreamlinerCatalog(
+        "net.snowflake.client.jdbc.SnowflakeDriver", Arrays.asList(schema), result);
+  }
 
     protected static class QueryHandler {
         private final Supplier<Connection> connectionSupplier;
@@ -270,4 +399,42 @@ public class StreamlinerSchemaCrawler {
             return result;
         }
     }
+
+  protected static class SnowflakeQueryHandler {
+    private final Supplier<Connection> connectionSupplier;
+
+    public SnowflakeQueryHandler(Supplier<Connection> connectionSupplier) {
+      this.connectionSupplier = connectionSupplier;
+    }
+
+    protected List<Map<String, Object>> queryToList(
+        String query, String schemaName, String tables) {
+      List<Map<String, Object>> result = Collections.synchronizedList(new ArrayList<>());
+      String queryString =
+          query.replace("{{SCHEMA_NAME}}", schemaName).replace("{{TABLE_LIST}}", tables);
+      StopWatch timer = StopWatch.createStarted();
+      String queryForLogging = queryString.replace('\n', ' ');
+      try (Connection connection = connectionSupplier.get();
+          Statement statement = connection.createStatement()) {
+        log.info("Executing: " + queryForLogging);
+        ResultSet rs = statement.executeQuery(queryString);
+        ResultSetMetaData rsmd = rs.getMetaData();
+
+        while (rs.next()) {
+          int count = rsmd.getColumnCount();
+          Map<String, Object> row = new LinkedHashMap<>();
+          for (int i = 1; i < count + 1; i++) {
+            row.put(rsmd.getColumnLabel(i), rs.getObject(i));
+          }
+          log.trace(row);
+          result.add(row);
+        }
+        timer.stop();
+        log.info(String.format("Took %s to execute %s", timer.formatTime(), queryForLogging));
+        return result;
+      } catch (SQLException e) {
+        throw new IllegalStateException(e);
+      }
+    }
+  }
 }
