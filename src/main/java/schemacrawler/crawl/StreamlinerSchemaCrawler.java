@@ -223,7 +223,7 @@ public class StreamlinerSchemaCrawler {
           String schemaName,
           List<String> tableTypes,
           List<String> tableWhitelist, int batchTableCount) throws SQLException {
-    String database = queryHandler.connectionSupplier.get().getCatalog();
+    String database = queryHandler.getCatalog();
     Map<String, MutableTable> tables = new TreeMap<>();
     Schema schema = new SchemaReference(database, schemaName);
     boolean findTables = tableTypes.contains("table");
@@ -401,10 +401,14 @@ public class StreamlinerSchemaCrawler {
     }
 
   protected static class SnowflakeQueryHandler {
-    private final Supplier<Connection> connectionSupplier;
+    private final Connection connection;
 
     public SnowflakeQueryHandler(Supplier<Connection> connectionSupplier) {
-      this.connectionSupplier = connectionSupplier;
+      this.connection = connectionSupplier.get();
+    }
+
+    protected String getCatalog() throws SQLException {
+        return connection.getCatalog();
     }
 
     protected List<Map<String, Object>> queryToList(
@@ -414,8 +418,7 @@ public class StreamlinerSchemaCrawler {
           query.replace("{{SCHEMA_NAME}}", schemaName).replace("{{TABLE_LIST}}", tables);
       StopWatch timer = StopWatch.createStarted();
       String queryForLogging = queryString.replace('\n', ' ');
-      try (Connection connection = connectionSupplier.get();
-          Statement statement = connection.createStatement()) {
+      try (Statement statement = connection.createStatement()) {
         log.info("Executing: " + queryForLogging);
         ResultSet rs = statement.executeQuery(queryString);
         ResultSetMetaData rsmd = rs.getMetaData();
