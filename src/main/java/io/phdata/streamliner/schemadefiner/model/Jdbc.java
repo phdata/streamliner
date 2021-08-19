@@ -27,7 +27,12 @@ public class Jdbc extends Source {
   private Map<String, String> metadata;
   // for table whitelisting
   private List<String> tables;
+  //used to fetch snowflake tables details in batch of value provided
   private int batchTableCount;
+  /* snowflake schema crawler uses two approach to extract schemas.
+  *  use "information_schema" for INFORMATION SCHEMA  and "show_command" for SHOW COMMAND approach.
+  * */
+  private String snowflakeCrawler;
 
   public Jdbc() {}
 

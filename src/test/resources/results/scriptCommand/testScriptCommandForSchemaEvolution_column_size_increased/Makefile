@@ -9,6 +9,6 @@ evolve-schema-all: evolve-schema-Employee
 
 
 evolve-schema-Employee:
-	$(MAKE) run -C Employee
+	$(MAKE) evolve-schema -C Employee
 
     
