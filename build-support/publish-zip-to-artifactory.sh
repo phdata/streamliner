@@ -9,6 +9,5 @@ ZIP=${PARENT}/target/universal/streamliner-$VERSION.zip
 test -f $ZIP
 
 echo "Uploading ${ZIP}"
-cloudsmith push raw phdata/streamliner --version $VERSION $ZIP
 cloudsmith push maven --artifact-id streamliner --group-id io.phdata.streamliner --version $VERSION phdata/streamliner --packaging zip $ZIP
 
