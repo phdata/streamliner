@@ -16,6 +16,7 @@
 
 package io.phdata.streamliner
 
+import io.phdata.streamliner.schemadefiner.configbuilder.GenerateStateCommand
 import io.phdata.streamliner.schemadefiner.configbuilder.SchemaCommand
 import io.phdata.streamliner.schemadefiner.configbuilder.ScriptCommand
 import org.apache.log4j.LogManager
@@ -44,6 +45,20 @@ object App {
           cli.produceScripts.typeMappingFile(),
           cli.produceScripts.templateDirectory(),
           cli.produceScripts.outputPath.getOrElse(null)
+        )
+
+      case Some(cli.generateState) =>
+        GenerateStateCommand.build(
+          cli.generateState.tableExclude.getOrElse(null),
+          cli.generateState.tableInclude.getOrElse(null),
+          cli.generateState.columnInclude.getOrElse(null),
+          cli.generateState.columnExclude.getOrElse(null),
+          cli.generateState.tableNameRemove.getOrElse(null),
+          cli.generateState.columnNameRemove.getOrElse(null),
+          cli.generateState.outputPath(),
+          cli.generateState.sourceSystemFile(),
+          cli.generateState.tableCsvPath(),
+          cli.generateState.columnCsvPath(),
         )
 
       case None =>
