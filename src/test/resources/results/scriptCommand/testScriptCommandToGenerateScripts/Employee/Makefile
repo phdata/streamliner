@@ -30,6 +30,15 @@ drop-stage: drop-stage.sql
 drop-table: drop-table.sql
 	$(snowsql-cmd) drop-table.sql
 
+create-table-evolve-schema: create-table-evolve-schema.sql
+	$(snowsql-cmd) create-table-evolve-schema.sql
+
+alter-snowpipe: alter-snowpipe.sql
+	$(snowsql-cmd) alter-snowpipe.sql
+
+no-change: no-change.sql
+	$(snowsql-cmd) no-change.sql
+
 first-run:
 	$(MAKE) create-schema
 	$(MAKE) create-stage
@@ -41,4 +50,6 @@ drop:
 	$(MAKE) drop-table
 	$(MAKE) drop-snowpipe
 
+evolve-schema:
+	$(MAKE) create-table-evolve-schema
 

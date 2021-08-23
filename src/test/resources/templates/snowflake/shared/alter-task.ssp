@@ -1,0 +1,4 @@
+<%@ val database: io.phdata.streamliner.schemadefiner.model.SnowflakeDatabase %>
+<%@ val task: String %>
+<%@ val status: String %>
+ALTER TASK IF EXISTS ${database.name}.${database.schema}.${task} ${status};

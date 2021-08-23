@@ -1,0 +1,61 @@
+<%--
+Copyright 2018 phData Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+--%>
+#import(io.phdata.streamliner.schemadefiner.model.Snowflake)
+<%@ val configuration: io.phdata.streamliner.schemadefiner.model.Configuration %>
+<%@ val table: io.phdata.streamliner.schemadefiner.model.SnowflakeTable %>
+#{
+    val destination = configuration.destination.asInstanceOf[Snowflake]
+
+}#
+create or replace procedure ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.table_run_qa(SCHEMA_NAME STRING, TABLE_NAME STRING, MINIMUM_PERCENTAGE FLOAT,
+MINIMUM_COUNT FLOAT, MINIMUM_RUNS FLOAT, STD_DEV FLOAT)
+returns float null
+language javascript
+as
+$$
+
+// Load metrics into the metrics repo.
+
+var start_qa_statement = snowflake.createStatement(
+{ sqlText: `call table_stats(:1, :2, :3, :4)`, binds: [SCHEMA_NAME, TABLE_NAME, MINIMUM_PERCENTAGE, MINIMUM_COUNT]} );
+start_qa_statement.execute();
+
+// Check if any metrics failed qa
+
+var qa_command = `select listagg(metric_values, ', ') as failed_qa
+from (
+select 'Column name: ' || metric_name || ' - values: ' || listagg(metric_value, ', ') as metric_values
+from table (table_qa(:1, :2, :3, :4))
+where pass_qa = false
+group by metric_name
+) A;`;
+var qa_statement = snowflake.createStatement(
+{ sqlText: qa_command, binds: [SCHEMA_NAME, TABLE_NAME, MINIMUM_RUNS, STD_DEV]} );
+var qa_results = qa_statement.execute();
+
+// Check if there were qa problems.
+
+qa_results.next()
+var qa_output = qa_results.getColumnValue(1)
+
+if (qa_output != '') {
+// call external function
+return 1
+}
+
+return 0.0;
+$$
+;

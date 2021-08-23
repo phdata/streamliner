@@ -126,6 +126,8 @@ public class ScriptCommand {
                           log.info("Rendering file: {} ", templateFile);
                           Map<String, Object> map = new LinkedHashMap<>();
                           map.put("configuration", configuration);
+                          map.put("configurationDiff", new ConfigurationDiff());
+                          map.put("tableDiff", new TableDiff());
                           map.put("table", table);
                           map.put("typeMapping", typeMapping);
                           map.put("templateContext", templateContext);
@@ -174,7 +176,7 @@ public class ScriptCommand {
         configuration.getTables().stream()
             .filter(
                 table -> {
-                  if (tableDiff.getExistsInSource()) {
+                  if (tableDiff.isExistsInSource()) {
                     if (table.getDestinationName().equals(tableDiff.getDestinationName())) {
                       return true;
                     }

@@ -12,7 +12,6 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.io.File;
-import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -20,7 +19,7 @@ import static org.junit.Assert.assertTrue;
 public class ScriptCommandTest {
   private static String outputPath = "src/test/output";
   private String outputFile = "src/test/output/confDiff/streamliner-configuration-diff.yml";
-  private String templateDirectory = "src/main/resources/templates/snowflake";
+  private String templateDirectory = "src/test/resources/templates/snowflake";
   private String typeMapping = "src/main/resources/type-mapping.yml";
   private String outputDir = "src/test/resources/results/scriptCommand";
   private String configDiff = "src/test/output/confDiff/streamliner-configuration-diff.yml";
@@ -54,18 +53,7 @@ public class ScriptCommandTest {
     File f = new File(String.format("%s/Employee", outputDir));
     assertTrue(f.exists());
     assertTrue(f.isDirectory());
-
-    Arrays.stream(f.listFiles())
-        .forEach(
-            file -> {
-              assertTrue(
-                  file.getName().equals("create-table-evolve-schema.sql")
-                      || file.getName().equals("Makefile")
-                      || file.getName().equals("copy-into.sql")
-                      || file.getName().equals("create-snowpipe.sql")
-                      || file.getName().equals("alter-snowpipe.sql")
-                      || file.getName().equals("no-change.sql"));
-            });
+    assertEquals(13, f.list().length);
   }
 
   @Test
@@ -101,18 +89,7 @@ public class ScriptCommandTest {
     File f = new File(String.format("%s/Department", outputDir));
     assertTrue(f.exists());
     assertTrue(f.isDirectory());
-
-    Arrays.stream(f.listFiles())
-        .forEach(
-            file -> {
-              assertTrue(
-                  file.getName().equals("create-table-evolve-schema.sql")
-                      || file.getName().equals("Makefile")
-                      || file.getName().equals("copy-into.sql")
-                      || file.getName().equals("create-snowpipe.sql")
-                      || file.getName().equals("alter-snowpipe.sql")
-                      || file.getName().equals("no-change.sql"));
-            });
+    assertEquals(13, f.list().length);
   }
 
   @Test
@@ -125,7 +102,7 @@ public class ScriptCommandTest {
     File f = new File(String.format("%s/Employee", outputDir));
     assertTrue(f.exists());
     assertTrue(f.isDirectory());
-    assertEquals(10, f.list().length);
+    assertEquals(13, f.list().length);
   }
 
   @Test

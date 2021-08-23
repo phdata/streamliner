@@ -20,8 +20,8 @@ import java.util.stream.Collectors;
 public class TableDiff {
   private String type;
   public String destinationName;
-  public Boolean existsInDestination;
-  public Boolean existsInSource;
+  public boolean existsInDestination;
+  public boolean existsInSource;
   private List<ColumnDiff> columnDiffs;
 
   public TableDiff() {}
@@ -30,8 +30,8 @@ public class TableDiff {
       String type,
       String destinationName,
       List<ColumnDiff> columnDiffs,
-      Boolean existsInDestination,
-      Boolean existsInSource) {
+      boolean existsInDestination,
+      boolean existsInSource) {
     this.type = type;
     this.destinationName = destinationName;
     this.columnDiffs = columnDiffs;
