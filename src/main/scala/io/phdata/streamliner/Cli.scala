@@ -84,8 +84,48 @@ class Cli(args: Seq[String]) extends ScallopConf(args) {
     )
   }
 
+  val generateState = new Subcommand("generate-state") {
+
+    val tableExclude: ScallopOption[String] =
+      opt[String]("table-exclude", descr = "Regex to exclude tables.", required = false)
+
+    val tableInclude: ScallopOption[String] =
+      opt[String]("table-include", descr = "Regex to include tables.", required = false)
+
+    val columnInclude: ScallopOption[String] =
+      opt[String]("column-include", descr = "Regex to include columns.", required = false)
+
+    val columnExclude: ScallopOption[String] =
+      opt[String]("column-exclude", descr = "Regex to exclude columns.", required = false)
+
+    val tableNameRemove: ScallopOption[String] = opt[String](
+      "table-name-remove",
+      descr = "Removes a given regex from table name.",
+      required = false)
+
+    val columnNameRemove: ScallopOption[String] = opt[String](
+      "column-name-remove",
+      descr = "Removes a given regex from column name.",
+      required = false)
+
+    val outputPath: ScallopOption[String] =
+      opt[String]("output-path", descr = "Path to save the generated state file.", required = true)
+
+    val sourceSystemFile: ScallopOption[String] = opt[String](
+      "source-schema-file",
+      descr = "Source schema config file generated through streamliner.",
+      required = true)
+
+    val tableCsvPath: ScallopOption[String] =
+      opt[String]("table-csv-file", descr = "Tables CSV file path.", required = true)
+
+    val columnCsvPath: ScallopOption[String] =
+      opt[String]("column-csv-file", descr = "Columns CSV file path.", required = true)
+  }
+
   addSubcommand(schema)
   addSubcommand(produceScripts)
+  addSubcommand(generateState)
 
   verify()
 }

@@ -33,7 +33,20 @@ public class TableDefinition {
     public TableDefinition() {
     }
 
-  public String columnList(String alias) {
+  public TableDefinition(
+      String type,
+      String sourceName,
+      String destinationName,
+      List<String> primaryKeys,
+      List<ColumnDefinition> columns) {
+    this.type = type;
+    this.sourceName = sourceName;
+    this.destinationName = destinationName;
+    this.primaryKeys = primaryKeys;
+    this.columns = columns;
+  }
+
+    public String columnList(String alias) {
     List<String> columnList =
         columns.stream()
             .map(

@@ -44,7 +44,8 @@ lazy val root = (project in file("."))
       "org.testcontainers" % "mysql" % "1.15.1" % "it,test",
       "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml" % "2.12.3",
       "org.projectlombok" % "lombok" % "1.18.20" % "provided",
-      "com.novocode" % "junit-interface" % "0.11" % "test"
+      "com.novocode" % "junit-interface" % "0.11" % "test",
+      "com.opencsv" % "opencsv" % "5.4"
     )
   )
 
