@@ -1,0 +1,12 @@
+#import(io.phdata.streamliner.schemadefiner.model.Snowflake)
+<%@ val configuration: io.phdata.streamliner.schemadefiner.model.Configuration %>
+<%@ val table: io.phdata.streamliner.schemadefiner.model.SnowflakeTable %>
+<%@ val tableDiff: io.phdata.streamliner.schemadefiner.model.TableDiff %>
+<%@ val typeMapping: Map[String, Map[String, String]]%>
+<%@ val templateContext: io.phdata.streamliner.schemadefiner.model.TemplateContext %>
+#{
+    val destination = configuration.destination.asInstanceOf[Snowflake]
+    val sourceColumnStr = table.sourceColumnConversion(typeMapping)
+}#
+
+<% render("../shared/alter-snowpipe.ssp", Map("configuration" -> configuration, "table" -> table, "tableDiff" -> tableDiff, "typeMapping" -> typeMapping, "templateContext" -> templateContext))%>

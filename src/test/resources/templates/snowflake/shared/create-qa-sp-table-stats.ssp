@@ -1,0 +1,82 @@
+<%--
+Copyright 2018 phData Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+--%>
+#import(io.phdata.streamliner.schemadefiner.model.Snowflake)
+<%@ val configuration: io.phdata.streamliner.schemadefiner.model.Configuration %>
+<%@ val table: io.phdata.streamliner.schemadefiner.model.SnowflakeTable %>
+#{
+    val destination = configuration.destination.asInstanceOf[Snowflake]
+
+}#
+create or replace procedure ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.table_stats(SCHEMA_NAME STRING, TABLE_NAME STRING, MINIMUM_PERCENTAGE FLOAT, MINIMUM_COUNT FLOAT)
+returns float null
+language javascript
+as
+$$
+var table_command = `SELECT COLUMN_NAME, TABLE_NAME, TABLE_SCHEMA, to_time(current_timestamp())
+FROM INFORMATION_SCHEMA.COLUMNS C
+WHERE TABLE_SCHEMA = :1
+    AND TABLE_NAME = :2
+    AND IS_IDENTITY = 'NO';`;
+var table_statement = snowflake.createStatement(
+{ sqlText: table_command, binds: [SCHEMA_NAME, TABLE_NAME]} );
+var column_results = table_statement.execute();
+var tempTable = TABLE_NAME + "_temp";
+var table_stream = SCHEMA_NAME + "." + TABLE_NAME + "_QA_STREAM"
+
+var temp_table_command = "create temporary table " + tempTable + " as " +
+" select * " +
+" from " + table_stream + ";";
+var temp_table_statement = snowflake.createStatement({ sqlText: temp_table_command} );
+temp_table_statement.execute();
+
+// Loop through columns and insert data based on the data.
+i = 0;
+
+while (column_results.next())  {
+var column_name = column_results.getColumnValue(1);
+var table_name = column_results.getColumnValue(2);
+var schema_name = column_results.getColumnValue(3);
+var current_time = column_results.getColumnValue(4);
+
+var insert_command = "insert into Analytics.QA_METRICS (RUN_DATE, RUN_TIME, TABLE_NAME, SCHEMA_NAME, METRIC_NAME, METRIC_VALUE, METRIC) " +
+"select " +
+"	CURRENT_DATE(), " +
+"	'" + current_time + "' as RUN_TIME, " +
+"	'" + table_name + "' as TABLE_NAME, " +
+"	'" + schema_name + "' as SCHEMA_NAME, " +
+"	'" + column_name + "' as METRIC_NAME, " +
+"	" + column_name + " as METRIC_VALUE, " +
+"	COUNT(1) as METRIC " +
+"from " + tempTable + " T " +
+"CROSS JOIN (select COUNT(1) as totalCount from " + tempTable + " T2 where METADATA$ACTION = 'INSERT') TC " +
+"WHERE METADATA$ACTION = 'INSERT' " +
+"GROUP BY " + column_name + ", totalCount " +
+"HAVING (COUNT(1) / totalCount) > :1 " +
+"	AND COUNT(1) > :2;";
+
+var insert_statement = snowflake.createStatement( {sqlText: insert_command, binds: [MINIMUM_PERCENTAGE, MINIMUM_COUNT]} );
+insert_statement.execute();
+i = i + 1;
+
+}
+
+var drop_temp_table_command = "drop table " + tempTable + "; "
+var drop_temp_table_statement = snowflake.createStatement({ sqlText: drop_temp_table_command} );
+drop_temp_table_statement.execute();
+
+return i;
+$$
+;

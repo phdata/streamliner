@@ -49,8 +49,8 @@ public class DiffGeneratorTest {
 
     TableDiff tableDiff = configDiff.getTableDiffs().get(0);
     assertEquals("Employee", tableDiff.getDestinationName());
-    assertEquals(false, tableDiff.getExistsInDestination());
-    assertEquals(true, tableDiff.getExistsInSource());
+    assertEquals(false, tableDiff.isExistsInDestination());
+    assertEquals(true, tableDiff.isExistsInSource());
     assertEquals(1, tableDiff.getColumnDiffs().size());
 
     ColumnDiff colDiff = tableDiff.getColumnDiffs().get(0);
@@ -82,8 +82,8 @@ public class DiffGeneratorTest {
 
     TableDiff tableDiff = configDiff.getTableDiffs().get(0);
     assertEquals("Employee", tableDiff.getDestinationName());
-    assertTrue(tableDiff.getExistsInDestination());
-    assertTrue(tableDiff.getExistsInSource());
+    assertTrue(tableDiff.isExistsInDestination());
+    assertTrue(tableDiff.isExistsInSource());
     assertEquals(1, tableDiff.getColumnDiffs().size());
 
     ColumnDiff colDiff = tableDiff.getColumnDiffs().get(0);
@@ -115,8 +115,8 @@ public class DiffGeneratorTest {
 
     TableDiff tableDiff = configDiff.getTableDiffs().get(0);
     assertEquals("Employee", tableDiff.getDestinationName());
-    assertTrue(tableDiff.getExistsInDestination());
-    assertTrue(tableDiff.getExistsInSource());
+    assertTrue(tableDiff.isExistsInDestination());
+    assertTrue(tableDiff.isExistsInSource());
     assertEquals(1, tableDiff.getColumnDiffs().size());
 
     ColumnDiff colDiff = tableDiff.getColumnDiffs().get(0);
@@ -152,8 +152,8 @@ public class DiffGeneratorTest {
 
     TableDiff tableDiff = configDiff.getTableDiffs().get(0);
     assertEquals("Employee", tableDiff.getDestinationName());
-    assertTrue(tableDiff.getExistsInDestination());
-    assertTrue(tableDiff.getExistsInSource());
+    assertTrue(tableDiff.isExistsInDestination());
+    assertTrue(tableDiff.isExistsInSource());
     assertEquals(1, tableDiff.getColumnDiffs().size());
 
     ColumnDiff colDiff = tableDiff.getColumnDiffs().get(0);
@@ -185,8 +185,8 @@ public class DiffGeneratorTest {
 
     TableDiff tableDiff = configDiff.getTableDiffs().get(0);
     assertEquals("Employee", tableDiff.getDestinationName());
-    assertTrue(tableDiff.getExistsInDestination());
-    assertTrue(tableDiff.getExistsInSource());
+    assertTrue(tableDiff.isExistsInDestination());
+    assertTrue(tableDiff.isExistsInSource());
     assertEquals(3, tableDiff.getColumnDiffs().size());
 
     ColumnDiff addedColDiff =
@@ -256,8 +256,8 @@ public class DiffGeneratorTest {
 
     TableDiff tableDiff = configDiff.getTableDiffs().get(0);
     assertEquals("Department", tableDiff.getDestinationName());
-    assertTrue(tableDiff.getExistsInDestination());
-    assertFalse(tableDiff.getExistsInSource());
+    assertTrue(tableDiff.isExistsInDestination());
+    assertFalse(tableDiff.isExistsInSource());
     assertEquals(1, tableDiff.getColumnDiffs().size());
 
     ColumnDiff colDiff = tableDiff.getColumnDiffs().get(0);
@@ -290,8 +290,8 @@ public class DiffGeneratorTest {
 
     TableDiff tableDiff = configDiff.getTableDiffs().get(0);
     assertEquals("Department", tableDiff.getDestinationName());
-    assertFalse(tableDiff.getExistsInDestination());
-    assertTrue(tableDiff.getExistsInSource());
+    assertFalse(tableDiff.isExistsInDestination());
+    assertTrue(tableDiff.isExistsInSource());
     assertEquals(1, tableDiff.getColumnDiffs().size());
 
     ColumnDiff colDiff = tableDiff.getColumnDiffs().get(0);
