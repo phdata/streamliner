@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 public class HadoopTable extends TableDefinition {
-  private String type;
+  private String type = "Hadoop";
   public String sourceName;
   public String destinationName;
   public String checkColumn;
