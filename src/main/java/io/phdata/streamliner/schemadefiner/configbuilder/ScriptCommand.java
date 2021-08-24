@@ -66,6 +66,25 @@ public class ScriptCommand {
             "TableDiff section is not found. Check the configuration difference (example: streamliner-configuration-diff.yml) file");
       }
       TemplateContext templateContext = new TemplateContext();
+      List<TableDiff> tablesNotInSource =
+          configDiff.getTableDiffs().stream()
+              .filter(tableDiff -> !tableDiff.isExistsInSource())
+              .collect(Collectors.toList());
+      tablesNotInSource.forEach(
+          table ->
+              templateContext.addError(
+                  String.format(
+                      "Table %s.%s.%s does not exists in source schema. Currently Streamliner doesn't support table delete.",
+                      ((Snowflake) configuration.getDestination()).getStagingDatabase().getName(),
+                      ((Snowflake) configuration.getDestination()).getStagingDatabase().getSchema(),
+                      table.getDestinationName())));
+
+      List<TableDiff> tablesInSource =
+          configDiff.getTableDiffs().stream()
+              .filter(tableDiff -> tableDiff.isExistsInSource())
+              .collect(Collectors.toList());
+      // currently table delete is not supported.
+      configDiff.setTableDiffs(tablesInSource);
       configDiff.getTableDiffs().stream()
           .forEach(
               tableDiff -> {
@@ -184,7 +203,9 @@ public class ScriptCommand {
                   return false;
                 })
             .collect(Collectors.toList());
-    return tableList.isEmpty() ? new TableDefinition() : tableList.get(0);
+    return tableList.isEmpty()
+        ? tableDiff.getType().equals("Snowflake") ? new SnowflakeTable() : new HadoopTable()
+        : tableList.get(0);
   }
 
   private static void writeSchemaMakeFile(

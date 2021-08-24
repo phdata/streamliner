@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 public class SnowflakeTable extends TableDefinition {
-  private String type;
+  private String type = "Snowflake";
   public String sourceName;
   public String destinationName;
   public String comment = "";
