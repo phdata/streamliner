@@ -69,6 +69,9 @@ public class GenerateStateCommand {
         createTableDefMap(sourceSchemaFile.getTables());
     TemplateContext context = new TemplateContext();
 
+    // schema crawler sorts by lower case name so we ensure that behavior here
+    csvTables.sort(Comparator.comparing(csvTable -> csvTable.getTableName().toLowerCase()));
+
     List<TableDefinition> tableDef =
         csvTables.stream()
             .map(
@@ -93,7 +96,10 @@ public class GenerateStateCommand {
                           .filter(
                               csvColumn -> csvColumn.getTableName().equals(csvTable.getTableName()))
                           .collect(Collectors.toList());
-
+                  // columns are sorted based on ordinal position
+                  csvTableCols.sort(
+                      Comparator.comparing(
+                          column -> Integer.parseInt(column.getOrdinalPosition())));
                   // log columns count and any missing columns.
                   if (finalSourceColDefMap != null) {
                     logColumnsDetail(csvTable, sourceTableDef, csvTableCols);
@@ -114,26 +120,49 @@ public class GenerateStateCommand {
                     removeColumnName(csvTable, csvTableCols, columnNameRemove);
                   }
 
-                  /* In case snowflake table does not exist in source schema, existing snowflake dataType and empty primary key is stored in state file.
-                   * In case some columns are missing from source schema, existing snowflake dataType is stored in state file.*/
+                  /* In case snowflake table does not exist in source schema, existing snowflake dataType, precision, scale and empty primary key is stored in state file.
+                   * In case some columns are missing from source schema, existing snowflake dataType, precision, scale is stored in state file.
+                   * Else values are picked from source schema file.*/
                   List<ColumnDefinition> d =
                       csvTableCols.stream()
                           .map(
-                              csvCol ->
-                                  new ColumnDefinition(
-                                      csvCol.getColumnName(),
-                                      csvCol.getColumnName(),
-                                      finalSourceColDefMap != null
-                                          ? finalSourceColDefMap.get(csvCol.getColumnName()) == null
-                                              ? csvCol.getDataType()
-                                              : finalSourceColDefMap
-                                                  .get(csvCol.getColumnName())
-                                                  .getDataType()
-                                          : csvCol.getDataType(),
-                                      csvCol.getComment(),
-                                      Integer.parseInt(csvCol.getPrecision()),
-                                      Integer.parseInt(csvCol.getScale()),
-                                      csvCol.getIsNullable().equals("YES")))
+                              csvCol -> {
+                                String dataType =
+                                    finalSourceColDefMap != null
+                                        ? finalSourceColDefMap.get(csvCol.getColumnName()) == null
+                                            ? csvCol.getDataType()
+                                            : finalSourceColDefMap
+                                                .get(csvCol.getColumnName())
+                                                .getDataType()
+                                        : csvCol.getDataType();
+
+                                Integer precision =
+                                    finalSourceColDefMap != null
+                                        ? finalSourceColDefMap.get(csvCol.getColumnName()) == null
+                                            ? Integer.parseInt(csvCol.getPrecision())
+                                            : finalSourceColDefMap
+                                                .get(csvCol.getColumnName())
+                                                .getPrecision()
+                                        : Integer.parseInt(csvCol.getPrecision());
+
+                                Integer scale =
+                                    finalSourceColDefMap != null
+                                        ? finalSourceColDefMap.get(csvCol.getColumnName()) == null
+                                            ? Integer.parseInt(csvCol.getScale())
+                                            : finalSourceColDefMap
+                                                .get(csvCol.getColumnName())
+                                                .getScale()
+                                        : Integer.parseInt(csvCol.getScale());
+
+                                return new ColumnDefinition(
+                                    csvCol.getColumnName(),
+                                    csvCol.getColumnName(),
+                                    dataType,
+                                    csvCol.getComment(),
+                                    precision,
+                                    scale,
+                                    csvCol.getIsNullable().equals("YES"));
+                              })
                           .collect(Collectors.toList());
 
                   return new SnowflakeTable(
