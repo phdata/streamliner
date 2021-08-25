@@ -167,4 +167,20 @@ public class ScriptCommandTest {
     ScriptCommand.build("src/test/resources/configDiff/noSchemaChanges/currConfig.yml", configDiff, typeMapping, templateDirectory, outputDir);
   }
 
+  @Test
+  public void testScriptCommandForSchemaEvolution_table_deleted() {
+    expectedEx.expect(RuntimeException.class);
+    expectedEx.expectMessage("require investigation");
+    Configuration prevConfig =
+            StreamlinerUtil.readYamlFile("src/test/resources/configDiff/deleteTable/prevConfig.yml");
+    Configuration currConfig =
+            StreamlinerUtil.readYamlFile("src/test/resources/configDiff/deleteTable/currConfig.yml");
+    ConfigurationDiff diff = DiffGenerator.createConfigDiff(prevConfig, currConfig);
+    StreamlinerUtil.writeConfigToYaml(diff, outputFile);
+
+    outputDir =
+            String.format("%s/%s", outputDir, "testScriptCommandForSchemaEvolution_table_deleted");
+    StreamlinerUtil.createDir(outputDir);
+    ScriptCommand.build("src/test/resources/configDiff/deleteTable/currConfig.yml", configDiff, typeMapping, templateDirectory, outputDir);
+  }
 }
