@@ -19,6 +19,7 @@ import lombok.ToString;
 @Getter
 @Setter
 public class Source {
+    /* after jackson de-serialization type will be null. In case if type value is needed, add visible = true at line 13 */
     private String type;
 
     public Source() {

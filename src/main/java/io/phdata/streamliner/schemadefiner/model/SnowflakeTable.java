@@ -8,7 +8,6 @@ import lombok.Setter;
 import lombok.ToString;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -18,7 +17,7 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 public class SnowflakeTable extends TableDefinition {
-  private String type = "Snowflake";
+  private String type;
   public String sourceName;
   public String destinationName;
   public String comment = "";

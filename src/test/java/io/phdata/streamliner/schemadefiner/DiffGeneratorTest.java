@@ -81,6 +81,7 @@ public class DiffGeneratorTest {
     assertEquals(1, configDiff.getTableDiffs().size());
 
     TableDiff tableDiff = configDiff.getTableDiffs().get(0);
+    assertEquals("Snowflake", tableDiff.getType());
     assertEquals("Employee", tableDiff.getDestinationName());
     assertTrue(tableDiff.isExistsInDestination());
     assertTrue(tableDiff.isExistsInSource());
@@ -114,6 +115,7 @@ public class DiffGeneratorTest {
     assertEquals(1, configDiff.getTableDiffs().size());
 
     TableDiff tableDiff = configDiff.getTableDiffs().get(0);
+    assertEquals("Snowflake", tableDiff.getType());
     assertEquals("Employee", tableDiff.getDestinationName());
     assertTrue(tableDiff.isExistsInDestination());
     assertTrue(tableDiff.isExistsInSource());
@@ -151,6 +153,7 @@ public class DiffGeneratorTest {
     assertEquals(1, configDiff.getTableDiffs().size());
 
     TableDiff tableDiff = configDiff.getTableDiffs().get(0);
+    assertEquals("Snowflake", tableDiff.getType());
     assertEquals("Employee", tableDiff.getDestinationName());
     assertTrue(tableDiff.isExistsInDestination());
     assertTrue(tableDiff.isExistsInSource());
@@ -184,6 +187,7 @@ public class DiffGeneratorTest {
     assertEquals(1, configDiff.getTableDiffs().size());
 
     TableDiff tableDiff = configDiff.getTableDiffs().get(0);
+    assertEquals("Snowflake", tableDiff.getType());
     assertEquals("Employee", tableDiff.getDestinationName());
     assertTrue(tableDiff.isExistsInDestination());
     assertTrue(tableDiff.isExistsInSource());
@@ -255,6 +259,7 @@ public class DiffGeneratorTest {
     assertEquals(1, configDiff.getTableDiffs().size());
 
     TableDiff tableDiff = configDiff.getTableDiffs().get(0);
+    assertEquals("Snowflake", tableDiff.getType());
     assertEquals("Department", tableDiff.getDestinationName());
     assertTrue(tableDiff.isExistsInDestination());
     assertFalse(tableDiff.isExistsInSource());
@@ -289,6 +294,7 @@ public class DiffGeneratorTest {
     assertEquals(1, configDiff.getTableDiffs().size());
 
     TableDiff tableDiff = configDiff.getTableDiffs().get(0);
+    assertEquals("Snowflake", tableDiff.getType());
     assertEquals("Department", tableDiff.getDestinationName());
     assertFalse(tableDiff.isExistsInDestination());
     assertTrue(tableDiff.isExistsInSource());

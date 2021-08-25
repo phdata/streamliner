@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.PROPERTY,
-        property = "type")
+        property = "type", visible = true)
 @JsonSubTypes({
         @JsonSubTypes.Type(value = HadoopTable.class, name = "Hadoop"),
         @JsonSubTypes.Type(value = SnowflakeTable.class, name = "Snowflake") })

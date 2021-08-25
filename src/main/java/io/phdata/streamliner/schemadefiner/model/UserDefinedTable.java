@@ -21,7 +21,7 @@ import java.util.List;
 @Getter
 @Setter
 public class UserDefinedTable {
-
+    /* after jackson de-serialization type will be null. In case if type value is needed, add visible = true at line 15 */
     private String type;
     private String name;
     private List<String> primaryKeys;
