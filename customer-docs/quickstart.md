@@ -191,10 +191,10 @@ GRANT ALL ON INTEGRATION STREAMLINER_QUICKSTART_1 TO ROLE sysadmin;
 
 ## Download
 
-Find the [latest version](https://repository.phdata.io/artifactory/list/binary/phdata/streamliner/) and then download:
+Find the [latest version](https://repo.phdata.io/public/streamliner/raw/) and then download:
 
 ```shell
-curl -O https://repository.phdata.io/artifactory/list/binary/phdata/streamliner/streamliner-<VERSION>.zip
+curl -O https://repo.phdata.io/public/streamliner/raw/versions/<VERSION>/streamliner-<VERSION>.zip
 ```
 
 and unzip:
@@ -272,14 +272,13 @@ The command below requires the file `password` be populated with the database pa
 another editor and populate it with the password for the database. _When the command is run, the value passed into `--database-password` is actually reading the contents of the `password` file as input for the argument._
 
 ```shell script
-mkdir -p output/STREAMLINER_QUICKSTART_1
-./bin/streamliner schema --config conf/private-ingest-configuration.yml --output-path output/STREAMLINER_QUICKSTART_1/ --database-password "`<password`"
+./bin/streamliner schema --config conf/private-ingest-configuration.yml --output-file output/STREAMLINER_QUICKSTART_1/conf/streamliner-configuration.yml --database-password <password>
 ```
 
 ## Generate Scripts
 
 ```shell script
-./bin/streamliner scripts --config output/STREAMLINER_QUICKSTART_1/conf/streamliner-configuration.yml --template-directory templates/snowflake --type-mapping conf/type-mapping.yml
+./bin/streamliner scripts --config output/STREAMLINER_QUICKSTART_1/conf/streamliner-configuration.yml --template-directory templates/snowflake --type-mapping conf/type-mapping.yml --output-path output/STREAMLINER_QUICKSTART_1/SANDBOX/scripts
 ```
 
 ## Run Scripts
