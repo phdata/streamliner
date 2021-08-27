@@ -107,8 +107,8 @@ Note : Before executing above command make sure output-file, previous-output-fil
 Output of step 1 streamliner-configuration1.yml is passed as previous-output-file in this command to calculate difference.
 
 Output of this command is : 
-   1. streamliner-configuration2.yml: This contains tables and columns details of oracle schema. This will also have details of new table t4 and column c3 in table t1.
-   2. streamliner-configDiff.yml: This contains details of difference between oracle schema. In this case this will have table t4 and column c3 in table t1 details.
+   * streamliner-configuration2.yml: This contains tables and columns details of oracle schema. This will also have details of new table t4 and column c3 in table t1.
+   * streamliner-configDiff.yml: This contains details of difference between oracle schema. In this case this will have table t4 and column c3 in table t1 details.
 
 4. Scripts command to generate evolve schema scripts. 
 
@@ -169,3 +169,11 @@ CSV is complicated as Snowflake uses ordinal position to identify column. Howeve
 2. Re-define the PIPE object to remove the use of the deleted column
 
 If data has been loaded without the column, then the ordering is wrong and corrupt data has been loaded. The table should be reloaded.
+
+### Column Extension
+
+#### Both CSV and Parquet
+
+Currently Streamliner supports column extension having data type equivalent to [Snowflake String data type](https://docs.snowflake.com/en/sql-reference/data-types-text.html) only.
+
+For example: Oracle varchar2 data type is equivalent to Snowflake varchar data type. 
