@@ -1,6 +1,7 @@
 package io.phdata.streamliner.schemadefiner.model;
 
 import io.phdata.streamliner.schemadefiner.util.StreamlinerUtil;
+import io.phdata.streamliner.schemadefiner.util.TemplateUtil;
 import io.phdata.streamliner.util.JavaHelper;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -162,7 +163,7 @@ public class TableDiff {
                         StreamlinerUtil.quoteIdentifierIfNeeded(
                             column.getCurrentColumnDef().getDestinationName()),
                         column.getCurrentColumnDef().mapDataTypeSnowflake(javaTypeMap),
-                        column.getCurrentColumnDef().getComment()))
+                        TemplateUtil.snowflakeEscape(column.getCurrentColumnDef().getComment())))
             .collect(Collectors.toList());
     return StringUtils.join(list, ",\n");
   }
@@ -190,7 +191,7 @@ public class TableDiff {
                 alterColumnDDL.add(
                     String.format(
                         "COLUMN %s COMMENT '%s'",
-                        currDef.getDestinationName(), currDef.getComment()));
+                        currDef.getDestinationName(), TemplateUtil.snowflakeEscape(currDef.getComment())));
               }
               if (!isColumnNullableSame(currDef, prevDef)) {
                 if (currDef.isNullable() == true) {
