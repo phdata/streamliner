@@ -407,8 +407,6 @@ public class StreamlinerUtil {
     return str;
   }
 
-
-
     public static Seq<?> convertJavaListToScalaSeq(List<?> inputList) {
         return JavaConverters.asScalaIteratorConverter(inputList.iterator()).asScala().toSeq();
     }
