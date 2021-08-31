@@ -10,36 +10,31 @@ import org.slf4j.LoggerFactory;
 import schemacrawler.crawl.StreamlinerCatalog;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SchemaCommand {
     private static final Logger log = LoggerFactory.getLogger(SchemaCommand.class);
-
-    public static void build(String configurationFile, String outputFile, String password, boolean createDocs, String previousOutputFile, String diffOutputFile){
+    // --config is ingest-configuration.yml
+    public static void build(String config, String stateDirectory, String password, boolean createDocs, String previousStateDirectory){
         log.debug(
-                "config: {}, output-file: {}, previous-output-file: {}, diff-output-file: {}, create-docs: {}",
-                configurationFile,
-                outputFile,
-                previousOutputFile,
-                diffOutputFile,
+                "--config: {}, --state-directory: {}, --previous-state-directory: {}, create-docs: {}",
+                config,
+                stateDirectory,
+                previousStateDirectory,
                 createDocs);
-        if ((previousOutputFile == null && diffOutputFile != null)
-                || previousOutputFile != null && diffOutputFile == null) {
-            log.error("Either previous-output-file or diff-output-file is not provided.");
-            throw new RuntimeException("Either previous-output-file or diff-output-file is not provided.");
-        }
+
         Boolean generateConfigDiff = false;
     // first checking all the required conditions. Otherwise after executing half of the process if
     // later it throws some error due to improper params then again it will consume time
-        isFile(outputFile, "--output-file");
-        if (previousOutputFile != null && diffOutputFile != null) {
-          isFile(previousOutputFile, "--previous-output-file");
-          isFile(diffOutputFile, "--diff-output-file");
+        validateStateDirectory(stateDirectory);
+        if (previousStateDirectory != null) {
+            validatePreviousStateDirectory(previousStateDirectory);
           generateConfigDiff = true;
         }
         log.info("Starting Schema Crawling......");
         // read ingest-configuration.yml
-        Configuration ingestConfig = StreamlinerUtil.readYamlFile(configurationFile);
+        Configuration ingestConfig = StreamlinerUtil.readYamlFile(config);
         isConfigurationValid(ingestConfig);
         Configuration outputConfig = null;
         if (ingestConfig.getSource() instanceof Jdbc) {
@@ -47,7 +42,7 @@ public class SchemaCommand {
                 throw new RuntimeException("A databasePassword is required when crawling JDBC sources");
             }
             if(createDocs){
-                writeDocs(ingestConfig, password, outputFile);
+                writeDocs(ingestConfig, password, stateDirectory);
             }
             SchemaDefiner schemaDef = new JdbcCrawler((Jdbc) ingestConfig.getSource(), password);
             StreamlinerCatalog catalog = schemaDef.retrieveSchema();
@@ -62,19 +57,64 @@ public class SchemaCommand {
             throw new RuntimeException(String.format("Unknown Source provided: %s", ingestConfig.getSource().getType()));
         }
         checkConfiguration(outputConfig);
-        StreamlinerUtil.writeConfigToYaml(outputConfig, StreamlinerUtil.getOutputDirectory(outputFile) ,outputFile);
-        log.info("Schema crawl is successful and configuration file is written to : {}", outputFile);
+        outputConfig.getTables().forEach(table -> {
+            List<TableDefinition> tableList = new ArrayList<>();
+            tableList.add(table);
+            Configuration conf = new Configuration(tableList);
+            StreamlinerUtil.writeYamlFile(conf, String.format("%s/%s.yml", stateDirectory,table.getSourceName()));
+        });
+
+        log.info("Schema crawl is successful and configuration file per table is written to directory : {}", stateDirectory);
 
         if (generateConfigDiff) {
             log.info("Calculating configuration differences....");
-            log.debug(
-                    "previous-output-file: {},  current config: {}, diff-output-file: {} ",
-                    previousOutputFile,
-                    outputFile,
-                    diffOutputFile);
-            SchemaEvolution.build(previousOutputFile, outputFile, diffOutputFile);
+            Configuration currentConfig = StreamlinerUtil.createConfig(stateDirectory, ingestConfig, "--state-directory");
+            Configuration previousConfig = StreamlinerUtil.createConfig(previousStateDirectory, ingestConfig, "--previous-state-directory");
+            log.debug("--state-directory: {}, --previous-state-directory: {}", stateDirectory, previousStateDirectory);
+            SchemaEvolution.build(previousConfig, currentConfig, String.format("%s/%s", stateDirectory,Constants.STREAMLINER_DIFF_FILE.value()));
         }
     }
+
+    private static void validatePreviousStateDirectory(String previousStateDirectory) {
+    File f = new File(previousStateDirectory);
+    if (f.exists()) {
+      if (f.isFile()) {
+        throw new RuntimeException(
+            String.format(
+                "Arg: %s. Expected directory. Found file: %s",
+                "--previous-state-directory",
+                previousStateDirectory));
+      }
+    } else {
+      throw new RuntimeException(
+          String.format("--previous-state-directory not found. Path: %s", previousStateDirectory));
+    }
+  }
+
+  private static void validateStateDirectory(String stateDirectory) {
+    /* --state-directory should be a directory.
+    During every run existing state-directory folder is deleted and new folder is created to ensure streamliner do not stores any unwanted table config file.
+    * */
+    File f = new File(stateDirectory);
+    if (f.exists()) {
+      if (f.isFile()) {
+        throw new RuntimeException(
+            String.format(
+                "Arg: %s. Expected directory. Found file: %s",
+                "--state-directory",
+                stateDirectory));
+      } else {
+        StreamlinerUtil.deleteDirectory(f);
+        log.info("Deleted old --state-directory.");
+        StreamlinerUtil.createDir(stateDirectory);
+        log.info("--state-directory folder created. Path: {}", stateDirectory);
+      }
+    } else {
+      log.info("--state-directory does not exists.");
+      StreamlinerUtil.createDir(stateDirectory);
+      log.info("--state-directory folder created. Path: {}", stateDirectory);
+    }
+  }
 
     private static void isConfigurationValid(Configuration ingestConfig) {
         if(ingestConfig == null){
@@ -140,31 +180,10 @@ public class SchemaCommand {
     }
   }
 
-    private static void writeDocs(Configuration ingestConfig, String password, String outputFile){
-        // finding the directory
-        String outputDir = StreamlinerUtil.getOutputDirectory(outputFile);
-        outputDir =  String.format("%s/docs", outputDir);
-
+    private static void writeDocs(Configuration ingestConfig, String password, String stateDirectory){
+        String outputDir =  String.format("%s/docs", stateDirectory);
         Jdbc jdbc = (Jdbc) ingestConfig.getSource();
         StreamlinerUtil.getErdOutput(jdbc, password, outputDir);
         StreamlinerUtil.getHtmlOutput(jdbc, password, outputDir);
     }
-
-  private static boolean isFile(String outputFile, String param) {
-    File f = new File(outputFile);
-    if (f.exists()) {
-      if (f.isDirectory()) {
-        log.error("{} is a Directory. Expecting a file: {}", param, outputFile);
-        throw new RuntimeException(
-            String.format("Arg: {}. Expected file. Found directory: {}", param, outputFile));
-      } else {
-        return true;
-      }
-    } else {
-      log.info("{} does not exists.", param);
-      StreamlinerUtil.createFile(outputFile);
-      log.debug("{} file created. Path: {}", param, outputFile);
-      return true;
-    }
-  }
 }

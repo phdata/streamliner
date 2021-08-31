@@ -16,10 +16,15 @@ limitations under the License.
 #import(io.phdata.streamliner.schemadefiner.model.Snowflake)
 <%@ val configuration: io.phdata.streamliner.schemadefiner.model.Configuration %>
 <%@ val table: io.phdata.streamliner.schemadefiner.model.SnowflakeTable %>
+<%@ val currConfigFile: String%>
+<%@ val prevStateDir: String%>
 #{
     val destination = configuration.destination.asInstanceOf[Snowflake]
 }#
 snowsql-cmd=${destination.snowSqlCommand} -f
+
+currTableStateFile=${currConfigFile}
+previousStateDirectory=${prevStateDir}
 
 copy-into: copy-into.sql
     $(snowsql-cmd) copy-into.sql
@@ -54,6 +59,7 @@ first-run:
     $(MAKE) create-table
     $(MAKE) copy-into
     $(MAKE) create-snowpipe
+	mv $(currTableStateFile) $(previousStateDirectory)
 
 drop:
     $(MAKE) drop-table

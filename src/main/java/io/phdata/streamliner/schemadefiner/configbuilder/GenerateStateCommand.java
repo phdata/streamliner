@@ -6,6 +6,7 @@ import io.phdata.streamliner.schemadefiner.util.StreamlinerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.*;
@@ -23,11 +24,12 @@ public class GenerateStateCommand {
       String columnExclude,
       String tableNameRemove,
       String columnNameRemove,
-      String outputPath,
-      String sourceSystemFile,
+      String outputDir,
+      String sourceSystemStateDirectory,
       String tableCsvPath,
       String columnCsvPath) {
-
+    validateOutputDirectory(outputDir);
+    validateSourceStateDirectory(sourceSystemStateDirectory);
     List<CSVTables> csvTables;
     List<CSVColumns> csvColumns;
     try {
@@ -46,7 +48,8 @@ public class GenerateStateCommand {
       throw new RuntimeException("File not found.", e);
     }
 
-    Configuration sourceSchemaFile = StreamlinerUtil.readConfigFromPath(sourceSystemFile);
+    Configuration sourceSchemaFile =
+        StreamlinerUtil.createConfig(sourceSystemStateDirectory, null, "--source-state-directory");
     // log table count and any missing tables.
     logTablesDetail(csvTables, sourceSchemaFile.getTables());
 
@@ -177,22 +180,59 @@ public class GenerateStateCommand {
                       d);
                 })
             .collect(Collectors.toList());
-    Configuration config =
-        new Configuration(
-            sourceSchemaFile.getName(),
-            sourceSchemaFile.getEnvironment(),
-            sourceSchemaFile.getPipeline(),
-            sourceSchemaFile.getSource(),
-            sourceSchemaFile.getDestination(),
-            tableDef);
-    StreamlinerUtil.writeConfigToYaml(
-        config, StreamlinerUtil.getOutputDirectory(outputPath), outputPath);
+
+    tableDef.forEach(table -> {
+      List<TableDefinition> tableList = new ArrayList<>();
+      tableList.add(table);
+      Configuration conf = new Configuration(tableList);
+      StreamlinerUtil.writeYamlFile(conf, String.format("%s/%s.yml", outputDir,table.getSourceName()));
+    });
 
     if (context.hasErrors()) {
       List<String> errors = context.getErrors();
       String msg = String.format("There are %d errors which require investigation.", errors.size());
       errors.forEach(log::error);
       log.warn(msg);
+    }
+  }
+
+  private static void validateSourceStateDirectory(String sourceSystemStateDirectory) {
+    File f = new File(sourceSystemStateDirectory);
+    if (f.exists()) {
+      if (f.isFile()) {
+        throw new RuntimeException(
+            String.format(
+                "Arg: %s. Expected directory. Found file: %s",
+                "source-state-directory", sourceSystemStateDirectory));
+      }
+    } else {
+      throw new RuntimeException(
+          String.format(
+              "%s does not exists. Path: %s",
+              "source-state-directory", sourceSystemStateDirectory));
+    }
+  }
+
+  private static void validateOutputDirectory(String outputDir) {
+    /* --output-path should be a directory.
+    During every run existing output-path folder is deleted and new folder is created to ensure streamliner do not stores any unwanted table config file.
+    * */
+    File f = new File(outputDir);
+    if (f.exists()) {
+      if (f.isFile()) {
+        throw new RuntimeException(
+            String.format(
+                "Arg: %s. Expected directory. Found file: %s", "output-path", outputDir));
+      } else {
+        StreamlinerUtil.deleteDirectory(f);
+        log.info("Deleted old --output-path.");
+        StreamlinerUtil.createDir(outputDir);
+        log.info("--output-path folder created. Path: {}", outputDir);
+      }
+    } else {
+      log.info("--output-path does not exists.");
+      StreamlinerUtil.createDir(outputDir);
+      log.info("--output-path folder created. Path: {}", outputDir);
     }
   }
 

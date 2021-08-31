@@ -1,0 +1,11 @@
+#import(io.phdata.streamliner.schemadefiner.model.Snowflake)
+<%@ val configuration: io.phdata.streamliner.schemadefiner.model.Configuration %>
+<%@ val table: io.phdata.streamliner.schemadefiner.model.SnowflakeTable %>
+<%@ val tableDiff: io.phdata.streamliner.schemadefiner.model.TableDiff %>
+<%@ val typeMapping: Map[String, Map[String, String]]%>
+<%@ val templateContext: io.phdata.streamliner.schemadefiner.model.TemplateContext %>
+#{
+    val destination = configuration.destination.asInstanceOf[Snowflake]
+}#
+
+SELECT 'INCOMPATIBLE CHANGES in ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName}';

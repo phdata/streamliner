@@ -15,41 +15,65 @@ import java.util.stream.Collectors;
 public class ScriptCommand {
   private static final Logger log = LoggerFactory.getLogger(ScriptCommand.class);
 
+    // config is ingest-configuration.yml
   public static void build(
-      String configurationFile,
-      String configurationDiffFile,
+      String config,
+      String stateDirectory,
+      String previousStateDirectory,
       String typeMappingFile,
       String templateDirectory,
       String outputDirectory) {
 
-    Configuration configuration = StreamlinerUtil.readConfigFromPath(configurationFile);
-    ConfigurationDiff configDiff = StreamlinerUtil.readConfigDiffFromPath(configurationDiffFile);
+    Configuration ingestConfig = StreamlinerUtil.readConfigFromPath(config);
+    if(ingestConfig == null){
+        throw new RuntimeException("--config file(example: private-ingest-configuration.yml ) can not be empty or config file path is null.");
+    }
+    Configuration configuration = StreamlinerUtil.createConfig(stateDirectory, ingestConfig, "--state-directory");
+    ConfigurationDiff configDiff = StreamlinerUtil.readConfigDiffFromPath(String.format("%s/%s", stateDirectory, Constants.STREAMLINER_DIFF_FILE.value()));
     if (configuration == null && configDiff == null) {
-      throw new RuntimeException(
-          "No configuration file found (example: streamliner-configuration.yml or streamliner-configuration-diff.yml) ");
+      throw new RuntimeException("--state-directory has no table config and streamliner-diff.yml not found.");
     }
     if (configuration == null) {
-      log.error("--config is mandatory");
-      throw new RuntimeException(
-          "--config is mandatory. Either no configuration file found (example: streamliner-configuration.yml) or file is empty. ");
+      throw new RuntimeException("--state-directory must have atleast one table config.");
     }
+    // --previous-state-directory is mandatory for every run. After every successful run, table config is moved from state-directory to previous-state-directory.
+    validatePreviousStateDirectory(previousStateDirectory);
+
     Map<String, Map<String, String>> typeMapping =
         StreamlinerUtil.readTypeMappingFile(typeMappingFile);
     if (outputDirectory == null || outputDirectory.equals("")) {
       outputDirectory =
           String.format(
               "output/%s/%s/scripts", configuration.getName(), configuration.getEnvironment());
+      log.info("Invalid --output-directory provided. Scripts will be saved at path: {}", outputDirectory);
     }
-    build(configuration, configDiff, typeMapping, templateDirectory, outputDirectory);
+    build(configuration, configDiff, typeMapping, templateDirectory, outputDirectory, stateDirectory, previousStateDirectory);
   }
 
-  private static void build(
+  private static void validatePreviousStateDirectory(String previousStateDirectory) {
+    if (previousStateDirectory == null || previousStateDirectory.equals("")) {
+      throw new RuntimeException("--previous-state-directory path can not be null or empty.");
+    }
+    File f = new File(previousStateDirectory);
+    if (!f.exists()) {
+      log.info("--previous-state-directory does not exists.");
+      StreamlinerUtil.createDir(previousStateDirectory);
+      log.info("--previous-state-directory folder created. Path: {}", previousStateDirectory);
+    }
+  }
+
+    private static void build(
       Configuration configuration,
       ConfigurationDiff configDiff,
       Map<String, Map<String, String>> typeMapping,
       String templateDirectory,
-      String outputDirectory) {
-    String pipeline = configDiff != null ? configDiff.getPipeline() : configuration.getPipeline();
+      String outputDirectory, String stateDirectory, String previousStateDirectory) {
+    String pipeline =
+        configDiff != null
+            ? (configDiff.getPipeline() == null
+                ? configuration.getPipeline()
+                : configDiff.getPipeline())
+            : configuration.getPipeline();
     List<File> files =
         StreamlinerUtil.listFilesInDir(String.format("%s/%s", templateDirectory, pipeline));
     List<File> templateFiles =
@@ -59,11 +83,10 @@ public class ScriptCommand {
 
     // if configDiff is found then evolve schema scripts are generated.
     if (configDiff != null) {
-      log.info(
-          "Configuration Difference (example: streamliner-configuration-diff.yml) file found.");
+      log.info("streamliner-diff.yml file found.");
       if (configDiff.getTableDiffs() == null) {
         throw new RuntimeException(
-            "TableDiff section is not found. Check the configuration difference (example: streamliner-configuration-diff.yml) file");
+            "TableDiff section is not found. Check the streamliner-diff.yml file in state-directory");
       }
       TemplateContext templateContext = new TemplateContext();
       List<TableDiff> tablesNotInSource =
@@ -74,10 +97,12 @@ public class ScriptCommand {
           table ->
               templateContext.addError(
                   String.format(
-                      "Table %s.%s.%s does not exists in source schema. Currently Streamliner doesn't support table delete.",
+                      "Table %s.%s.%s does not exists in source schema. Currently Streamliner doesn't support table delete. User should delete the table manually from snowflake and config %s.yml from --previous-state-directory: %s",
                       ((Snowflake) configuration.getDestination()).getStagingDatabase().getName(),
                       ((Snowflake) configuration.getDestination()).getStagingDatabase().getSchema(),
-                      table.getDestinationName())));
+                      table.getDestinationName(),
+                      table.getDestinationName(),
+                      previousStateDirectory)));
 
       List<TableDiff> tablesInSource =
           configDiff.getTableDiffs().stream()
@@ -103,6 +128,11 @@ public class ScriptCommand {
                           map.put("typeMapping", typeMapping);
                           map.put("templateContext", templateContext);
                           map.put("util", new StreamlinerUtil());
+                          map.put(
+                              "currConfigFile",
+                              String.format(
+                                  "%s/%s.yml", getAbsolutePath(stateDirectory), tableDiff.getDestinationName()));
+                          map.put("prevStateDir", getAbsolutePath(previousStateDirectory));
                           String rendered = JavaHelper.getLayout(templateFile.getPath(), map);
                           String replaced = rendered.replace("    ", "\t");
                           log.debug(replaced);
@@ -151,6 +181,11 @@ public class ScriptCommand {
                           map.put("typeMapping", typeMapping);
                           map.put("templateContext", templateContext);
                           map.put("util", new StreamlinerUtil());
+                          map.put(
+                              "currConfigFile",
+                              String.format(
+                                  "%s/%s.yml", getAbsolutePath(stateDirectory), table.getSourceName()));
+                          map.put("prevStateDir", getAbsolutePath(previousStateDirectory));
                           String rendered = JavaHelper.getLayout(templateFile.getPath(), map);
 
                           String replaced = rendered.replace("    ", "\t");
@@ -254,5 +289,9 @@ public class ScriptCommand {
           StreamlinerUtil.writeFile(rendered, fileName);
           StreamlinerUtil.isExecutable(fileName);
         });
+  }
+  private static String getAbsolutePath(String path){
+      File f = new File(path);
+      return f.getAbsolutePath();
   }
 }

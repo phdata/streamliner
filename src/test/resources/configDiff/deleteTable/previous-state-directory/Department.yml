@@ -1,0 +1,17 @@
+tables:
+  - type: "Snowflake"
+    sourceName: "Department"
+    destinationName: "Department"
+    comment: ""
+    primaryKeys:
+      - "DEPT_ID"
+    fileFormat:
+      location: "VIRTUAL_COLUMNS"
+      fileType: "PARQUET"
+    columns:
+      - sourceName: "DEPT_ID"
+        destinationName: "DEPT_ID"
+        dataType: "NUMBER"
+        comment: ""
+        precision: 38
+        scale: 0

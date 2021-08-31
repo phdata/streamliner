@@ -24,25 +24,20 @@ class Cli(args: Seq[String]) extends ScallopConf(args) {
 
   val schema = new Subcommand("schema") {
 
-    val filePath: ScallopOption[String] =
+    val config: ScallopOption[String] =
       opt[String]("config", descr = "Path to ingest configuration", required = true)
 
-    val outputFile: ScallopOption[String] = opt[String](
-      "output-file",
-      descr = "File name with path where Streamliner configuration should be written to",
+    val stateDirectory: ScallopOption[String] = opt[String](
+      "state-directory",
+      descr =
+        "Current run table config directory where Streamliner configuration per table will be written.",
       required = true)
 
-    val previousOutputFile: ScallopOption[String] = opt[String](
-      "previous-output-file",
-      descr = "Previous run file name with path where Streamliner configuration is written to",
+    val previousStateDirectory: ScallopOption[String] = opt[String](
+      "previous-state-directory",
+      descr =
+        "Previous run table config directory where Streamliner configuration per table is written to",
       required = false)
-
-    val diffOutputFile: ScallopOption[String] =
-      opt[String](
-        "diff-output-file",
-        descr =
-          "File name with path where Streamliner configuration difference should be  written to",
-        required = false)
 
     val databasePassword: ScallopOption[String] = opt[String](
       "database-password",
@@ -60,19 +55,25 @@ class Cli(args: Seq[String]) extends ScallopConf(args) {
 
   val produceScripts = new Subcommand("scripts") {
 
-    val filePath: ScallopOption[String] =
-      opt[String]("config", descr = "Path to streamliner configuration", required = true)
+    val config: ScallopOption[String] =
+      opt[String]("config", descr = "Path to ingest configuration", required = true)
 
-    val configDiffFilePath: ScallopOption[String] =
-      opt[String](
-        "config-diff",
-        descr = "Path to streamliner configuration difference",
-        required = false)
+    val stateDirectory: ScallopOption[String] = opt[String](
+      "state-directory",
+      descr =
+        "Current run table config directory where Streamliner configuration per table will be written.",
+      required = true)
+
+    val previousStateDirectory: ScallopOption[String] = opt[String](
+      "previous-state-directory",
+      descr =
+        "Previous run table config directory where Streamliner configuration per table is written to",
+      required = true)
 
     val outputPath: ScallopOption[String] = opt[String](
       "output-path",
       descr = "Directory path where scripts should be written to",
-      required = false)
+      required = true)
 
     val typeMappingFile: ScallopOption[String] =
       opt[String]("type-mapping", descr = "Path to data type mapping file", required = true)
@@ -109,11 +110,14 @@ class Cli(args: Seq[String]) extends ScallopConf(args) {
       required = false)
 
     val outputPath: ScallopOption[String] =
-      opt[String]("output-path", descr = "Path to save the generated state file.", required = true)
+      opt[String](
+        "output-path",
+        descr = "Directory to save the generated state file per table.",
+        required = true)
 
-    val sourceSystemFile: ScallopOption[String] = opt[String](
-      "source-schema-file",
-      descr = "Source schema config file generated through streamliner.",
+    val sourceStateDirectory: ScallopOption[String] = opt[String](
+      "source-state-directory",
+      descr = "Source schema state directory generated through streamliner.",
       required = true)
 
     val tableCsvPath: ScallopOption[String] =

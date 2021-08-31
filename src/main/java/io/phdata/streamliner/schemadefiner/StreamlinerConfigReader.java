@@ -6,7 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import schemacrawler.crawl.SchemaDefinerHelper;
 import schemacrawler.crawl.StreamlinerCatalog;
-
+/* @deprecated use of StreamlinerConfigreader should be avoided. It was implemented to read config file generated after schema command.
+ * But now since we are generating config file per table it does not have Source detail which is needed for  StreamlinerConfigReader */
+@Deprecated
 public class StreamlinerConfigReader  implements SchemaDefiner{
     private static final Logger log = LoggerFactory.getLogger(StreamlinerConfigReader.class);
     private String configFilePath;

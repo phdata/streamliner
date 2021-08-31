@@ -1,0 +1,26 @@
+#import(io.phdata.streamliner.schemadefiner.model.Snowflake)
+<%@ val configurationDiff: io.phdata.streamliner.schemadefiner.model.ConfigurationDiff %>
+<%@ val tableDiff: io.phdata.streamliner.schemadefiner.model.TableDiff %>
+<%@ val templateContext: io.phdata.streamliner.schemadefiner.model.TemplateContext %>
+<%@ val util: io.phdata.streamliner.schemadefiner.util.StreamlinerUtil%>
+<%@ val configuration: io.phdata.streamliner.schemadefiner.model.Configuration %>
+<%@ val typeMapping: Map[String, Map[String, String]]%>
+#{
+    val destination = configuration.destination.asInstanceOf[Snowflake]
+}#
+
+#if (tableDiff.existsInDestination && tableDiff.existsInSource)
+    #if (tableDiff.allChangesAreCompatible(typeMapping))
+        #if (tableDiff.isColumnAdded())
+            ALTER TABLE ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${tableDiff.destinationName} ADD COLUMN ${unescape(tableDiff.columnDDL(typeMapping))};
+        #end
+        #if (tableDiff.isColumnModified(typeMapping))
+            ALTER TABLE ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${tableDiff.destinationName} ALTER (${unescape(tableDiff.alterColumnDDL(typeMapping))});
+        #end
+        
+    #elseif (!tableDiff.allChangesAreCompatible(typeMapping))
+        <%
+            templateContext.addError(s"Incompatible change in table ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${tableDiff.destinationName}. User should resolve this incompatible change manually as per the documentation.. Template: create-table-evolve-schema.ssp")
+        %>
+    #end
+#end

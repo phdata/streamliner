@@ -3,14 +3,18 @@
 <%@ val tableDiff: io.phdata.streamliner.schemadefiner.model.TableDiff %>
 <%@ val typeMapping: Map[String, Map[String, String]]%>
 <%@ val templateContext: io.phdata.streamliner.schemadefiner.model.TemplateContext %>
-
+<%@ val currConfigFile: String%>
+<%@ val prevStateDir: String%>
 #{
     val destination = configurationDiff.currentDestination.asInstanceOf[Snowflake]
 }#
 snowsql-cmd=${destination.snowSqlCommand} -f
 
-create-table-evolve-schema: create-table-evolve-schema.sql
-    $(snowsql-cmd) create-table-evolve-schema.sql
+currTableStateFile=${currConfigFile}
+previousStateDirectory=${prevStateDir}
+
+alter-table-evolve-schema: alter-table-evolve-schema.sql
+    $(snowsql-cmd) alter-table-evolve-schema.sql
 
 copy-into: copy-into.sql
     $(snowsql-cmd) copy-into.sql
@@ -21,28 +25,32 @@ create-snowpipe: create-snowpipe.sql
 alter-snowpipe: alter-snowpipe.sql
     $(snowsql-cmd) alter-snowpipe.sql
 
-no-change: no-change.sql
-    $(snowsql-cmd) no-change.sql
+incompatible-change: incompatible-change.sql
+    $(snowsql-cmd) incompatible-change.sql
+
+create-table: create-table.sql
+    $(snowsql-cmd) create-table.sql
 
 evolve-schema:
-    $(MAKE) create-table-evolve-schema
-
 #if (tableDiff.existsInDestination && tableDiff.existsInSource)
     #if (!tableDiff.areThereAnyChanges(typeMapping))
-	$(MAKE) no-change
+	$(MAKE) incompatible-change
+    <%
+        templateContext.addError(s"Incompatible change in table ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${tableDiff.destinationName}. User should resolve this incompatible change manually as per the documentation. Template: snowflake-schema-evolution/Makefile.ssp")
+    %>
 
     #elseif (tableDiff.allChangesAreCompatible(typeMapping))
+	$(MAKE) alter-table-evolve-schema
 	$(MAKE) alter-snowpipe
 	$(MAKE) copy-into
+	mv $(currTableStateFile) $(previousStateDirectory)
 
-    #elseif (!tableDiff.allChangesAreCompatible(typeMapping))
-        <%
-            templateContext.addError(s"Incompatible change in table ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${tableDiff.destinationName} which will be ignored. Template: snowflake-schema-evolution/Makefile.ssp")
-        %>
     #end
 #elseif (tableDiff.existsInSource && !tableDiff.existsInDestination)
+	$(MAKE) create-table
 	$(MAKE) create-snowpipe
-	$(MAKE) copy-into
+	$(MAKE) copy-into	
+	mv $(currTableStateFile) $(previousStateDirectory)
 #end
 
 

@@ -3,6 +3,9 @@
 
 snowsql-cmd=snowsql -c connection -f
 
+currTableStateFile=/Users/anishkumar/anishKumar/dev/github/streamliner/src/test/resources/configDiff/addAllColumn/state-directory/Employee.yml
+previousStateDirectory=/Users/anishkumar/anishKumar/dev/github/streamliner/src/test/resources/configDiff/addAllColumn/previous-state-directory
+
 copy-into: copy-into.sql
 	$(snowsql-cmd) copy-into.sql
 
@@ -30,14 +33,14 @@ drop-stage: drop-stage.sql
 drop-table: drop-table.sql
 	$(snowsql-cmd) drop-table.sql
 
-create-table-evolve-schema: create-table-evolve-schema.sql
-	$(snowsql-cmd) create-table-evolve-schema.sql
+alter-table-evolve-schema: alter-table-evolve-schema.sql
+	$(snowsql-cmd) alter-table-evolve-schema.sql
 
 alter-snowpipe: alter-snowpipe.sql
 	$(snowsql-cmd) alter-snowpipe.sql
 
-no-change: no-change.sql
-	$(snowsql-cmd) no-change.sql
+incompatible-change: incompatible-change.sql
+	$(snowsql-cmd) incompatible-change.sql
 
 first-run:
 	$(MAKE) create-schema
@@ -45,11 +48,10 @@ first-run:
 	$(MAKE) create-table
 	$(MAKE) copy-into
 	$(MAKE) create-snowpipe
+	mv $(currTableStateFile) $(previousStateDirectory)
 
 drop:
 	$(MAKE) drop-table
 	$(MAKE) drop-snowpipe
 
 evolve-schema:
-	$(MAKE) create-table-evolve-schema
-

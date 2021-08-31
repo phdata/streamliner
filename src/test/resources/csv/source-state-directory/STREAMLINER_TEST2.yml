@@ -1,0 +1,40 @@
+tables:
+- type: "Snowflake"
+  sourceName: "STREAMLINER_TEST2"
+  destinationName: "STREAMLINER_TEST2"
+  primaryKeys:
+  - "C1"
+  columns:
+  - sourceName: "C1"
+    destinationName: "C1"
+    dataType: "NUMBER"
+    comment: ""
+    precision: 0
+    scale: -127
+    nullable: false
+  - sourceName: "C2"
+    destinationName: "C2"
+    dataType: "VARCHAR2"
+    comment: ""
+    precision: 300
+    scale: 0
+    nullable: true
+  - sourceName: "C4"
+    destinationName: "C4"
+    dataType: "VARCHAR2"
+    comment: ""
+    precision: 40
+    scale: 0
+    nullable: true
+  - sourceName: "C5"
+    destinationName: "C5"
+    dataType: "VARCHAR2"
+    comment: ""
+    precision: 41
+    scale: 0
+    nullable: true
+  comment: ""
+  fileFormat:
+    location: "STREAMLINER_TEST2"
+    fileType: "PARQUET"
+  pkList: "C1"
