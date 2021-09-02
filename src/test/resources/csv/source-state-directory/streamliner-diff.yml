@@ -1,0 +1,105 @@
+name: "STREAMLINERTEST"
+environment: "STREAMLINERTEST"
+pipeline: "snowflake-snowpipe-append"
+previousDestination:
+  type: "Snowflake"
+  snowSqlCommand: "snowsql -c streamliner_quickstart -o exit_on_error=true"
+  storagePath: "s3://phdata-streamliner-demo/"
+  storageIntegration: "STREAMLINER_QUICKSTART_1"
+  snsTopic: "arn:aws:sns:us-east-1:545053092614:streamliner-snowflake-demo"
+  warehouse: "STREAMLINERTEST"
+  taskSchedule: "5 minutes"
+  stagingDatabase:
+    name: "STREAMLINERSTGDB"
+    schema: "STREAMLINERSTG"
+  reportingDatabase:
+    name: "STREAMLINERDB"
+    schema: "STREAMLINER"
+  stageName: "streamliner_external_stage"
+  fileFormat:
+    name: "MY_CSV_FORMAT"
+    options:
+      type: ""
+currentDestination:
+  type: "Snowflake"
+  snowSqlCommand: "snowsql -c streamliner_quickstart -o exit_on_error=true"
+  storagePath: "s3://phdata-streamliner-demo/"
+  storageIntegration: "STREAMLINER_QUICKSTART_1"
+  snsTopic: "arn:aws:sns:us-east-1:545053092614:streamliner-snowflake-demo"
+  warehouse: "STREAMLINERTEST"
+  taskSchedule: "5 minutes"
+  stagingDatabase:
+    name: "STREAMLINERSTGDB"
+    schema: "STREAMLINERSTG"
+  reportingDatabase:
+    name: "STREAMLINERDB"
+    schema: "STREAMLINER"
+  stageName: "streamliner_external_stage"
+  fileFormat:
+    name: "MY_CSV_FORMAT"
+    options:
+      type: ""
+tableDiffs:
+- destinationName: "STREAMLINER_TEST5"
+  existsInDestination: true
+  existsInSource: true
+  columnDiffs:
+  - previousColumnDef:
+      sourceName: "C3"
+      destinationName: "C3"
+      dataType: "VARCHAR2"
+      comment: ""
+      precision: 100
+      scale: 0
+      nullable: false
+    currentColumnDef:
+      sourceName: "C3"
+      destinationName: "C3"
+      dataType: "VARCHAR2"
+      comment: ""
+      precision: 150
+      scale: 0
+      nullable: false
+    isDeleted: false
+    isAdd: false
+    isUpdate: true
+  columnAdded: false
+- type: "Snowflake"
+  destinationName: "STREAMLINER_TEST3"
+  existsInDestination: true
+  existsInSource: false
+  columnDiffs:
+  - previousColumnDef:
+      sourceName: "C1"
+      destinationName: "C1"
+      dataType: "NUMBER"
+      comment: ""
+      precision: 0
+      scale: -127
+      nullable: false
+    isDeleted: true
+    isAdd: false
+    isUpdate: false
+  - previousColumnDef:
+      sourceName: "C2"
+      destinationName: "C2"
+      dataType: "VARCHAR2"
+      comment: "STREAMLINER_TEST3 Column C2"
+      precision: 300
+      scale: 0
+      nullable: true
+    isDeleted: true
+    isAdd: false
+    isUpdate: false
+  - previousColumnDef:
+      sourceName: "C3"
+      destinationName: "C3"
+      dataType: "VARCHAR2"
+      comment: ""
+      precision: 100
+      scale: 0
+      nullable: false
+    isDeleted: true
+    isAdd: false
+    isUpdate: false
+  columnAdded: false

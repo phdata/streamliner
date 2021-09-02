@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = false)
@@ -31,5 +32,26 @@ public class Configuration {
         this.destination = destination;
         this.tables = tables;
     }
+
+    public Configuration(List<TableDefinition> tables){
+        this.tables = tables;
+    }
+
+    public Configuration(String name, String environment, String pipeline, Source source, Destination destination) {
+        this.name = name;
+        this.environment = environment;
+        this.pipeline = pipeline;
+        this.source = source;
+        this.destination = destination;
+    }
+
+  public void addTableDefinition(TableDefinition table) {
+    if (this.tables == null) {
+      this.tables = new ArrayList<>();
+      this.tables.add(table);
+    } else {
+      this.tables.add(table);
+    }
+  }
 }
 

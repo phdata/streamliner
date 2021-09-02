@@ -112,7 +112,7 @@ public class StreamlinerUtil {
     public static ConfigurationDiff readConfigDiffFromPath(String path){
         if (path == null) return null;
         if(!fileExists(path)){
-            throw new RuntimeException(String.format("Configuration difference file not found: %s", path));
+            return null;
         }
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -452,4 +452,49 @@ public class StreamlinerUtil {
               new String[] {
                 "VARCHAR", "CHAR", "CHARACTER", "STRING", "TEXT", "BINARY", "VARBINARY"
               }));
+
+  public static Configuration createConfig(String directory, Configuration ingestConfig, String param) {
+    if (directory == null) {
+      throw new RuntimeException(String.format("%s path is null.", param));
+    }
+    File f = new File(directory);
+    if (f.exists()) {
+      if (f.isFile()) {
+        throw new RuntimeException(
+            String.format(
+                "Arg: %s. Expected directory. Found file: %s",
+                    param,
+                    directory));
+      }
+    } else {
+      throw new RuntimeException(String.format("%s does not exists. Path: %s", param, directory));
+    }
+    Configuration tempConf;
+    if (ingestConfig == null) {
+      tempConf = new Configuration();
+    } else {
+      tempConf =
+          new Configuration(
+              ingestConfig.getName(),
+              ingestConfig.getEnvironment(),
+              ingestConfig.getPipeline(),
+              ingestConfig.source,
+              ingestConfig.getDestination());
+    }
+
+    File tablesConfig[] = f.listFiles();
+    Arrays.asList(tablesConfig).stream()
+        .forEach(
+            tableConfig -> {
+              /* state-directory have streamliner-diff.yml and table configs like EMPLOYEE.yml, DEPT.yml.
+               * To create a common config file, streamliner-diff.yml should not be read.*/
+              if (!tableConfig.getName().equals(Constants.STREAMLINER_DIFF_FILE.value())) {
+                Configuration config = StreamlinerUtil.readYamlFile(tableConfig.getAbsolutePath());
+                if (config != null && config.getTables() != null && !config.getTables().isEmpty()) {
+                  tempConf.addTableDefinition(config.getTables().get(0));
+                }
+              }
+            });
+    return tempConf.getTables() == null ? null : tempConf;
+  }
 }

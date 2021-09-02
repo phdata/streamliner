@@ -1,0 +1,23 @@
+tables:
+  - type: "Snowflake"
+    sourceName: "Employee"
+    destinationName: "Employee"
+    comment: ""
+    primaryKeys:
+      - "ID"
+    fileFormat:
+      location: "VIRTUAL_COLUMNS"
+      fileType: "PARQUET"
+    columns:
+      - sourceName: "ID"
+        destinationName: "ID"
+        dataType: "NUMBER"
+        comment: ""
+        precision: 38
+        scale: 0
+      - sourceName: "NAME"
+        destinationName: "NAME"
+        dataType: "VARCHAR"
+        comment: ""
+        precision: 38
+        scale: 0

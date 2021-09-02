@@ -1,0 +1,11 @@
+tables:
+- type: "Snowflake"
+  sourceName: "TABLE_NAME"
+  destinationName: "TABLE_NAME"
+  primaryKeys: []
+  columns: []
+  comment: "COMMENT"
+  fileFormat:
+    location: "TABLE_NAME"
+    fileType: "PARQUET"
+  pkList: ""

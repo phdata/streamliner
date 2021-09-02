@@ -1,0 +1,66 @@
+<%--
+Copyright 2018 phData Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+--%>
+<%@ val tables: Seq[io.phdata.streamliner.schemadefiner.model.TableDefinition] %>
+<%@ val configDiff: io.phdata.streamliner.schemadefiner.model.ConfigurationDiff %>
+<%@ val util: io.phdata.streamliner.schemadefiner.util.StreamlinerUtil%>
+
+#{
+    val tableDiffs = util.convertTableDefinitionListToSeq(configDiff.getTableDiffs())
+}#
+
+#if (tableDiffs != null)
+    #if (!tableDiffs.isEmpty)
+        <%
+            val evolveSchemaTables = tableDiffs.map(t => s"evolve-schema-${t.destinationName}").mkString(" ")
+        %>
+
+evolve-schema-all: ${evolveSchemaTables}
+
+#for (table <- tableDiffs)
+
+evolve-schema-${table.destinationName}:
+	$(MAKE) evolve-schema -C ${table.destinationName}
+
+#end
+    #elseif (tableDiffs.isEmpty)
+        evolve-schema-all:
+    #end
+
+#elseif (tables != null)
+    <%
+        val firstRunTables = tables.map(t => s"first-run-${t.destinationName}").mkString(" ")
+        val runTables = tables.map(t => s"run-${t.destinationName}").mkString(" ")
+        val dropTables = tables.map(t => s"drop-${t.destinationName}").mkString(" ")
+    %>
+
+first-run-all: ${firstRunTables}
+
+run-all: ${runTables}
+
+drop-all: ${dropTables}
+
+#for (table <- tables)
+first-run-${table.destinationName}:
+	$(MAKE) first-run -C ${table.destinationName}
+
+run-${table.destinationName}:
+	$(MAKE) run -C ${table.destinationName}
+
+drop-${table.destinationName}:
+	$(MAKE) drop -C ${table.destinationName}
+
+#end
+#end

@@ -1,0 +1,40 @@
+name: "STREAMLINER_QUICKSTART_1"
+environment: "SANDBOX"
+pipeline: "snowflake-snowpipe-append"
+previousDestination:
+  type: "Snowflake"
+  snowSqlCommand: "snowsql -c connection"
+  storagePath: "s3://streamliner-quickstart-1/employees/"
+  storageIntegration: "STREAMLINER_QUICKSTART_1"
+  warehouse: "SANDBOX_POC1"
+  taskSchedule: ""
+  stagingDatabase:
+    name: "SANDBOX_POC1"
+    schema: "EMPLOYEES"
+  reportingDatabase:
+    name: ""
+    schema: ""
+  stageName: "stage1"
+  fileFormat:
+    name: ""
+    options:
+      type: ""
+currentDestination:
+  type: "Snowflake"
+  snowSqlCommand: "snowsql -c connection"
+  storagePath: "s3://streamliner-quickstart-1/employees/"
+  storageIntegration: "STREAMLINER_QUICKSTART_1"
+  warehouse: "SANDBOX_POC1"
+  taskSchedule: ""
+  stagingDatabase:
+    name: "SANDBOX_POC1"
+    schema: "EMPLOYEES"
+  reportingDatabase:
+    name: ""
+    schema: ""
+  stageName: "stage1"
+  fileFormat:
+    name: ""
+    options:
+      type: ""
+tableDiffs: []

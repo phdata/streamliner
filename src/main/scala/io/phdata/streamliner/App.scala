@@ -30,21 +30,21 @@ object App {
     cli.subcommand match {
       case Some(cli.schema) =>
         SchemaCommand.build(
-          cli.schema.filePath(),
-          cli.schema.outputFile.getOrElse(""),
+          cli.schema.config(),
+          cli.schema.stateDirectory(),
           cli.schema.databasePassword.getOrElse(""),
           cli.schema.createDocs.getOrElse(false),
-          cli.schema.previousOutputFile.getOrElse(null),
-          cli.schema.diffOutputFile.getOrElse(null)
+          cli.schema.previousStateDirectory.getOrElse(null)
         )
 
       case Some(cli.produceScripts) =>
         ScriptCommand.build(
-          cli.produceScripts.filePath.getOrElse(null),
-          cli.produceScripts.configDiffFilePath.getOrElse(null),
+          cli.produceScripts.config(),
+          cli.produceScripts.stateDirectory(),
+          cli.produceScripts.previousStateDirectory(),
           cli.produceScripts.typeMappingFile(),
           cli.produceScripts.templateDirectory(),
-          cli.produceScripts.outputPath.getOrElse(null)
+          cli.produceScripts.outputPath()
         )
 
       case Some(cli.generateState) =>
@@ -56,7 +56,7 @@ object App {
           cli.generateState.tableNameRemove.getOrElse(null),
           cli.generateState.columnNameRemove.getOrElse(null),
           cli.generateState.outputPath(),
-          cli.generateState.sourceSystemFile(),
+          cli.generateState.sourceStateDirectory(),
           cli.generateState.tableCsvPath(),
           cli.generateState.columnCsvPath(),
         )
