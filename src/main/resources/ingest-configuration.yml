@@ -9,6 +9,10 @@ source:
   schema: "" # JDBC Schema / database name
   tableTypes: # Controls the types of tables included in the configuration output
     - table
+# OPTIONAL: This is used to manage allowed schema changes. If this parameter is not provided in config, by default it includes all the values from enum SchemaChanges
+#  validSchemaChanges:
+#    - COLUMN_ADD
+#    - UPDATE_COLUMN_COMMENT
 # OPTIONAL: used to fetch snowflake tables details in batch of value provide. Default value is 10.
 #  batchTableCount: 11
 # OPTIONAL: table whitelisting

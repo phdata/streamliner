@@ -1,6 +1,7 @@
 
 
 
+
 snowsql-cmd=snowsql -c connection -f
 
 currTableStateFile=/Users/anishkumar/anishKumar/dev/github/streamliner/src/test/resources/configDiff/addAllColumn/state-directory/Employee.yml

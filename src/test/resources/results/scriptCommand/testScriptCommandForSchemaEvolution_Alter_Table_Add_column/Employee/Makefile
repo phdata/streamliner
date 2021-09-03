@@ -55,5 +55,4 @@ evolve-schema:
 
 		$(MAKE) alter-table-evolve-schema
 		$(MAKE) alter-snowpipe
-		$(MAKE) copy-into
 		mv $(currTableStateFile) $(previousStateDirectory)
