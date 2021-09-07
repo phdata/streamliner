@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 --%>
 #import(io.phdata.streamliner.schemadefiner.model.Snowflake)
+#import(io.phdata.streamliner.schemadefiner.model.Jdbc)
 <%@ val configuration: io.phdata.streamliner.schemadefiner.model.Configuration %>
 <%@ val table: io.phdata.streamliner.schemadefiner.model.SnowflakeTable %>
 <%@ val tableDiff: io.phdata.streamliner.schemadefiner.model.TableDiff %>
@@ -23,6 +24,8 @@ limitations under the License.
 <%@ val prevStateDir: String%>
 #{
     val destination = configuration.destination.asInstanceOf[Snowflake]
+    val source = configuration.source.asInstanceOf[Jdbc]
+    val validSchemaChanges = source.getValidSchemaChanges
 }#
 snowsql-cmd=${destination.snowSqlCommand} -f
 
@@ -79,22 +82,28 @@ drop:
 
 evolve-schema:
 #if (tableDiff.existsInDestination && tableDiff.existsInSource)
-    #if (!tableDiff.areThereAnyChanges(typeMapping))
+    #if (!tableDiff.allChangesAreCompatible(typeMapping, validSchemaChanges))
         $(MAKE) incompatible-change
         <%
-            templateContext.addError(s"Incompatible change in table ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${tableDiff.destinationName}. User should analyse the changes and manually move ${tableDiff.destinationName}.yml from state-directory to previous-state-directory. Template: snowflake-snowpipe-append/Makefile.ssp")
+            templateContext.addError(s"Incompatible change in table ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${tableDiff.destinationName}. User should resolve this incompatible change manually as per the documentation. Template: snowflake-snowpipe-append/Makefile.ssp")
         %>
 
-    #elseif (tableDiff.allChangesAreCompatible(typeMapping))
+    #elseif (tableDiff.allChangesAreCompatible(typeMapping, validSchemaChanges))
 	$(MAKE) alter-table-evolve-schema
         $(MAKE) alter-snowpipe
-        $(MAKE) copy-into
         mv $(currTableStateFile) $(previousStateDirectory)
 
     #end
 #elseif (tableDiff.existsInSource && !tableDiff.existsInDestination)
-	$(MAKE) create-table
-	$(MAKE) create-snowpipe
-	$(MAKE) copy-into
-	mv $(currTableStateFile) $(previousStateDirectory)
+    #if (tableDiff.allChangesAreCompatible(typeMapping, validSchemaChanges))
+        $(MAKE) create-table
+        $(MAKE) create-snowpipe
+        mv $(currTableStateFile) $(previousStateDirectory)
+    #elseif (!tableDiff.allChangesAreCompatible(typeMapping, validSchemaChanges))
+        $(MAKE) incompatible-change
+        <%
+            templateContext.addError(s"Incompatible change in table ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${tableDiff.destinationName}. User should resolve this incompatible change manually as per the documentation. Template: snowflake-snowpipe-append/Makefile.ssp")
+        %>
+    #end
+
 #end

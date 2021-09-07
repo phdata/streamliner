@@ -22,8 +22,12 @@ object JavaHelper {
     engine.layout(uri, attributes.asScala.toMap)
   }
 
-  def convertJavaMapToScalaMap(map: java.util.Map[String, String]): Map[String, String] = {
-    map.asScala.toMap
+  def convertJavaMapToScalaMap(map: java.util.Map[String, java.util.Map[String, String]])
+    : Map[String, Map[String, String]] = {
+    val keys = map.keySet()
+    val temp = new util.LinkedHashMap[String, Map[String, String]]()
+    keys.forEach(k => temp.put(k, map.get(k).asScala.toMap))
+    temp.asScala.toMap
   }
 
   def convertScalaMapToJavaMap(

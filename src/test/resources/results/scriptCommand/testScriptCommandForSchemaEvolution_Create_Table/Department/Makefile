@@ -52,7 +52,7 @@ drop:
 	$(MAKE) drop-snowpipe
 
 evolve-schema:
-	$(MAKE) create-table
-	$(MAKE) create-snowpipe
-	$(MAKE) copy-into
-	mv $(currTableStateFile) $(previousStateDirectory)
+	
+		$(MAKE) create-table
+		$(MAKE) create-snowpipe
+		mv $(currTableStateFile) $(previousStateDirectory)

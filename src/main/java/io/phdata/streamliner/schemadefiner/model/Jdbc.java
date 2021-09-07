@@ -5,8 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @EqualsAndHashCode(callSuper = false)
 @ToString
@@ -28,6 +27,11 @@ public class Jdbc extends Source {
   // for table whitelisting
   private List<String> tables;
   private int batchTableCount;
+  /* This is used to manage allowed schema changes.
+  For example: To exclude column add for CSV users we should not pass "COLUMN_ADD" in the list. Then column add becomes incompatible change for CSV users.
+  If this parameter is not provided in config, by default it includes all the values from enum SchemaChanges. This is handled in code.
+  */
+  private Set<SchemaChanges> validSchemaChanges = new HashSet<>();
 
   public Jdbc() {}
 

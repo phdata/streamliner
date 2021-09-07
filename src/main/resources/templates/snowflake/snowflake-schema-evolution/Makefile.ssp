@@ -1,5 +1,7 @@
 #import(io.phdata.streamliner.schemadefiner.model.Snowflake)
+#import(io.phdata.streamliner.schemadefiner.model.Jdbc)
 <%@ val configurationDiff: io.phdata.streamliner.schemadefiner.model.ConfigurationDiff %>
+<%@ val configuration: io.phdata.streamliner.schemadefiner.model.Configuration %>
 <%@ val tableDiff: io.phdata.streamliner.schemadefiner.model.TableDiff %>
 <%@ val typeMapping: Map[String, Map[String, String]]%>
 <%@ val templateContext: io.phdata.streamliner.schemadefiner.model.TemplateContext %>
@@ -7,6 +9,8 @@
 <%@ val prevStateDir: String%>
 #{
     val destination = configurationDiff.currentDestination.asInstanceOf[Snowflake]
+    val source = configuration.source.asInstanceOf[Jdbc]
+    val validSchemaChanges = source.getValidSchemaChanges
 }#
 snowsql-cmd=${destination.snowSqlCommand} -f
 
@@ -33,23 +37,21 @@ create-table: create-table.sql
 
 evolve-schema:
 #if (tableDiff.existsInDestination && tableDiff.existsInSource)
-    #if (!tableDiff.areThereAnyChanges(typeMapping))
+    #if (!tableDiff.allChangesAreCompatible(typeMapping, validSchemaChanges))
 	$(MAKE) incompatible-change
     <%
         templateContext.addError(s"Incompatible change in table ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${tableDiff.destinationName}. User should resolve this incompatible change manually as per the documentation. Template: snowflake-schema-evolution/Makefile.ssp")
     %>
 
-    #elseif (tableDiff.allChangesAreCompatible(typeMapping))
+    #elseif (tableDiff.allChangesAreCompatible(typeMapping, validSchemaChanges))
 	$(MAKE) alter-table-evolve-schema
 	$(MAKE) alter-snowpipe
-	$(MAKE) copy-into
 	mv $(currTableStateFile) $(previousStateDirectory)
 
     #end
 #elseif (tableDiff.existsInSource && !tableDiff.existsInDestination)
 	$(MAKE) create-table
 	$(MAKE) create-snowpipe
-	$(MAKE) copy-into	
 	mv $(currTableStateFile) $(previousStateDirectory)
 #end
 

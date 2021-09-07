@@ -1,4 +1,5 @@
 #import(io.phdata.streamliner.schemadefiner.model.Snowflake)
+#import(io.phdata.streamliner.schemadefiner.model.Jdbc)
 <%@ val configurationDiff: io.phdata.streamliner.schemadefiner.model.ConfigurationDiff %>
 <%@ val tableDiff: io.phdata.streamliner.schemadefiner.model.TableDiff %>
 <%@ val templateContext: io.phdata.streamliner.schemadefiner.model.TemplateContext %>
@@ -7,20 +8,22 @@
 <%@ val typeMapping: Map[String, Map[String, String]]%>
 #{
     val destination = configuration.destination.asInstanceOf[Snowflake]
+    val source = configuration.source.asInstanceOf[Jdbc]
+    val validSchemaChanges = source.getValidSchemaChanges
 }#
 
 #if (tableDiff.existsInDestination && tableDiff.existsInSource)
-    #if (tableDiff.allChangesAreCompatible(typeMapping))
+    #if (tableDiff.allChangesAreCompatible(typeMapping, validSchemaChanges))
         #if (tableDiff.isColumnAdded())
             ALTER TABLE ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${tableDiff.destinationName} ADD COLUMN ${unescape(tableDiff.columnDDL(typeMapping))};
         #end
         #if (tableDiff.isColumnModified(typeMapping))
             ALTER TABLE ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${tableDiff.destinationName} ALTER (${unescape(tableDiff.alterColumnDDL(typeMapping))});
         #end
-        
-    #elseif (!tableDiff.allChangesAreCompatible(typeMapping))
+
+    #elseif (!tableDiff.allChangesAreCompatible(typeMapping, validSchemaChanges))
         <%
-            templateContext.addError(s"Incompatible change in table ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${tableDiff.destinationName}. User should resolve this incompatible change manually as per the documentation.. Template: create-table-evolve-schema.ssp")
+            templateContext.addError(s"Incompatible change in table ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${tableDiff.destinationName}. User should resolve this incompatible change manually as per the documentation.. Template: alter-table-evolve-schema.ssp")
         %>
     #end
 #end

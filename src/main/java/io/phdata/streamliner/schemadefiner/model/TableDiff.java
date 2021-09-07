@@ -9,9 +9,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @EqualsAndHashCode(callSuper = false)
@@ -42,30 +40,53 @@ public class TableDiff {
 
   public boolean allChangesAreCompatible(
       scala.collection.immutable.Map<String, scala.collection.immutable.Map<String, String>>
-          typeMapping) {
+          typeMapping,
+      Set<SchemaChanges> validSchemaChanges) {
     Map<String, Map<String, String>> javaTypeMap = JavaHelper.convertScalaMapToJavaMap(typeMapping);
+    if (validSchemaChanges == null || validSchemaChanges.isEmpty()) {
+      validSchemaChanges.addAll(Arrays.asList(SchemaChanges.values()));
+    }
+
+    if (isNewTable()) {
+      if (!validSchemaChanges.contains(SchemaChanges.TABLE_ADD)) {
+        return false;
+      } else {
+        return true;
+      }
+    }
 
     for (ColumnDiff colDiff : columnDiffs) {
       if (colDiff.getIsDeleted()) {
         return false;
-      } else if (colDiff.getIsUpdate()) {
+      }
+      if (colDiff.getIsAdd() && !validSchemaChanges.contains(SchemaChanges.COLUMN_ADD)) {
+        return false;
+      }
+      if (colDiff.getIsUpdate()) {
         ColumnDefinition currDef = colDiff.getCurrentColumnDef();
         ColumnDefinition prevDef = colDiff.getPreviousColumnDef();
         if (!isDataTypeSame(currDef, prevDef)) {
           return false;
-        } else if (!isColumnCommentSame(currDef, prevDef)
-            || !isColumnNullableSame(currDef, prevDef)) {
-          return true;
-        } else if (!isSnowflakeStringDataType(javaTypeMap, currDef)
-            || currDef.getPrecision() == prevDef.getPrecision()) {
-          /* currently datatype increase is implemented only for snowflake string data type
-           * ColumnDiff isUpdate becomes true if any variable of the ColumnDefinition changes.
-           * Since we are checking increment of column length only, precision is being checked here. */
+        }
+        if (!isColumnNullableSame(currDef, prevDef)
+            && !validSchemaChanges.contains(SchemaChanges.UPDATE_COLUMN_NULLABILITY)) {
+          return false;
+        }
+        if (!isColumnCommentSame(currDef, prevDef)
+            && !validSchemaChanges.contains(SchemaChanges.UPDATE_COLUMN_COMMENT)) {
+          return false;
+        }
+        if (isPrecisionChangeValid(currDef, prevDef, javaTypeMap)
+            && !validSchemaChanges.contains(SchemaChanges.EXTEND_COLUMN_LENGTH)) {
           return false;
         }
       }
     }
     return true;
+  }
+
+  private boolean isNewTable() {
+    return existsInSource && !existsInDestination;
   }
 
   private boolean isDataTypeSame(ColumnDefinition currDef, ColumnDefinition prevDef) {
