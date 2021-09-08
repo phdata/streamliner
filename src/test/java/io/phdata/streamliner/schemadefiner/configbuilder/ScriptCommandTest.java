@@ -34,7 +34,7 @@ public class ScriptCommandTest {
     outputDir =
         String.format("%s/%s", outputDir, "testScriptCommandForSchemaEvolution_Alter_Table_Add_column");
     StreamlinerUtil.createDir(outputDir);
-    ScriptCommand.build(config, stateDirectory, previousDirectory, typeMapping,templateDirectory, outputDir);
+    new ScriptCommand().build(config, stateDirectory, previousDirectory, typeMapping,templateDirectory, outputDir);
     File f = new File(String.format("%s/Employee", outputDir));
     assertTrue(f.exists());
     assertTrue(f.isDirectory());
@@ -56,7 +56,7 @@ public class ScriptCommandTest {
     outputDir =
         String.format("%s/%s", outputDir, "testScriptCommandForSchemaEvolution_Alter_Table_Modify_column");
     StreamlinerUtil.createDir(outputDir);
-    ScriptCommand.build(config, stateDirectory, previousDirectory, typeMapping,templateDirectory, outputDir);
+    new ScriptCommand().build(config, stateDirectory, previousDirectory, typeMapping,templateDirectory, outputDir);
   }
 
   @Test
@@ -72,7 +72,7 @@ public class ScriptCommandTest {
     outputDir =
             String.format("%s/%s", outputDir, "testScriptCommandForSchemaEvolution_Create_Table");
     StreamlinerUtil.createDir(outputDir);
-    ScriptCommand.build(config, stateDirectory, previousDirectory, typeMapping,templateDirectory, outputDir);
+    new ScriptCommand().build(config, stateDirectory, previousDirectory, typeMapping,templateDirectory, outputDir);
     File f = new File(String.format("%s/Department", outputDir));
     assertTrue(f.exists());
     assertTrue(f.isDirectory());
@@ -86,7 +86,7 @@ public class ScriptCommandTest {
     outputDir =
             String.format("%s/%s", outputDir, "testScriptCommandToGenerateScripts");
     StreamlinerUtil.createDir(outputDir);
-    ScriptCommand.build(config, stateDirectory, previousDirectory, typeMapping,templateDirectory, outputDir);
+    new ScriptCommand().build(config, stateDirectory, previousDirectory, typeMapping,templateDirectory, outputDir);
 
     File f = new File(String.format("%s/Employee", outputDir));
     assertTrue(f.exists());
@@ -103,7 +103,7 @@ public class ScriptCommandTest {
     outputDir =
             String.format("%s/%s", outputDir, "testScriptCommand_mandatory_config");
     StreamlinerUtil.createDir(outputDir);
-    ScriptCommand.build(config, stateDirectory, previousDirectory, typeMapping,templateDirectory, outputDir);
+    new ScriptCommand().build(config, stateDirectory, previousDirectory, typeMapping,templateDirectory, outputDir);
   }
 
   @Test
@@ -118,7 +118,7 @@ public class ScriptCommandTest {
     outputDir =
             String.format("%s/%s", outputDir, "testScriptCommandForSchemaEvolution_column_size_increased");
     StreamlinerUtil.createDir(outputDir);
-    ScriptCommand.build(config, stateDirectory, previousDirectory, typeMapping,templateDirectory, outputDir);
+    new ScriptCommand().build(config, stateDirectory, previousDirectory, typeMapping,templateDirectory, outputDir);
 
     File f = new File(String.format("%s/Employee", outputDir));
     assertTrue(f.exists());
@@ -138,7 +138,7 @@ public class ScriptCommandTest {
     outputDir =
             String.format("%s/%s", outputDir, "testScriptCommandForSchemaEvolution_column_comment_nullable_changed");
     StreamlinerUtil.createDir(outputDir);
-    ScriptCommand.build(config, stateDirectory, previousDirectory, typeMapping,templateDirectory, outputDir);
+    new ScriptCommand().build(config, stateDirectory, previousDirectory, typeMapping,templateDirectory, outputDir);
 
     File f = new File(String.format("%s/Employee", outputDir));
     assertTrue(f.exists());
@@ -158,7 +158,7 @@ public class ScriptCommandTest {
     outputDir =
             String.format("%s/%s", outputDir, "testScriptCommandForSchemaEvolution_no_schema_changes");
     StreamlinerUtil.createDir(outputDir);
-    ScriptCommand.build(config, stateDirectory, previousDirectory, typeMapping,templateDirectory, outputDir);
+    new ScriptCommand().build(config, stateDirectory, previousDirectory, typeMapping,templateDirectory, outputDir);
 
     File f = new File(String.format("%s/Makefile", outputDir));
     assertTrue(f.exists());
@@ -179,6 +179,6 @@ public class ScriptCommandTest {
     outputDir =
             String.format("%s/%s", outputDir, "testScriptCommandForSchemaEvolution_table_deleted");
     StreamlinerUtil.createDir(outputDir);
-    ScriptCommand.build(config, stateDirectory, previousDirectory, typeMapping,templateDirectory, outputDir);
+    new ScriptCommand().build(config, stateDirectory, previousDirectory, typeMapping,templateDirectory, outputDir);
   }
 }

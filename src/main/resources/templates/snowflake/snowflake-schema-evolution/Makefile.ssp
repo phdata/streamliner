@@ -50,9 +50,17 @@ evolve-schema:
 
     #end
 #elseif (tableDiff.existsInSource && !tableDiff.existsInDestination)
-	$(MAKE) create-table
-	$(MAKE) create-snowpipe
-	mv $(currTableStateFile) $(previousStateDirectory)
+    #if (tableDiff.allChangesAreCompatible(typeMapping, validSchemaChanges))
+        $(MAKE) create-table
+        $(MAKE) create-snowpipe
+        mv $(currTableStateFile) $(previousStateDirectory)
+    #elseif (!tableDiff.allChangesAreCompatible(typeMapping, validSchemaChanges))
+        $(MAKE) incompatible-change
+        <%
+            templateContext.addError(s"Incompatible change in table ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${tableDiff.destinationName}. User should resolve this incompatible change manually as per the documentation. Template: snowflake-schema-evolution/Makefile.ssp")
+        %>
+    #end
+
 #end
 
 

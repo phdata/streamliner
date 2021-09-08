@@ -89,11 +89,11 @@ public class TableDiff {
     return existsInSource && !existsInDestination;
   }
 
-  private boolean isDataTypeSame(ColumnDefinition currDef, ColumnDefinition prevDef) {
+  public boolean isDataTypeSame(ColumnDefinition currDef, ColumnDefinition prevDef) {
     return currDef.getDataType().equalsIgnoreCase(prevDef.getDataType());
   }
 
-  private boolean isColumnNullableSame(ColumnDefinition currDef, ColumnDefinition prevDef) {
+  public boolean isColumnNullableSame(ColumnDefinition currDef, ColumnDefinition prevDef) {
     return currDef.isNullable() == prevDef.isNullable();
   }
 
@@ -135,11 +135,11 @@ public class TableDiff {
     }
   }
 
-  private boolean isColumnCommentSame(ColumnDefinition currDef, ColumnDefinition prevDef) {
+  public boolean isColumnCommentSame(ColumnDefinition currDef, ColumnDefinition prevDef) {
     return currDef.getComment().equals(prevDef.getComment());
   }
 
-  private boolean isPrecisionChangeValid(
+  public boolean isPrecisionChangeValid(
       ColumnDefinition currDef,
       ColumnDefinition prevDef,
       Map<String, Map<String, String>> typeMapping) {
