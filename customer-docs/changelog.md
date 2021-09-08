@@ -1,3 +1,7 @@
+## 5.1
+- Support extending string-like columns, column comments, and nullability changes
+- Documentation updates
+
 ## 5.0
 *Please note that migration of templates is required from Strealiner 4.x to 5.0*
 - Support Schema Evolution
