@@ -48,6 +48,7 @@ public class ScriptCommand {
       log.info("Invalid --output-directory provided. Scripts will be saved at path: {}", outputDirectory);
     }
     build(configuration, configDiff, typeMapping, templateDirectory, outputDirectory, stateDirectory, previousStateDirectory);
+    log.info("Scripts generated successfully.");
   }
 
   private static void validatePreviousStateDirectory(String previousStateDirectory) {
@@ -135,7 +136,6 @@ public class ScriptCommand {
                           map.put("prevStateDir", getAbsolutePath(previousStateDirectory));
                           String rendered = JavaHelper.getLayout(templateFile.getPath(), map);
                           String replaced = rendered.replace("    ", "\t");
-                          log.debug(replaced);
                           String fileName =
                               String.format(
                                   "%s/%s",
@@ -187,9 +187,7 @@ public class ScriptCommand {
                                   "%s/%s.yml", getAbsolutePath(stateDirectory), table.getSourceName()));
                           map.put("prevStateDir", getAbsolutePath(previousStateDirectory));
                           String rendered = JavaHelper.getLayout(templateFile.getPath(), map);
-
                           String replaced = rendered.replace("    ", "\t");
-                          log.debug(replaced);
                           String fileName =
                               String.format(
                                   "%s/%s", tableDir, templateFile.getName().replace(".ssp", ""));
@@ -260,7 +258,6 @@ public class ScriptCommand {
       map.put("typeMapping", typeMapping);
       String rendered = JavaHelper.getLayout(makefile, map);
       String replaced = rendered.replace("    ", "\t");
-      log.debug(replaced);
       StreamlinerUtil.writeFile(replaced, outputDirectory + "/Makefile");
     }
 
@@ -281,7 +278,6 @@ public class ScriptCommand {
           map.put("util", new StreamlinerUtil());
           map.put("typeMapping", typeMapping);
           String rendered = JavaHelper.getLayout(templateFile.getPath(), map);
-          log.debug("Rendered file: {}", rendered);
           String templateFileName =
               templateFile.getName().replace(".ssp", "").replace(".schema", "");
           String fileName = String.format("%s/%s", outputDirectory, templateFileName);

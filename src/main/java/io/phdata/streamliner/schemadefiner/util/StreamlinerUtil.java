@@ -355,8 +355,6 @@ public class StreamlinerUtil {
 
   public static void writeFile(String content, String fileName) {
     log.info("Writing file: {}", fileName);
-    log.trace("File content: {}", content);
-
     try (FileWriter fw = new FileWriter(fileName)) {
       fw.write(content);
     } catch (IOException e) {
