@@ -38,7 +38,7 @@ object App {
         )
 
       case Some(cli.produceScripts) =>
-        ScriptCommand.build(
+        new ScriptCommand().build(
           cli.produceScripts.config(),
           cli.produceScripts.stateDirectory(),
           cli.produceScripts.previousStateDirectory(),

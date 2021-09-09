@@ -3,20 +3,21 @@ package io.phdata.streamliner.schemadefiner.configbuilder;
 import io.phdata.streamliner.schemadefiner.model.*;
 import io.phdata.streamliner.schemadefiner.util.StreamlinerUtil;
 import io.phdata.streamliner.util.JavaHelper;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ScriptCommand {
   private static final Logger log = LoggerFactory.getLogger(ScriptCommand.class);
+  private Map<String, Map<String, List>> commonTables = new LinkedHashMap<>();;
+  private Map<String, Collection> addedOrDeletedorIncompatibleTables = new LinkedHashMap<>();;
 
     // config is ingest-configuration.yml
-  public static void build(
+  public void build(
       String config,
       String stateDirectory,
       String previousStateDirectory,
@@ -51,7 +52,7 @@ public class ScriptCommand {
     log.info("Scripts generated successfully.");
   }
 
-  private static void validatePreviousStateDirectory(String previousStateDirectory) {
+  private void validatePreviousStateDirectory(String previousStateDirectory) {
     if (previousStateDirectory == null || previousStateDirectory.equals("")) {
       throw new RuntimeException("--previous-state-directory path can not be null or empty.");
     }
@@ -63,7 +64,7 @@ public class ScriptCommand {
     }
   }
 
-    private static void build(
+    private void build(
       Configuration configuration,
       ConfigurationDiff configDiff,
       Map<String, Map<String, String>> typeMapping,
@@ -94,6 +95,11 @@ public class ScriptCommand {
           configDiff.getTableDiffs().stream()
               .filter(tableDiff -> !tableDiff.isExistsInSource())
               .collect(Collectors.toList());
+      addedOrDeletedorIncompatibleTables.put(
+          Constants.TABLES_DELETED.value(),
+          tablesNotInSource.stream()
+              .map(table -> table.getDestinationName())
+              .collect(Collectors.toList()));
       tablesNotInSource.forEach(
           table ->
               templateContext.addError(
@@ -146,6 +152,17 @@ public class ScriptCommand {
               });
       writeSchemaMakeFile(
           configuration, configDiff, typeMapping, templateDirectory, outputDirectory);
+
+      try {
+        /*intentionally kept inside try catch block.
+        any exception while generating the delta-change-summary should not block the run. */
+        generateDeltaChangeSummary(configDiff, configuration, typeMapping, outputDirectory);
+      } catch (Exception e) {
+        String errorMsg = String.format("Error generating delta-change-summary file. %s", e);
+        log.error(errorMsg);
+        StreamlinerUtil.writeFile(
+            errorMsg, String.format("%s/%s", outputDirectory, "delta-change-summary.txt"));
+      }
       if (templateContext.hasErrors()) {
         List<String> errors = templateContext.getErrors();
         String msg =
@@ -218,7 +235,151 @@ public class ScriptCommand {
     }
   }
 
-  private static TableDefinition getOriginalTable(
+  private void generateDeltaChangeSummary(
+      ConfigurationDiff configDiff,
+      Configuration config,
+      Map<String, Map<String, String>> typeMapping,
+      String outputDirectory) {
+    // this does not have deleted tables. deleted tables are already removed from this list.
+    Set<TableDiff> tableDiffs = new LinkedHashSet<>(configDiff.getTableDiffs());
+    Set<SchemaChanges> validSchemaChanges = getValidSchemaChanges(config.getSource());
+    if (validSchemaChanges == null || validSchemaChanges.isEmpty()) {
+      validSchemaChanges.addAll(Arrays.asList(SchemaChanges.values()));
+    }
+    List<TableDiff> addedTables =
+        tableDiffs.stream()
+            .filter(tableDiff -> tableDiff.existsInSource && !tableDiff.isExistsInDestination())
+            .collect(Collectors.toList());
+    List<String> addedTablesName =
+        addedTables.stream()
+            .map(tableDiff -> tableDiff.getDestinationName())
+            .collect(Collectors.toList());
+    addedOrDeletedorIncompatibleTables.put(Constants.TABLES_ADDED.value(), addedTablesName);
+    Set<String> incompatibleTables =
+        tableDiffs.stream()
+            .filter(
+                tableDiff ->
+                    !tableDiff.allChangesAreCompatible(
+                        JavaHelper.convertJavaMapToScalaMap(typeMapping), validSchemaChanges))
+            .map(incompatibleTable -> incompatibleTable.getDestinationName())
+            .collect(Collectors.toSet());
+    //Deleted tables are also added as incompatible change tables.
+    incompatibleTables.addAll(addedOrDeletedorIncompatibleTables.get(Constants.TABLES_DELETED.value()));
+    addedOrDeletedorIncompatibleTables.put(
+        Constants.TABLES_INCOMPATIBLE.value(), incompatibleTables);
+
+    // now tableDiffs will have updatedTables only.
+    tableDiffs.removeAll(addedTables);
+
+    tableDiffs.stream()
+        .forEach(
+            tableDiff -> {
+              List<ColumnDiff> columnDiffs = tableDiff.getColumnDiffs();
+              List<String> columnsAdded =
+                  columnDiffs.stream()
+                      .filter(columnDiff -> columnDiff.getIsAdd())
+                      .map(col -> col.getCurrentColumnDef().getSourceName())
+                      .collect(Collectors.toList());
+              List<String> columnsDeleted =
+                  columnDiffs.stream()
+                      .filter(columnDiff -> columnDiff.getIsDeleted())
+                      .map(col -> col.getPreviousColumnDef().getSourceName())
+                      .collect(Collectors.toList());
+              List<ColumnDiff> columnsUpdated =
+                  columnDiffs.stream()
+                      .filter(columnDiff -> columnDiff.getIsUpdate())
+                      .collect(Collectors.toList());
+              Map<String, List> columnsDetail = new LinkedHashMap<>();
+              columnsDetail.put(Constants.COLUMNS_UPDATED.value(), columnsUpdated);
+              columnsDetail.put(Constants.COLUMNS_DELETED.value(), columnsDeleted);
+              columnsDetail.put(Constants.COLUMNS_ADDED.value(), columnsAdded);
+              commonTables.put(tableDiff.getDestinationName(), columnsDetail);
+            });
+
+    createContent(validSchemaChanges, outputDirectory, typeMapping);
+  }
+
+  private Set<SchemaChanges> getValidSchemaChanges(Source source) {
+    if (source instanceof Jdbc) {
+      return ((Jdbc) source).getValidSchemaChanges();
+    }
+    return null;
+  }
+
+  private void createContent(
+      Set<SchemaChanges> validSchemaChanges,
+      String outputDirectory,
+      Map<String, Map<String, String>> typeMapping) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("\nSTREAMLINER DELTA CHANGE SUMMARY\n");
+    sb.append("***********************************************************\n");
+    sb.append(String.format("ALLOWED SCHEMA CHANGES: %s\n\n", validSchemaChanges.toString()));
+    sb.append(
+        String.format(
+            "TABLES ADDED: %s\n",
+            addedOrDeletedorIncompatibleTables.get(Constants.TABLES_ADDED.value()).toString()));
+    sb.append(
+        String.format(
+            "TABLES DELETED: %s\n",
+            addedOrDeletedorIncompatibleTables.get(Constants.TABLES_DELETED.value()).toString()));
+
+    if (commonTables.isEmpty()) {
+      sb.append("TABLES UPDATED: []\n");
+    } else {
+      sb.append("TABLES UPDATED:\n");
+      sb.append("===============\n");
+      for (Map.Entry<String, Map<String, List>> entry : commonTables.entrySet()) {
+        Map<String, List> colDetail = entry.getValue();
+        sb.append(String.format("TABLE: %s\n", entry.getKey()));
+        sb.append("------------------------------\n");
+        sb.append(
+            String.format("COLUMN ADDED: %s\n", colDetail.get(Constants.COLUMNS_ADDED.value())));
+        sb.append(
+            String.format(
+                "COLUMN DELETED: %s\n", colDetail.get(Constants.COLUMNS_DELETED.value())));
+        List<ColumnDiff> colDiffs = colDetail.get(Constants.COLUMNS_UPDATED.value());
+        TableDiff tableDiff = new TableDiff();
+        if (colDiffs.isEmpty()) {
+          sb.append("COLUMN UPDATED: []\n");
+        } else {
+          sb.append("COLUMN UPDATED:\n");
+        }
+        colDiffs.forEach(
+            colDiff -> {
+              List<String> changes = new ArrayList<>();
+              ColumnDefinition currDef = colDiff.getCurrentColumnDef();
+              ColumnDefinition prevDef = colDiff.getPreviousColumnDef();
+              if (!tableDiff.isColumnCommentSame(currDef, prevDef)) {
+                changes.add("COMMENT");
+              }
+              if (!tableDiff.isColumnNullableSame(currDef, prevDef)) {
+                changes.add("NULLABILITY");
+              }
+              if (tableDiff.isPrecisionChangeValid(currDef, prevDef, typeMapping)) {
+                changes.add("LENGTH");
+              }
+              if (!tableDiff.isDataTypeSame(currDef, prevDef)) {
+                changes.add("DATA TYPE");
+              }
+              sb.append(
+                  String.format(
+                      "%s -- %s\n", currDef.getDestinationName(), StringUtils.join(changes, ", ")));
+            });
+        sb.append("------------------------------\n\n");
+      }
+    }
+    sb.append("\n");
+    sb.append(
+        String.format(
+            "TABLES WITH INCOMPATIBLE CHANGES: %s\n",
+            addedOrDeletedorIncompatibleTables
+                .get(Constants.TABLES_INCOMPATIBLE.value())
+                .toString()));
+    StreamlinerUtil.writeFile(
+        sb.toString(), String.format("%s/%s", outputDirectory, "delta-change-summary.txt"));
+  }
+
+    private TableDefinition getOriginalTable(
       Configuration configuration, TableDiff tableDiff) {
     if (configuration.getTables() == null) {
       throw new RuntimeException(
@@ -241,7 +402,7 @@ public class ScriptCommand {
         : tableList.get(0);
   }
 
-  private static void writeSchemaMakeFile(
+  private void writeSchemaMakeFile(
       Configuration configuration,
       ConfigurationDiff configDiff,
       Map<String, Map<String, String>> typeMapping,
@@ -286,7 +447,7 @@ public class ScriptCommand {
           StreamlinerUtil.isExecutable(fileName);
         });
   }
-  private static String getAbsolutePath(String path){
+  private String getAbsolutePath(String path){
       File f = new File(path);
       return f.getAbsolutePath();
   }
