@@ -67,17 +67,21 @@ object SchemaCrawlerImpl extends FileUtil {
   }
 
   private def setLogLevel(): Unit = {
-    val logManager = LogManager.getRootLogger()
-    val level = logManager.getLevel.toString match {
-      case "OFF" => Level.OFF
-      case "ERROR" | "FATAL" | "SEVERE" => Level.SEVERE
-      case "WARN" | "WARNING" => Level.WARNING
-      case "CONFIG" | "DEBUG" => Level.CONFIG
-      case "INFO" => Level.INFO
-      case "TRACE" => Level.FINER
-      case _ => Level.ALL
+    if (sys.env.contains("SCHEMA_CRAWLER_DEBUG")) {
+      new LoggingConfig(Level.ALL)
+    } else {
+      val logManager = LogManager.getRootLogger()
+      val level = logManager.getLevel.toString match {
+        case "OFF" => Level.OFF
+        case "ERROR" | "FATAL" | "SEVERE" => Level.SEVERE
+        case "WARN" | "WARNING" => Level.WARNING
+        case "CONFIG" | "DEBUG" => Level.CONFIG
+        case "INFO" => Level.INFO
+        case "TRACE" => Level.FINER
+        case _ => Level.ALL
+      }
+      new LoggingConfig(level)
     }
-    new LoggingConfig(level)
   }
 
   private def getOptions(jdbc: Jdbc): SchemaCrawlerOptions = {
@@ -96,11 +100,11 @@ object SchemaCrawlerImpl extends FileUtil {
       .asJava
     // schema crawler now names the objects differently, eg Hive."default"
     limitOptionsBuilder
-      .includeSchemas(new RegularExpressionInclusionRule(s".*${jdbc.schema}.*"))
+      .includeSchemas(new RegularExpressionInclusionRule(s".*${jdbc.schema}"))
       .tableTypes(tableTypes)
     jdbc.userDefinedTable match {
       case Some(tables) =>
-        val tableList = tables.map(t => s".*${jdbc.schema}.*\\.${t.name}").mkString("|")
+        val tableList = tables.map(t => s".*${jdbc.schema}\\.${t.name}").mkString("|")
         limitOptionsBuilder.includeTables(new RegularExpressionInclusionRule(s"($tableList)"))
       case None => // no-op
     }
