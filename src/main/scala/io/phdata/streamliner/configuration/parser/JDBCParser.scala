@@ -6,6 +6,8 @@ import io.phdata.streamliner.configuration.mapper.SnowflakeTableMapper
 import io.phdata.streamliner.schemacrawler.SchemaCrawlerImpl
 import org.apache.log4j.Logger
 
+import scala.collection.mutable.ListBuffer
+
 import collection.JavaConverters._
 
 object JDBCParser {
@@ -16,20 +18,22 @@ object JDBCParser {
     val jdbc = configuration.source.asInstanceOf[Jdbc]
     val catalog = SchemaCrawlerImpl.getCatalog(jdbc, password)
 
-    val tables =
-      catalog.getSchemas.asScala.find(s => s.getFullName.contains(jdbc.schema)) match {
-        case Some(schema) =>
-          val schemaCrawlerTables = catalog.getTables(schema).asScala.toList
-          configuration.destination match {
-            case hadoop: Hadoop =>
-              HadoopTableMapper.mapSchemaCrawlerTables(schemaCrawlerTables, jdbc.userDefinedTable)
-            case snowflake: Snowflake =>
-              SnowflakeTableMapper
-                .mapSchemaCrawlerTables(schemaCrawlerTables, jdbc.userDefinedTable)
-          }
-        case None =>
-          throw new RuntimeException(s"Schema: ${jdbc.schema}, does not exist in source system")
+    val tables = ListBuffer.empty[TableDefinition]
+
+    tables ++= catalog.getSchemas.asScala.flatMap(schema => {
+      val schemaCrawlerTables = catalog.getTables(schema).asScala.toList
+      configuration.destination match {
+        case hadoop: Hadoop =>
+          HadoopTableMapper.mapSchemaCrawlerTables(schemaCrawlerTables, jdbc.userDefinedTable)
+        case snowflake: Snowflake =>
+          SnowflakeTableMapper
+            .mapSchemaCrawlerTables(schemaCrawlerTables, jdbc.userDefinedTable)
       }
+    })
+
+    if (tables.isEmpty) {
+      throw new RuntimeException(s"Schema: ${jdbc.schema}, no tables found in source system")
+    }
 
     configuration.copy(
       source = jdbc.copy(driverClass = Some(catalog.getJdbcDriverInfo.getDriverClassName)),
