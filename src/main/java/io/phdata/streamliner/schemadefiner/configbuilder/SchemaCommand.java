@@ -53,7 +53,6 @@ public class SchemaCommand {
             StreamlinerCatalog catalog = schemaDef.retrieveSchema();
             outputConfig = StreamlinerUtil.mapGlueCatalogToConfig(ingestConfig, catalog);
         } else {
-            log.error("Unknown Source provided: {}", ingestConfig.getSource().getType());
             throw new RuntimeException(String.format("Unknown Source provided: %s", ingestConfig.getSource().getType()));
         }
         checkConfiguration(outputConfig);
@@ -150,7 +149,6 @@ public class SchemaCommand {
                     checkPrimaryKeys(table);
                   }
                 } else {
-                    log.error("Unknown Table found: {}", table.getType());
                     throw new RuntimeException(String.format("Unknown Table found: %s", table.getType()));
                 }
               });

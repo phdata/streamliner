@@ -43,8 +43,7 @@ public class JdbcCrawler implements SchemaDefiner {
         try {
             return StreamlinerSchemaCrawler.getCatalog(jdbc, connectionSupplier, schemaCrawlerOptions, tableTypes);
         } catch (Exception e) {
-            log.error("Error in JdbcCrawler: {}", e.getMessage());
-            throw new RuntimeException("Error in JdbcCrawler: {}", e);
+            throw new RuntimeException(String.format("Error in JdbcCrawler: %s", e), e);
         }
 
     }

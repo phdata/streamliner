@@ -138,6 +138,8 @@ public class StreamlinerUtil {
                 .filter(matchDatabaseOrSchema(jdbc)).collect(Collectors.toList());
         if (schema.isEmpty()) {
             throw new IllegalStateException(String.format("No result found for %s", jdbc.getSchema()));
+        } else if (schema.size() > 1) {
+            throw new IllegalStateException(String.format("Found more than one result for %s: %s", jdbc.getSchema(), schema));
         }
         List<Table> tableList = (List<Table>) catalog.getTables(schema.get(0));
         if(tableList == null || tableList.isEmpty()){
@@ -254,8 +256,7 @@ public class StreamlinerUtil {
         try {
             executable.execute();
         } catch (Exception e) {
-            log.error("Error executing schema crawler. Error: {}", e.getMessage());
-            throw new RuntimeException("Error executing schema crawler.", e);
+            throw new RuntimeException("Error executing schema crawler: " + e, e);
         }
     }
 
@@ -267,12 +268,12 @@ public class StreamlinerUtil {
 
         limitOptionsBuilder
             .includeSchemas(
-                new RegularExpressionInclusionRule(String.format(".*%s.*", jdbc.getSchema())))
+                new RegularExpressionInclusionRule(String.format(".*%s", jdbc.getSchema())))
             .tableTypes(mapTableTypes(jdbc.getTableTypes()));
         // table whitelisting
         if (jdbc.getTables() != null) {
             List<String> list = jdbc.getTables().stream()
-                    .map(table -> String.format(".*%s.*\\.%s", jdbc.getSchema(), table)).collect(Collectors.toList());
+                    .map(table -> String.format(".*%s\\.%s", jdbc.getSchema(), table)).collect(Collectors.toList());
             String tableList = String.join("|", list);
             limitOptionsBuilder.includeTables(new RegularExpressionInclusionRule(String.format("(%s)",tableList)));
         }
@@ -292,6 +293,9 @@ public class StreamlinerUtil {
     }
 
     private static void setLogLevel() {
+      if (System.getenv().containsKey("SCHEMA_CRAWLER_DEBUG")) {
+        new LoggingConfig(Level.ALL);
+      } else {
         org.apache.log4j.Logger logManager = LogManager.getRootLogger();
         String str = logManager.getLevel().toString();
         Level level;
@@ -311,6 +315,7 @@ public class StreamlinerUtil {
             level = Level.ALL;
         }
         new LoggingConfig(level);
+      }
     }
 
   public static boolean deleteDirectory(File directoryToBeDeleted) {
