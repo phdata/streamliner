@@ -53,6 +53,4 @@ drop:
 
 evolve-schema:
 	
-		$(MAKE) create-table
-		$(MAKE) create-snowpipe
-		mv $(currTableStateFile) $(previousStateDirectory)
+		$(MAKE) first-run
