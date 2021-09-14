@@ -96,9 +96,7 @@ evolve-schema:
     #end
 #elseif (tableDiff.existsInSource && !tableDiff.existsInDestination)
     #if (tableDiff.allChangesAreCompatible(typeMapping, validSchemaChanges))
-        $(MAKE) create-table
-        $(MAKE) create-snowpipe
-        mv $(currTableStateFile) $(previousStateDirectory)
+        $(MAKE) first-run
     #elseif (!tableDiff.allChangesAreCompatible(typeMapping, validSchemaChanges))
         $(MAKE) incompatible-change
         <%

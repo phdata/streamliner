@@ -76,51 +76,54 @@ can be executed in Snowflake to create these tables. To achieve this below comma
 
 1. Schema command to extract oracle database schema.
 
-```
-./bin/streamliner schema --config conf/ingest-configuration.yml --output-file output/streamliner-configuration1.yml --database-password <db_pass>
+```shell script
+./bin/streamliner schema --config conf/private-ingest-configuration.yml --state-directory output/state-directory --database-password <db_pass>
 ```
 
-Note : Before executing above command make sure output-file is not a directory.
+Note : Before executing above command make sure _state-directory_ is a directory.
 
-Output of this command is streamliner-configuration1.yml that contains tables t1, t2, t3 and columns details of oracle schema.
+Output of this command is a _state-directory_ that contains various config files. Each file contains config per table. In our case t1.yml, t2.yml and t3.yml will be generated that contains the table and table columns details.
 
 2. Scripts command to generate initial scripts.
 
-```
-./bin/streamliner scripts --config output/streamliner-configuration1.yml --template-directory templates/snowflake --type-mapping conf/type-mapping.yml --output-path output/scripts
+```shell script
+./bin/streamliner scripts --config conf/private-ingest-configuration.yml --state-directory output/state-directory --previous-state-directory output/previous-state-directory --template-directory templates/snowflake --type-mapping conf/type-mapping.yml --output-path output/scripts
 ```
 
-Output of step 1 streamliner-configuration1.yml is passed as config in this command.
+Output of step 1 _state-directory_ is passed to _--state-directory_ in this command.
 
-Output of this command is scripts that can be executed in snowflake to create table t1, t2 and t3.
+Output of this command is
+1. scripts that can be executed in snowflake to create table t1, t2 and t3.
+2. folder _previous-state-directory_ is created.  
+3. on successful execution of all the scripts of a table, table config file (example t1.yml) is moved from _state-directory_ to _previous-state-directory_. 
 
 As time passes a new table t4 is created in oracle schema. Also a new column c3 is added in table t1. Now to keep snowflake updated with oracle schema we have to execute below commands.
 
 3. Schema command to extract oracle schema and calculate difference.
 
-```
-./bin/streamliner schema --config conf/ingest-configuration.yml --output-file output/streamliner-configuration2.yml --previous-output-file output/streamliner-configuration1.yml --diff-output-file output/configDiff/streamliner-configDiff.yml --database-password <db_pass>
+```shell script
+./bin/streamliner schema --config conf/private-ingest-configuration.yml --state-directory output/state-directory --previous-state-directory  output/previous-state-directory --database-password <db_pass>
 ```
 
-Note : Before executing above command make sure output-file, previous-output-file and diff-output-file is not a directory.
+Note : Before executing above command make sure _state-directory_ and _previous-state-directory_ is a directory.
 
-Output of step 1 streamliner-configuration1.yml is passed as previous-output-file in this command to calculate difference.
+Output of step 2 _previous-state-directory_ folder is passed to _--previous-state-directory_ in this command to calculate difference.
 
 Output of this command is : 
-   * streamliner-configuration2.yml: This contains tables and columns details of oracle schema. This will also have details of new table t4 and column c3 in table t1.
-   * streamliner-configDiff.yml: This contains details of difference between oracle schema. In this case this will have table t4 and column c3 in table t1 details.
+   * state-directory: This folder contains various config files. Each file contains config per table. This folder will also have t4.yml that stores new table t4 details and t1.yml will have new column c3 details as well.
+   * streamliner-diff.yml: This contains details of difference between oracle schema states. In this case it will have new table t4 and column c3 in table t1 details. By default **streamliner-diff.yml** is generated in _state-directory_ folder
 
 4. Scripts command to generate evolve schema scripts. 
 
+```shell script
+./bin/streamliner scripts --config conf/private-ingest-configuration.yml --state-directory output/state-directory --previous-state-directory output/previous-state-directory --template-directory templates/snowflake --type-mapping conf/type-mapping.yml --output-path output/scripts
 ```
-./bin/streamliner scripts --config output/streamliner-configuration2.yml --config-diff output/configDiff/streamliner-configDiff.yml --template-directory templates/snowflake --type-mapping conf/type-mapping.yml --output-path output/evolve_schema_scripts
-```
 
-Output of step 3 streamliner-configuration2.yml is passed as config and streamliner-configDiff.yml as config-diff. 
+Output of step 3 _state-directory_ is passed to  _--state-directory_  and output of step 2 _previous-state-directory_ is passed to _--previous-state-directory_ in this command.
 
-Output of this command is scripts that can be executed in snowflake to create table 4 and alter table t1 to add column c3.
-
-Note: In all the commands above any name can be provided to the configuration files.   
+Output of this command is 
+1. scripts that can be executed in snowflake to create table 4 and alter table t1 to add column c3.
+2. on successful execution of all the scripts of a table, table config file (example t4.yml) is moved from _state-directory_ to _previous-state-directory_.
 
 ## Exception Handling Process
 
@@ -159,14 +162,16 @@ Column deletes are simpler to handle, especially with Parquet.
 Column deletes are handled gracefully. If the column has yet to be deleted in Snowflake, it'll be populated with null. Therefore, you simply need to:
 
 1. Drop column on the Snowflake side.
-2. Re-define the PIPE object to remove the use of the deleted column
+2. Re-define the PIPE object to remove the use of the deleted column.
+3. Move table config file from _state-directory_ to _previous-state-directory_.
 
 #### CSV
 
 CSV is complicated as Snowflake uses ordinal position to identify column. However, if no data has been loaded since the user deleted the column, you can:
 
 1. Drop column on the Snowflake side.
-2. Re-define the PIPE object to remove the use of the deleted column
+2. Re-define the PIPE object to remove the use of the deleted column.
+3. Move table config file from _state-directory_ to _previous-state-directory_.
 
 If data has been loaded without the column, then the ordering is wrong and corrupt data has been loaded. The table should be reloaded.
 
@@ -177,3 +182,13 @@ If data has been loaded without the column, then the ordering is wrong and corru
 Currently Streamliner supports column extension having data type equivalent to [Snowflake String data type](https://docs.snowflake.com/en/sql-reference/data-types-text.html) only.
 
 For example: Oracle varchar2 data type is equivalent to Snowflake varchar data type. 
+
+### Tables Delete
+
+#### Both CSV and Parquet
+
+Below manual steps are needed to handle table delete.
+
+1. Drop the table on the Snowflake side.
+2. Drop the PIPE object.
+3. Delete the table config file from _previous-state-directory_. If file is not deleted, it will generate wrong difference output. 

@@ -272,13 +272,13 @@ The command below requires the file `password` be populated with the database pa
 another editor and populate it with the password for the database. _When the command is run, the value passed into `--database-password` is actually reading the contents of the `password` file as input for the argument._
 
 ```shell script
-./bin/streamliner schema --config conf/private-ingest-configuration.yml --output-file output/STREAMLINER_QUICKSTART_1/conf/streamliner-configuration.yml --database-password <password>
+./bin/streamliner schema --config conf/private-ingest-configuration.yml --state-directory output/state-directory --database-password <password>
 ```
 
 ## Generate Scripts
 
 ```shell script
-./bin/streamliner scripts --config output/STREAMLINER_QUICKSTART_1/conf/streamliner-configuration.yml --template-directory templates/snowflake --type-mapping conf/type-mapping.yml --output-path output/STREAMLINER_QUICKSTART_1/SANDBOX/scripts
+./bin/streamliner scripts --config conf/private-ingest-configuration.yml --state-directory output/state-directory --previous-state-directory output/previous-state-directory --template-directory templates/snowflake --type-mapping conf/type-mapping.yml --output-path output/STREAMLINER_QUICKSTART_1/SANDBOX/scripts
 ```
 
 ## Run Scripts
