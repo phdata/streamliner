@@ -156,7 +156,9 @@ public class ScriptCommand {
       try {
         /*intentionally kept inside try catch block.
         any exception while generating the delta-change-summary should not block the run. */
-        generateDeltaChangeSummary(configDiff, configuration, typeMapping, outputDirectory);
+        if (configDiff.getTableDiffs() != null && !configDiff.getTableDiffs().isEmpty()) {
+          generateDeltaChangeSummary(configDiff, configuration, typeMapping, outputDirectory);
+        }
       } catch (Exception e) {
         String errorMsg = String.format("Error generating delta-change-summary file. %s", e);
         log.error(errorMsg);
