@@ -376,21 +376,17 @@ public class GenerateStateCommand {
         snowflakeColumnCount,
         sourceColumnCount);
 
-    if (snowflakeColumnCount > sourceColumnCount) {
-      log.debug(
-          "Table {} have {} columns missing from Source schema.",
-          csvTable.getTableName(),
-          getListDiff(csvCols, sourceCols));
-    } else if (sourceColumnCount > snowflakeColumnCount) {
-      log.debug(
-          "Table {} have {} columns missing from Snowflake.",
-          sourceTableDef.getSourceName(),
-          getListDiff(sourceCols, csvCols));
-    } else {
-      log.debug(
-          "Table {} have equal number of columns in Snowflake and Source schema.",
-          sourceTableDef.getSourceName());
-    }
+    /* It's good to log both columns missing and columns added.
+     * 1. In case of column rename, it will be column add and column delete.
+     * 2. Sometime columns count remains same if count of column add is equal to column delete.*/
+    log.debug(
+        "Table {} have {} columns missing from Source schema.",
+        csvTable.getTableName(),
+        getListDiff(csvCols, sourceCols));
+    log.debug(
+        "Table {} have {} columns added in Source schema.",
+        csvTable.getTableName(),
+        getListDiff(sourceCols, csvCols));
   }
 
   private static void logTablesDetail(
