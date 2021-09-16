@@ -342,7 +342,7 @@ public class StreamlinerSchemaCrawler {
                         String queryString = query.replace("{{SCHEMA_NAME}}", schemaName)
                                 .replace("{{THREAD_INDEX}}", String.valueOf(finalThreadIndex));
                         StopWatch timer = StopWatch.createStarted();
-                        String queryForLogging = query.replace('\n', ' ');
+                        String queryForLogging = queryString.replace('\n', ' ');
                         try (Connection connection = connectionSupplier.get();
                              Statement statement = connection.createStatement()) {
                             try {

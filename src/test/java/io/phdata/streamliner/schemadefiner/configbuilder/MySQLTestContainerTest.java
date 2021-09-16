@@ -362,6 +362,44 @@ public class MySQLTestContainerTest {
         StreamlinerUtil.deleteDirectory(new File("src/test/output"));
     }
 
+    @Test
+    public void test13TableIgnoreTest() throws SQLException, FileNotFoundException {
+        performExecuteUpdate(con, "CREATE TABLE Employee (\n" +
+                "    EmployeeId int NOT NULL,\n" +
+                "    LastName varchar(255),\n" +
+                "    FirstName varchar(255),\n" +
+                "    Address varchar(255),\n" +
+                "    City varchar(255)\n" +
+                ");");
+        performExecuteUpdate(con, "CREATE TABLE Doctors (\n" +
+                "    Id int NOT NULL,\n" +
+                "    LastName varchar(255),\n" +
+                "    FirstName varchar(255),\n" +
+                "    Address varchar(255),\n" +
+                "    City varchar(255)\n" +
+                ");");
+        String config = "src/test/resources/conf/ingest-configuration-tableIgnore.yml";
+        String stateDirectory =
+                "src/test/resources/results/schemaCommand/test13TableIgnoreTest/state-directory";
+        String dbPass = mysql.getPassword();
+        boolean createDocs = false;
+
+        updateSourceDetail(config);
+
+        // Schema comnmand
+        SchemaCommand.build(config,stateDirectory,dbPass,createDocs, null);
+
+        Configuration outputConfig = StreamlinerUtil.readYamlFile(String.format("%s/%s", stateDirectory, "Persons.yml"));
+
+        assertNotNull(outputConfig.getTables());
+        assertEquals(1, outputConfig.getTables().size());
+        assertNotNull(outputConfig.getTables().get(0).getPrimaryKeys());
+        assertEquals(2, outputConfig.getTables().get(0).getPrimaryKeys().size());
+        assertEquals("Persons", outputConfig.getTables().get(0).getSourceName());
+
+        StreamlinerUtil.deleteDirectory(new File("src/test/output"));
+    }
+
   private void testSchemaCommandOptionalParams(String stateDirectory, String[] schemaCommand1) {
     // Scala App main method
     App.main(schemaCommand1);

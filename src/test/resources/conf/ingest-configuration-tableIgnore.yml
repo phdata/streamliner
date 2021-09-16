@@ -1,0 +1,30 @@
+name: STREAMLINER_QUICKSTART_1
+environment: SANDBOX
+pipeline: snowflake-snowpipe-append
+source:
+  type: Jdbc
+  url: jdbc:mysql://localhost:55059/STREAMLINER_DB
+  username: streamliner_user
+  passwordFile: /
+  schema: STREAMLINER_DB
+  tableTypes: [table]
+  parallelism: 4
+  userDefinedTable:
+  - name: Persons
+    type: Snowflake
+    primaryKeys: [PersonID, FirstName]
+  ignoreTables: [Employee]
+  tables: [Persons, Employee]
+destination:
+  type: Snowflake
+  snowSqlCommand: snowsql -c connection
+  storagePath: s3://streamliner-quickstart-1/employees/
+  storageIntegration: STREAMLINER_QUICKSTART_1
+  warehouse: SANDBOX_POC1
+  taskSchedule: ''
+  stageName: stage1
+  fileFormat:
+    name: ''
+    options: {type: ''}
+  stagingDatabase: {name: SANDBOX_POC1, schema: EMPLOYEES}
+  reportingDatabase: {name: '', schema: ''}
