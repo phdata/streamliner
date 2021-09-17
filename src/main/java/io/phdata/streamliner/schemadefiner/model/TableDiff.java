@@ -206,21 +206,21 @@ public class TableDiff {
                 alterColumnDDL.add(
                     String.format(
                         "COLUMN %s SET DATA TYPE %s",
-                        currDef.getDestinationName(), currDef.mapDataTypeSnowflake(javaTypeMap)));
+                        StreamlinerUtil.quoteIdentifierIfNeeded(currDef.getDestinationName()), currDef.mapDataTypeSnowflake(javaTypeMap)));
               }
               if (!isColumnCommentSame(currDef, prevDef)) {
                 alterColumnDDL.add(
                     String.format(
                         "COLUMN %s COMMENT '%s'",
-                        currDef.getDestinationName(), TemplateUtil.snowflakeEscape(currDef.getComment())));
+                        StreamlinerUtil.quoteIdentifierIfNeeded(currDef.getDestinationName()), TemplateUtil.snowflakeEscape(currDef.getComment())));
               }
               if (!isColumnNullableSame(currDef, prevDef)) {
                 if (currDef.isNullable() == true) {
                   alterColumnDDL.add(
-                      String.format("COLUMN %s DROP NOT NULL", currDef.getDestinationName()));
+                      String.format("COLUMN %s DROP NOT NULL", StreamlinerUtil.quoteIdentifierIfNeeded(currDef.getDestinationName())));
                 } else {
                   alterColumnDDL.add(
-                      String.format("COLUMN %s SET NOT NULL", currDef.getDestinationName()));
+                      String.format("COLUMN %s SET NOT NULL", StreamlinerUtil.quoteIdentifierIfNeeded(currDef.getDestinationName())));
                 }
               }
             });
