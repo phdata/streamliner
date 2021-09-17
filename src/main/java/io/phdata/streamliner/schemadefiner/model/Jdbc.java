@@ -26,12 +26,17 @@ public class Jdbc extends Source {
   private Map<String, String> metadata;
   // for table whitelisting
   private List<String> tables;
+  // used to fetch snowflake tables details in batch of value provided
   private int batchTableCount;
   /* This is used to manage allowed schema changes.
   For example: To exclude column add for CSV users we should not pass "COLUMN_ADD" in the list. Then column add becomes incompatible change for CSV users.
   If this parameter is not provided in config, by default it includes all the values from enum SchemaChanges. This is handled in code.
   */
   private Set<SchemaChanges> validSchemaChanges = new HashSet<>();
+  /* Used to ignore the tables.
+  *  In case tables(used for table whitelisting) and ignoreTables are used simultaneously then tables are ignored from whitelisted tables.
+  * */
+  private Set<String> ignoreTables;
 
   public Jdbc() {}
 

@@ -171,7 +171,7 @@ CSV is complicated as Snowflake uses ordinal position to identify column. Howeve
 
 1. Drop column on the Snowflake side.
 2. Re-define the PIPE object to remove the use of the deleted column.
-3. Move table config file from _state-directory_ to _previous-state-directory_.
+3. Move table config file from _state-directory_ to _previous-state-directory_ or remove the deleted column details from _previous-state-directory_ table config file
 
 If data has been loaded without the column, then the ordering is wrong and corrupt data has been loaded. The table should be reloaded.
 
@@ -192,3 +192,23 @@ Below manual steps are needed to handle table delete.
 1. Drop the table on the Snowflake side.
 2. Drop the PIPE object.
 3. Delete the table config file from _previous-state-directory_. If file is not deleted, it will generate wrong difference output. 
+
+### How to ignore tables having incompatible changes?
+
+In ingest config file (example: private-ingest-configuration.yml) add all the tables having incompatible changes in the parameter **ignoreTables** under _source_ section.
+
+This is how the source section will look like:
+
+```yaml
+source:
+  type: Jdbc
+  url: "jdbc:mysql://<REPLACE_WITH_YOUR_FULL_MYSQL_HOSTNAME>:33006?characterEncoding=latin1"
+  username: "<YOUR MYSQL ADMIN USER>" # e.g.: "admin"
+  passwordFile: "" # empty for snowflake
+  schema: "employees"
+  tableTypes:
+    - table
+  ignoreTables:
+    - table1
+    - table2
+```

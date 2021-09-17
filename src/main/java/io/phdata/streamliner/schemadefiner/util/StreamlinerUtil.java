@@ -145,6 +145,14 @@ public class StreamlinerUtil {
         if(tableList == null || tableList.isEmpty()){
             throw new RuntimeException(String.format("%s schema does not  have %s in source system",jdbc.getSchema(), jdbc.getTableTypes().toString()));
         }
+        if(jdbc.getIgnoreTables() != null && !jdbc.getIgnoreTables().isEmpty()){
+           tableList = tableList.stream().
+                   filter(table -> !jdbc.getIgnoreTables().contains(table.getName()))
+                   .collect(Collectors.toList());
+        }
+        if(tableList.isEmpty()){
+            throw new RuntimeException("No tables found or all tables ignored.");
+        }
         List<TableDefinition> tables = null;
         if (ingestConfig.getDestination() instanceof Snowflake) {
             tables = SnowflakeMapper.mapSchemaCrawlerTables(tableList, jdbc.getUserDefinedTable());
@@ -271,7 +279,7 @@ public class StreamlinerUtil {
                 new RegularExpressionInclusionRule(String.format(".*%s", jdbc.getSchema())))
             .tableTypes(mapTableTypes(jdbc.getTableTypes()));
         // table whitelisting
-        if (jdbc.getTables() != null) {
+        if (jdbc.getTables() != null && !jdbc.getTables().isEmpty()) {
             List<String> list = jdbc.getTables().stream()
                     .map(table -> String.format(".*%s\\.%s", jdbc.getSchema(), table)).collect(Collectors.toList());
             String tableList = String.join("|", list);
