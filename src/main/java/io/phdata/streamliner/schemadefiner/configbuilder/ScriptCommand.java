@@ -280,12 +280,12 @@ public class ScriptCommand {
               List<String> columnsAdded =
                   columnDiffs.stream()
                       .filter(columnDiff -> columnDiff.getIsAdd())
-                      .map(col -> col.getCurrentColumnDef().getSourceName())
+                      .map(col -> StreamlinerUtil.quoteIdentifierIfNeeded(col.getCurrentColumnDef().getSourceName()))
                       .collect(Collectors.toList());
               List<String> columnsDeleted =
                   columnDiffs.stream()
                       .filter(columnDiff -> columnDiff.getIsDeleted())
-                      .map(col -> col.getPreviousColumnDef().getSourceName())
+                      .map(col -> StreamlinerUtil.quoteIdentifierIfNeeded(col.getPreviousColumnDef().getSourceName()))
                       .collect(Collectors.toList());
               List<ColumnDiff> columnsUpdated =
                   columnDiffs.stream()
@@ -365,7 +365,7 @@ public class ScriptCommand {
               }
               sb.append(
                   String.format(
-                      "%s -- %s\n", currDef.getDestinationName(), StringUtils.join(changes, ", ")));
+                      "%s -- %s\n", StreamlinerUtil.quoteIdentifierIfNeeded(currDef.getDestinationName()), StringUtils.join(changes, ", ")));
             });
         sb.append("------------------------------\n\n");
       }

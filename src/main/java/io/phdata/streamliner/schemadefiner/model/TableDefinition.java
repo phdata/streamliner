@@ -67,7 +67,7 @@ public class TableDefinition {
   public String pkConstraint(String aAlias, String bAlias, String joinCondition) {
     List<String> pkList =
         primaryKeys.stream()
-            .map(pk -> String.format("%s.%s = %s.%s", aAlias, pk, bAlias, pk))
+            .map(pk -> String.format("%s.%s = %s.%s", aAlias, StreamlinerUtil.quoteIdentifierIfNeeded(pk), bAlias, StreamlinerUtil.quoteIdentifierIfNeeded(pk)))
             .collect(Collectors.toList());
     return StringUtils.join(pkList, joinCondition == null ? " AND " : joinCondition);
   }
@@ -80,7 +80,7 @@ public class TableDefinition {
                   if (aAlias == null || aAlias.equals("")) {
                     return String.format(
                         "%s = %s.%s",
-                        column.getDestinationName(), bAlias, column.getDestinationName());
+                            StreamlinerUtil.quoteIdentifierIfNeeded(column.getDestinationName()), bAlias, StreamlinerUtil.quoteIdentifierIfNeeded(column.getDestinationName()));
                   } else {
                     return String.format(
                         "%s.%s = %s.%s",
