@@ -9,6 +9,7 @@
     val sourceColumnStr = table.sourceColumnConversion(typeMapping)
 }#
 
+#if (tableDiff.existsInDestination && tableDiff.existsInSource)
 USE DATABASE ${destination.stagingDatabase.name};
 
 USE SCHEMA ${destination.stagingDatabase.schema};
@@ -71,3 +72,4 @@ $$
 CALL streamliner_recreate_pipe('${table.destinationName}_pipe');
 
 DROP PROCEDURE streamliner_recreate_pipe(string);
+#end
