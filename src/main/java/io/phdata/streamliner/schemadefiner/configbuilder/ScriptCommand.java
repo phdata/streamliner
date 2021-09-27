@@ -1,22 +1,37 @@
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 package io.phdata.streamliner.schemadefiner.configbuilder;
 
 import io.phdata.streamliner.schemadefiner.model.*;
 import io.phdata.streamliner.schemadefiner.util.StreamlinerUtil;
 import io.phdata.streamliner.util.JavaHelper;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ScriptCommand {
   private static final Logger log = LoggerFactory.getLogger(ScriptCommand.class);
   private Map<String, Map<String, List>> commonTables = new LinkedHashMap<>();;
   private Map<String, Collection> addedOrDeletedorIncompatibleTables = new LinkedHashMap<>();;
 
-    // config is ingest-configuration.yml
+  // config is ingest-configuration.yml
   public void build(
       String config,
       String stateDirectory,
@@ -26,18 +41,24 @@ public class ScriptCommand {
       String outputDirectory) {
 
     Configuration ingestConfig = StreamlinerUtil.readConfigFromPath(config);
-    if(ingestConfig == null){
-        throw new RuntimeException("--config file(example: private-ingest-configuration.yml ) can not be empty or config file path is null.");
+    if (ingestConfig == null) {
+      throw new RuntimeException(
+          "--config file(example: private-ingest-configuration.yml ) can not be empty or config file path is null.");
     }
-    Configuration configuration = StreamlinerUtil.createConfig(stateDirectory, ingestConfig, "--state-directory");
-    ConfigurationDiff configDiff = StreamlinerUtil.readConfigDiffFromPath(String.format("%s/%s", stateDirectory, Constants.STREAMLINER_DIFF_FILE.value()));
+    Configuration configuration =
+        StreamlinerUtil.createConfig(stateDirectory, ingestConfig, "--state-directory");
+    ConfigurationDiff configDiff =
+        StreamlinerUtil.readConfigDiffFromPath(
+            String.format("%s/%s", stateDirectory, Constants.STREAMLINER_DIFF_FILE.value()));
     if (configuration == null && configDiff == null) {
-      throw new RuntimeException("--state-directory has no table config and streamliner-diff.yml not found.");
+      throw new RuntimeException(
+          "--state-directory has no table config and streamliner-diff.yml not found.");
     }
     if (configuration == null) {
       throw new RuntimeException("--state-directory must have atleast one table config.");
     }
-    // --previous-state-directory is mandatory for every run. After every successful run, table config is moved from state-directory to previous-state-directory.
+    // --previous-state-directory is mandatory for every run. After every successful run, table
+    // config is moved from state-directory to previous-state-directory.
     validatePreviousStateDirectory(previousStateDirectory);
 
     Map<String, Map<String, String>> typeMapping =
@@ -46,9 +67,18 @@ public class ScriptCommand {
       outputDirectory =
           String.format(
               "output/%s/%s/scripts", configuration.getName(), configuration.getEnvironment());
-      log.info("Invalid --output-directory provided. Scripts will be saved at path: {}", outputDirectory);
+      log.info(
+          "Invalid --output-directory provided. Scripts will be saved at path: {}",
+          outputDirectory);
     }
-    build(configuration, configDiff, typeMapping, templateDirectory, outputDirectory, stateDirectory, previousStateDirectory);
+    build(
+        configuration,
+        configDiff,
+        typeMapping,
+        templateDirectory,
+        outputDirectory,
+        stateDirectory,
+        previousStateDirectory);
     log.info("Scripts generated successfully.");
   }
 
@@ -64,12 +94,14 @@ public class ScriptCommand {
     }
   }
 
-    private void build(
+  private void build(
       Configuration configuration,
       ConfigurationDiff configDiff,
       Map<String, Map<String, String>> typeMapping,
       String templateDirectory,
-      String outputDirectory, String stateDirectory, String previousStateDirectory) {
+      String outputDirectory,
+      String stateDirectory,
+      String previousStateDirectory) {
     String pipeline =
         configDiff != null
             ? (configDiff.getPipeline() == null
@@ -138,7 +170,8 @@ public class ScriptCommand {
                           map.put(
                               "currConfigFile",
                               String.format(
-                                  "%s/%s.yml", getAbsolutePath(stateDirectory), tableDiff.getDestinationName()));
+                                  "%s/%s.yml",
+                                  getAbsolutePath(stateDirectory), tableDiff.getDestinationName()));
                           map.put("prevStateDir", getAbsolutePath(previousStateDirectory));
                           String rendered = JavaHelper.getLayout(templateFile.getPath(), map);
                           String replaced = rendered.replace("    ", "\t");
@@ -203,7 +236,8 @@ public class ScriptCommand {
                           map.put(
                               "currConfigFile",
                               String.format(
-                                  "%s/%s.yml", getAbsolutePath(stateDirectory), table.getSourceName()));
+                                  "%s/%s.yml",
+                                  getAbsolutePath(stateDirectory), table.getSourceName()));
                           map.put("prevStateDir", getAbsolutePath(previousStateDirectory));
                           String rendered = JavaHelper.getLayout(templateFile.getPath(), map);
                           String replaced = rendered.replace("    ", "\t");
@@ -224,8 +258,7 @@ public class ScriptCommand {
                           StreamlinerUtil.isExecutable(fileName);
                         });
               });
-      writeSchemaMakeFile(
-          configuration, null, typeMapping, templateDirectory, outputDirectory);
+      writeSchemaMakeFile(configuration, null, typeMapping, templateDirectory, outputDirectory);
       if (templateContext.hasErrors()) {
         List<String> errors = templateContext.getErrors();
         String msg =
@@ -265,8 +298,9 @@ public class ScriptCommand {
                         JavaHelper.convertJavaMapToScalaMap(typeMapping), validSchemaChanges))
             .map(incompatibleTable -> incompatibleTable.getDestinationName())
             .collect(Collectors.toSet());
-    //Deleted tables are also added as incompatible change tables.
-    incompatibleTables.addAll(addedOrDeletedorIncompatibleTables.get(Constants.TABLES_DELETED.value()));
+    // Deleted tables are also added as incompatible change tables.
+    incompatibleTables.addAll(
+        addedOrDeletedorIncompatibleTables.get(Constants.TABLES_DELETED.value()));
     addedOrDeletedorIncompatibleTables.put(
         Constants.TABLES_INCOMPATIBLE.value(), incompatibleTables);
 
@@ -280,12 +314,18 @@ public class ScriptCommand {
               List<String> columnsAdded =
                   columnDiffs.stream()
                       .filter(columnDiff -> columnDiff.getIsAdd())
-                      .map(col -> StreamlinerUtil.quoteIdentifierIfNeeded(col.getCurrentColumnDef().getSourceName()))
+                      .map(
+                          col ->
+                              StreamlinerUtil.quoteIdentifierIfNeeded(
+                                  col.getCurrentColumnDef().getSourceName()))
                       .collect(Collectors.toList());
               List<String> columnsDeleted =
                   columnDiffs.stream()
                       .filter(columnDiff -> columnDiff.getIsDeleted())
-                      .map(col -> StreamlinerUtil.quoteIdentifierIfNeeded(col.getPreviousColumnDef().getSourceName()))
+                      .map(
+                          col ->
+                              StreamlinerUtil.quoteIdentifierIfNeeded(
+                                  col.getPreviousColumnDef().getSourceName()))
                       .collect(Collectors.toList());
               List<ColumnDiff> columnsUpdated =
                   columnDiffs.stream()
@@ -315,7 +355,10 @@ public class ScriptCommand {
     StringBuilder sb = new StringBuilder();
     sb.append("\nSTREAMLINER DELTA CHANGE SUMMARY\n");
     sb.append("***********************************************************\n");
-    sb.append(String.format("ALLOWED SCHEMA CHANGES: %s\n\n", validSchemaChanges.toString()));
+    sb.append(
+        String.format(
+            "ALLOWED SCHEMA CHANGES: %s\n\n",
+            validSchemaChanges.stream().sorted().collect(Collectors.toList()).toString()));
     sb.append(
         String.format(
             "TABLES ADDED: %s\n",
@@ -365,7 +408,9 @@ public class ScriptCommand {
               }
               sb.append(
                   String.format(
-                      "%s -- %s\n", StreamlinerUtil.quoteIdentifierIfNeeded(currDef.getDestinationName()), StringUtils.join(changes, ", ")));
+                      "%s -- %s\n",
+                      StreamlinerUtil.quoteIdentifierIfNeeded(currDef.getDestinationName()),
+                      StringUtils.join(changes, ", ")));
             });
         sb.append("------------------------------\n\n");
       }
@@ -381,8 +426,7 @@ public class ScriptCommand {
         sb.toString(), String.format("%s/%s", outputDirectory, "delta-change-summary.txt"));
   }
 
-    private TableDefinition getOriginalTable(
-      Configuration configuration, TableDiff tableDiff) {
+  private TableDefinition getOriginalTable(Configuration configuration, TableDiff tableDiff) {
     if (configuration.getTables() == null) {
       throw new RuntimeException(
           "Tables section is not found. Check the configuration (example: streamliner-configuration.yml) file");
@@ -449,8 +493,9 @@ public class ScriptCommand {
           StreamlinerUtil.isExecutable(fileName);
         });
   }
-  private String getAbsolutePath(String path){
-      File f = new File(path);
-      return f.getAbsolutePath();
+
+  private String getAbsolutePath(String path) {
+    File f = new File(path);
+    return f.getAbsolutePath();
   }
 }

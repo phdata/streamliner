@@ -31,13 +31,15 @@ class Cli(args: Seq[String]) extends ScallopConf(args) {
       "state-directory",
       descr =
         "Current run table config directory where Streamliner configuration per table will be written.",
-      required = true)
+      required = true
+    )
 
     val previousStateDirectory: ScallopOption[String] = opt[String](
       "previous-state-directory",
       descr =
         "Previous run table config directory where Streamliner configuration per table is written to",
-      required = false)
+      required = false
+    )
 
     val databasePassword: ScallopOption[String] = opt[String](
       "database-password",
@@ -62,18 +64,21 @@ class Cli(args: Seq[String]) extends ScallopConf(args) {
       "state-directory",
       descr =
         "Current run table config directory where Streamliner configuration per table will be written.",
-      required = true)
+      required = true
+    )
 
     val previousStateDirectory: ScallopOption[String] = opt[String](
       "previous-state-directory",
       descr =
         "Previous run table config directory where Streamliner configuration per table is written to",
-      required = true)
+      required = true
+    )
 
     val outputPath: ScallopOption[String] = opt[String](
       "output-path",
       descr = "Directory path where scripts should be written to",
-      required = true)
+      required = true
+    )
 
     val typeMappingFile: ScallopOption[String] =
       opt[String]("type-mapping", descr = "Path to data type mapping file", required = true)
@@ -102,23 +107,27 @@ class Cli(args: Seq[String]) extends ScallopConf(args) {
     val tableNameRemove: ScallopOption[String] = opt[String](
       "table-name-remove",
       descr = "Removes a given regex from table name.",
-      required = false)
+      required = false
+    )
 
     val columnNameRemove: ScallopOption[String] = opt[String](
       "column-name-remove",
       descr = "Removes a given regex from column name.",
-      required = false)
+      required = false
+    )
 
     val outputPath: ScallopOption[String] =
       opt[String](
         "output-path",
         descr = "Directory to save the generated state file per table.",
-        required = true)
+        required = true
+      )
 
     val sourceStateDirectory: ScallopOption[String] = opt[String](
       "source-state-directory",
       descr = "Source schema state directory generated through streamliner.",
-      required = true)
+      required = true
+    )
 
     val tableCsvPath: ScallopOption[String] =
       opt[String]("table-csv-file", descr = "Tables CSV file path.", required = true)

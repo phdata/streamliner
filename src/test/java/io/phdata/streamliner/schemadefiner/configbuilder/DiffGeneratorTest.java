@@ -1,21 +1,36 @@
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 package io.phdata.streamliner.schemadefiner.configbuilder;
+
+import static org.junit.Assert.*;
 
 import io.phdata.streamliner.schemadefiner.model.ColumnDiff;
 import io.phdata.streamliner.schemadefiner.model.Configuration;
 import io.phdata.streamliner.schemadefiner.model.ConfigurationDiff;
 import io.phdata.streamliner.schemadefiner.model.TableDiff;
 import io.phdata.streamliner.schemadefiner.util.StreamlinerUtil;
+import java.io.File;
+import java.util.stream.Collectors;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
-import java.util.stream.Collectors;
-
-import static org.junit.Assert.*;
-
 public class DiffGeneratorTest {
-  private static  String outputPath = "src/test/output/";
+  private static String outputPath = "src/test/output/";
   private String outputFile = "src/test/output/configDiff/streamliner-configDiff.yml";
 
   @Before
@@ -30,7 +45,7 @@ public class DiffGeneratorTest {
   }
 
   @Test
-  public void testPrevConfigEmpty(){
+  public void testPrevConfigEmpty() {
     Configuration prevConfig =
         StreamlinerUtil.readYamlFile("src/test/resources/configDiff/addAllColumn/prevConfig.yml");
     Configuration currConfig =
@@ -64,7 +79,7 @@ public class DiffGeneratorTest {
   }
 
   @Test
-  public void testNewColumnAdded(){
+  public void testNewColumnAdded() {
     Configuration prevConfig =
         StreamlinerUtil.readYamlFile("src/test/resources/configDiff/addColumn/prevConfig.yml");
     Configuration currConfig =
@@ -98,7 +113,7 @@ public class DiffGeneratorTest {
   }
 
   @Test
-  public void testColumnChanged(){
+  public void testColumnChanged() {
     Configuration prevConfig =
         StreamlinerUtil.readYamlFile("src/test/resources/configDiff/changeColumn/prevConfig.yml");
     Configuration currConfig =
@@ -136,7 +151,7 @@ public class DiffGeneratorTest {
   }
 
   @Test
-  public void testColumnDeleted(){
+  public void testColumnDeleted() {
     Configuration prevConfig =
         StreamlinerUtil.readYamlFile("src/test/resources/configDiff/deleteColumn/prevConfig.yml");
     Configuration currConfig =
@@ -170,7 +185,7 @@ public class DiffGeneratorTest {
   }
 
   @Test
-  public void testColumnDeletedAddedChanged(){
+  public void testColumnDeletedAddedChanged() {
     Configuration prevConfig =
         StreamlinerUtil.readYamlFile("src/test/resources/configDiff/hybridChanges/prevConfig.yml");
     Configuration currConfig =
@@ -241,7 +256,7 @@ public class DiffGeneratorTest {
   }
 
   @Test
-  public void testTableDelete(){
+  public void testTableDelete() {
     Configuration prevConfig =
         StreamlinerUtil.readYamlFile("src/test/resources/configDiff/deleteTable/prevConfig.yml");
     Configuration currConfig =
@@ -273,14 +288,14 @@ public class DiffGeneratorTest {
     assertFalse(colDiff.getIsAdd());
     assertTrue(colDiff.getIsDeleted());
     assertFalse(colDiff.getIsUpdate());
-    }
+  }
 
   @Test
-  public void testTableAdded(){
+  public void testTableAdded() {
     Configuration prevConfig =
-            StreamlinerUtil.readYamlFile("src/test/resources/configDiff/addTable/prevConfig.yml");
+        StreamlinerUtil.readYamlFile("src/test/resources/configDiff/addTable/prevConfig.yml");
     Configuration currConfig =
-            StreamlinerUtil.readYamlFile("src/test/resources/configDiff/addTable/currConfig.yml");
+        StreamlinerUtil.readYamlFile("src/test/resources/configDiff/addTable/currConfig.yml");
     ConfigurationDiff diff = DiffGenerator.createConfigDiff(prevConfig, currConfig);
     StreamlinerUtil.writeConfigToYaml(diff, outputFile);
     ConfigurationDiff configDiff = StreamlinerUtil.readConfigDiffFromPath(outputFile);

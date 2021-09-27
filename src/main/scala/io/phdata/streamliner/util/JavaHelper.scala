@@ -16,14 +16,16 @@ object JavaHelper {
     val keys = typeMapping.keySet()
     val temp = new util.LinkedHashMap[String, Map[String, String]]()
     keys.forEach(k =>
-      temp.put(k, typeMapping.get(k).asInstanceOf[util.Map[String, String]].asScala.toMap))
+      temp.put(k, typeMapping.get(k).asInstanceOf[util.Map[String, String]].asScala.toMap)
+    )
     val scalaTypeMapping = temp.asScala.toMap
     attributes.put("typeMapping", scalaTypeMapping)
     engine.layout(uri, attributes.asScala.toMap)
   }
 
-  def convertJavaMapToScalaMap(map: java.util.Map[String, java.util.Map[String, String]])
-    : Map[String, Map[String, String]] = {
+  def convertJavaMapToScalaMap(
+      map: java.util.Map[String, java.util.Map[String, String]]
+  ): Map[String, Map[String, String]] = {
     val keys = map.keySet()
     val temp = new util.LinkedHashMap[String, Map[String, String]]()
     keys.forEach(k => temp.put(k, map.get(k).asScala.toMap))
@@ -31,7 +33,8 @@ object JavaHelper {
   }
 
   def convertScalaMapToJavaMap(
-      map: Map[String, Map[String, String]]): util.Map[String, util.Map[String, String]] = {
+      map: Map[String, Map[String, String]]
+  ): util.Map[String, util.Map[String, String]] = {
     val keys = map.keySet
     val newMap = new util.LinkedHashMap[String, util.Map[String, String]]()
     keys.foreach(k => {

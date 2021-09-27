@@ -3,7 +3,7 @@ environment: SANDBOX
 pipeline: snowflake-snowpipe-append
 source:
   type: Jdbc
-  url: jdbc:mysql://localhost:55059/STREAMLINER_DB
+  url: jdbc:mysql://localhost:52055/STREAMLINER_DB
   username: streamliner_user
   passwordFile: /
   schema: STREAMLINER_DB

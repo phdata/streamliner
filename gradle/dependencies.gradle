@@ -1,0 +1,86 @@
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
+// This file contains all of the dependencies required for the build.
+// Centrally locating all of the dependencies ensures each subproject
+// uses the same dependency version for all dependencies used.
+
+ext {
+  versions = [:]
+  libs = [:]
+}
+
+versions += [
+  awsJavaSdkGlue          : "1.12.78",
+  circe                   : "0.14.1",
+  commonsLang             : "3.12.0",
+  findBugs                : "3.0.1",
+  gradle                  : "7.2",
+  graphvizJava            : "0.8.1",
+  hive                    : "3.1.2",
+  jacksonDataformatYaml   : "2.12.5",
+  jacoco                  : "0.8.7",
+  junit                   : "4.13.2",
+  junitInterface          : "0.11",
+  mysqlConnector          : "8.0.26",
+  mysqlTest               : "1.16.0",
+  ojdbc                   : "19.12.0.0",
+  openCsv                 : "5.5.2",
+  scala                   : "2.12.15",
+  scalateCore             : "1.9.7",
+  scalatest               : "3.2.10",
+  scallop                 : "3.1.1",
+  schemacrawler           : "16.12.3",
+  slf4j                   : "1.7.32",
+  spotBugs                : "4.4.1",
+]
+
+// Log the Gradle version used vs defined.
+if (gradle.gradleVersion != versions.gradle) {
+  logger.warn("Using gradle version $gradle.gradleVersion (Build defines $versions.gradle)")
+}
+
+// Add base Scala version
+versions["scalaBase"] = versions.scala.substring(0, versions.scala.lastIndexOf("."))
+
+libs += [
+  awsJavaSdkGlue          : "com.amazonaws:aws-java-sdk-glue:$versions.awsJavaSdkGlue",
+  circeGeneric            : "io.circe:circe-generic_$versions.scalaBase:$versions.circe",
+  circeYaml               : "io.circe:circe-yaml_$versions.scalaBase:$versions.circe",
+  commonsLang             : "org.apache.commons:commons-lang3:$versions.commonsLang",
+  findBugsAnnotations     : "com.google.code.findbugs:annotations:$versions.findBugs",
+  graphvizJava            : "guru.nidi:graphviz-java:$versions.graphvizJava",
+  hiveJdbc                : "org.apache.hive:hive-jdbc:$versions.hive",
+  jacksonDataformatYaml   : "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$versions.jacksonDataformatYaml",
+  junit                   : "junit:junit:$versions.junit",
+  junitInterface          : "com.novocode:junit-interface:$versions.junitInterface",
+  mysqlConnector          : "mysql:mysql-connector-java:$versions.mysqlConnector",
+  mysqlTest               : "org.testcontainers:mysql:$versions.mysqlTest",
+  ojdbc                   : "com.oracle.database.jdbc:ojdbc10:$versions.ojdbc",
+  openCsv                 : "com.opencsv:opencsv:$versions.openCsv",
+  scalaLibrary            : "org.scala-lang:scala-library:$versions.scala",
+  scalateCore             :  "org.scalatra.scalate:scalate-core_$versions.scalaBase:$versions.scalateCore",
+  scalatest               : "org.scalatest:scalatest_$versions.scalaBase:$versions.scalatest",
+  scallop                 : "org.rogach:scallop_$versions.scalaBase:$versions.scallop",
+  schemacrawlerMysql      : "us.fatehi:schemacrawler-mysql:$versions.schemacrawler",
+  schemacrawlerPostgresql : "us.fatehi:schemacrawler-postgresql:$versions.schemacrawler",
+  schemacrawlerOracle     : "us.fatehi:schemacrawler-oracle:$versions.schemacrawler",
+  schemacrawlerDb2        : "us.fatehi:schemacrawler-db2:$versions.schemacrawler",
+  schemacrawlerSqlserver  : "us.fatehi:schemacrawler-sqlserver:$versions.schemacrawler",
+  slf4j                   : "org.slf4j:slf4j-api:$versions.slf4j",
+  slf4jLog4j12            : "org.slf4j:slf4j-log4j12:$versions.slf4j",
+]
