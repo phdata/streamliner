@@ -2,9 +2,13 @@
 target/
 output/
 integration-tests/pipewrench
+integration-tests/streamliner
 **/private*
 **/*.log
 .DS_Store*
 build-support/artifactory.env
 venv
 *.swp
+*.iml
+**/build/
+**/.gradle/

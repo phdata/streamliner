@@ -1,0 +1,113 @@
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
+// This file contains common tasks and configuration for checking the quality of the code.
+
+apply plugin: "com.diffplug.spotless" // Ensures code follows the defined coding style.
+//apply plugin: "com.github.spotbugs"   // Performs static code analysis to look for bugs in Java code.
+apply plugin: "com.github.ben-manes.versions" // Provides a task to determine which dependencies have updates.
+apply plugin: "jacoco" // Provides code coverage metrics for Java code.
+apply plugin: "scalafmt" // Automatically formats Scala code on each build.
+
+// Configure the Spotless plugin.
+spotless {
+  java {
+    targetExclude "**/parser/**/*.java"
+    googleJavaFormat("1.7")
+    licenseHeaderFile "${rootDir}/config/spotless/java-license-header"
+  }
+}
+check.dependsOn "spotlessApply"
+
+// Configure the Spotbugs plugin.
+// TODO: Fix spotbugs issues and enable.
+//spotbugs {
+//  toolVersion = versions.spotBugs
+//  ignoreFailures = false
+//  maxHeapSize = '1g'
+//  effort = "max"
+//  // TODO: Fix medium and low spotbugs issues.
+//  reportLevel = "high"
+//  excludeFilter = file("${rootDir}/config/spotbugs/excludeFilter.xml")
+//}
+//spotbugsMain {
+//  reports {
+//    xml.enabled false
+//    html.enabled true
+//  }
+//}
+//spotbugsTest {
+//  reports {
+//    xml.enabled false
+//    html.enabled true
+//  }
+//}
+//// Create an aggregate spotbugs task.
+//// This simplifies running spotbugs on all the code by only needing one task
+//// instead of multiple in your command.
+//task spotbugs(dependsOn: [spotbugsMain, spotbugsTest], group: "Verification") {
+//  description = "Run SpotBugs analysis."
+//}
+
+scalafmt {
+  configFilePath = "$rootDir/.scalafmt.conf"
+}
+
+// Run scalafmt on compile.
+tasks.withType(ScalaCompile) {
+  if (!propertyExists("skipFormat")) {
+    dependsOn("scalafmtAll")
+  }
+}
+
+// Configure the jacoco plugin for test coverage reporting.
+jacoco {
+  toolVersion = versions.jacoco
+}
+tasks.withType(JacocoReport) {
+  reports {
+    csv.required = false
+    xml.required = true
+    html.required = true
+  }
+}
+test {
+  // Report is always generated after tests run.
+  finalizedBy jacocoTestReport
+}
+jacocoTestReport {
+  // Tests are required to run before generating the report.
+  dependsOn test
+}
+
+// Configure the versions plugin to only show dependency updates for released versions.
+dependencyUpdates {
+  gradleReleaseChannel = "current"
+  revision = "release"
+  resolutionStrategy {
+    componentSelection { rules ->
+      rules.all { ComponentSelection selection ->
+        boolean rejected = ["snap", "alpha", "beta", "rc", "cr", "m"].any { qualifier ->
+          selection.candidate.version ==~ /(?i).*[.-]${qualifier}[.\d-].*/
+        }
+        if (rejected) {
+          selection.reject("Release candidate")
+        }
+      }
+    }
+  }
+}

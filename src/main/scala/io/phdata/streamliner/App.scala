@@ -21,6 +21,8 @@ import io.phdata.streamliner.schemadefiner.configbuilder.SchemaCommand
 import io.phdata.streamliner.schemadefiner.configbuilder.ScriptCommand
 import org.apache.log4j.LogManager
 
+import scala.language.reflectiveCalls
+
 object App {
 
   private val logger = LogManager.getLogger(App.getClass)
@@ -58,10 +60,10 @@ object App {
           cli.generateState.outputPath(),
           cli.generateState.sourceStateDirectory(),
           cli.generateState.tableCsvPath(),
-          cli.generateState.columnCsvPath(),
+          cli.generateState.columnCsvPath()
         )
 
-      case None =>
+      case _ =>
         logger.error("Please provide a valid sub command options are `schema` and `scripts`")
 
     }

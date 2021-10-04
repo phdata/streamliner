@@ -1,0 +1,1 @@
+This is checked in to ensure the directories exist for testScriptCommand_mandatory_config.

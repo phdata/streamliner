@@ -1,16 +1,31 @@
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 package io.phdata.streamliner.schemadefiner.model;
 
 import io.phdata.streamliner.util.JavaHelper;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.apache.commons.lang3.StringUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @EqualsAndHashCode(callSuper = false)
 @ToString
@@ -26,13 +41,12 @@ public class HadoopTable extends TableDefinition {
   public Map<String, String> metadata;
   public Integer numberOfMappers = 1;
   public String splitByColumn;
-  public Integer numberOfPartitions = 2 ;
+  public Integer numberOfPartitions = 2;
   public List<ColumnDefinition> columns = new ArrayList<>();
   public String pkList;
   public String pkAsStringCommaSeparated;
   public List<ColumnDefinition> pkColumnDefs;
   public List<ColumnDefinition> nonPKColumnDefs;
-
 
   public HadoopTable() {}
 
@@ -57,20 +71,23 @@ public class HadoopTable extends TableDefinition {
     this.splitByColumn = splitByColumn;
     this.numberOfPartitions = numberOfPartitions;
     this.columns = columns;
-    pkList = StringUtils.join(
+    pkList =
+        StringUtils.join(
             primaryKeys.stream().map(pk -> String.format("`%s`", pk)).collect(Collectors.toList()),
             ",");
     pkAsStringCommaSeparated = StringUtils.join(primaryKeys, ",");
-    pkColumnDefs = columns.stream()
-                    .filter(c -> primaryKeys.contains(c.getSourceName()))
-                    .collect(Collectors.toList());
-    nonPKColumnDefs = columns.stream()
-                    .filter(c -> !primaryKeys.contains(c.getSourceName()))
-                    .collect(Collectors.toList());
-
+    pkColumnDefs =
+        columns.stream()
+            .filter(c -> primaryKeys.contains(c.getSourceName()))
+            .collect(Collectors.toList());
+    nonPKColumnDefs =
+        columns.stream()
+            .filter(c -> !primaryKeys.contains(c.getSourceName()))
+            .collect(Collectors.toList());
   }
 
-  // these setters are needed to set value to parent class. jackson is not setting the parent class value
+  // these setters are needed to set value to parent class. jackson is not setting the parent class
+  // value
   public void setDestinationName(String destinationName) {
     super.destinationName = destinationName;
     this.destinationName = destinationName;

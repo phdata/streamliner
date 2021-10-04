@@ -1,15 +1,30 @@
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
 package io.phdata.streamliner.schemadefiner.model;
 
 import io.phdata.streamliner.util.JavaHelper;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 @EqualsAndHashCode(callSuper = false)
 @ToString
@@ -17,44 +32,50 @@ import java.util.Map;
 @Setter
 @Slf4j
 public class ColumnDefinition {
-    public static final int SNOWFLAKE_MAX_LENGTH = 16_777_216;
-    public String sourceName;
-    public String destinationName;
-    public String dataType;
-    public String comment = "";
-    public Integer precision;
-    public Integer scale;
-    public boolean nullable = true;
+  public static final int SNOWFLAKE_MAX_LENGTH = 16_777_216;
+  public String sourceName;
+  public String destinationName;
+  public String dataType;
+  public String comment = "";
+  public Integer precision;
+  public Integer scale;
+  public boolean nullable = true;
 
-    public ColumnDefinition() {
-    }
+  public ColumnDefinition() {}
 
-    public ColumnDefinition(String sourceName, String destinationName, String dataType, String comment,
-                            Integer precision, Integer scale, boolean nullable) {
-        this.sourceName = sourceName;
-        this.destinationName = destinationName;
-        this.dataType = dataType;
-        this.comment = comment;
-        this.precision = precision;
-        this.scale = scale;
-        this.nullable = nullable;
-    }
+  public ColumnDefinition(
+      String sourceName,
+      String destinationName,
+      String dataType,
+      String comment,
+      Integer precision,
+      Integer scale,
+      boolean nullable) {
+    this.sourceName = sourceName;
+    this.destinationName = destinationName;
+    this.dataType = dataType;
+    this.comment = comment;
+    this.precision = precision;
+    this.scale = scale;
+    this.nullable = nullable;
+  }
 
-    public ColumnDefinition(String sourceName, String destinationName, String dataType, String comment) {
-        this.sourceName = sourceName;
-        this.destinationName = destinationName;
-        this.dataType = dataType;
-        this.comment = comment;
-    }
+  public ColumnDefinition(
+      String sourceName, String destinationName, String dataType, String comment) {
+    this.sourceName = sourceName;
+    this.destinationName = destinationName;
+    this.dataType = dataType;
+    this.comment = comment;
+  }
 
-    private String cleanseDataType(String dataType){
-        if(!dataType.endsWith(" IDENTITY")){
-            return dataType.toUpperCase();
-        }else{
-            int index = dataType.lastIndexOf(" IDENTITY");
-            return dataType.substring(0, index);
-        }
+  private String cleanseDataType(String dataType) {
+    if (!dataType.endsWith(" IDENTITY")) {
+      return dataType.toUpperCase();
+    } else {
+      int index = dataType.lastIndexOf(" IDENTITY");
+      return dataType.substring(0, index);
     }
+  }
 
   public String mapDataTypeSnowflake(
       scala.collection.immutable.Map<String, scala.collection.immutable.Map<String, String>>
@@ -69,12 +90,15 @@ public class ColumnDefinition {
     Integer s = scale == null ? 0 : scale;
 
     if (p > SNOWFLAKE_MAX_LENGTH) {
-        log.warn("Truncating column {} (source name) from {} to Snowflakes max of {}",sourceName, p,
-                SNOWFLAKE_MAX_LENGTH);
+      log.warn(
+          "Truncating column {} (source name) from {} to Snowflakes max of {}",
+          sourceName,
+          p,
+          SNOWFLAKE_MAX_LENGTH);
       p = SNOWFLAKE_MAX_LENGTH;
     }
 
-      // Oracle specific type mapping
+    // Oracle specific type mapping
     if (cleanDataType.equalsIgnoreCase("NUMBER")) {
       if (p == 0 && (s == -127 || s == 0)) {
         return "NUMBER(38, 8)";
@@ -95,7 +119,7 @@ public class ColumnDefinition {
 
   public String mapDataTypeHadoop(
       Map<String, Map<String, String>> typeMapping, String targetFormat) {
-      return getHadoopDataType(targetFormat, typeMapping);
+    return getHadoopDataType(targetFormat, typeMapping);
   }
 
   public String mapDataTypeHadoop(
@@ -103,35 +127,36 @@ public class ColumnDefinition {
           typeMapping,
       String targetFormat) {
     Map<String, Map<String, String>> javaTypeMap = JavaHelper.convertScalaMapToJavaMap(typeMapping);
-      return getHadoopDataType(targetFormat, javaTypeMap);
+    return getHadoopDataType(targetFormat, javaTypeMap);
   }
 
-    private String getHadoopDataType(String targetFormat, Map<String, Map<String, String>> javaTypeMap) {
-        String cleanDataType = cleanseDataType(dataType);
-        Integer p = precision == null ? 0 : precision;
-        Integer s = scale == null ? 0 : scale;
+  private String getHadoopDataType(
+      String targetFormat, Map<String, Map<String, String>> javaTypeMap) {
+    String cleanDataType = cleanseDataType(dataType);
+    Integer p = precision == null ? 0 : precision;
+    Integer s = scale == null ? 0 : scale;
 
-        // Oracle specific type mapping
-        if (cleanDataType.equalsIgnoreCase("NUMBER")) {
-            if (s > 0) {
-                return String.format("DECIMAL(%d, %d)", p, s);
-            } else if (p > 19 && s == 0) {
-                return String.format("DECIMAL(%d, %d)", p, s);
-            } else if (p >= 10 && p <= 19 && s == 0) {
-                return "BIGINT";
-            } else if (p == 0 && s == -127) {
-                return "VARCHAR";
-            } else {
-                return "INTEGER";
-            }
-        } else if (cleanDataType.equalsIgnoreCase("DECIMAL")) {
-            return String.format("DECIMAL(%d, %d)", p, s);
-        } else {
-            return mapDataType(cleanDataType, javaTypeMap, targetFormat);
-        }
+    // Oracle specific type mapping
+    if (cleanDataType.equalsIgnoreCase("NUMBER")) {
+      if (s > 0) {
+        return String.format("DECIMAL(%d, %d)", p, s);
+      } else if (p > 19 && s == 0) {
+        return String.format("DECIMAL(%d, %d)", p, s);
+      } else if (p >= 10 && p <= 19 && s == 0) {
+        return "BIGINT";
+      } else if (p == 0 && s == -127) {
+        return "VARCHAR";
+      } else {
+        return "INTEGER";
+      }
+    } else if (cleanDataType.equalsIgnoreCase("DECIMAL")) {
+      return String.format("DECIMAL(%d, %d)", p, s);
+    } else {
+      return mapDataType(cleanDataType, javaTypeMap, targetFormat);
     }
+  }
 
-    public String mapDataType(
+  public String mapDataType(
       String sourceDataType, Map<String, Map<String, String>> typeMapping, String targetFormat) {
     Map<String, String> dataTypeMap = typeMapping.get(sourceDataType.toLowerCase());
     if (dataTypeMap == null || dataTypeMap.isEmpty()) {
