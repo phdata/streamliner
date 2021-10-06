@@ -21,6 +21,9 @@
       - [Jdbc Hadoop Configuration](#jdbc-hadoop-configuration)
       - [Glue Snowflake Configuration](#glue-snowflake-configuration)
   * [Templates](#templates)
+    + [Make targets](#make-targets)
+      - [Command Types](#command-types)
+      - [Actual Commands](#actual-commands)
     + [Hadoop Templates](#hadoop-templates)
       - [Incremental With Kudu](#incremental-with-kudu)
       - [Kudu Table DDL](#kudu-table-ddl)
@@ -247,7 +250,33 @@ destination:
 ## Templates
 Templates define a data ingestion pipeline for a single table within a schema or database.  Templates generate DDL and DML statements and are written using [Scala Server Pages](https://scalate.github.io/scalate/documentation/ssp-reference.html).  Streamliner has templates for automating data pipelines in Snowflake and Hadoop data platforms.
 
-Each template or pipeline has three main functions `first-run`, `run`, and `clean`.  `first-run` will create tables and provision objects necessary to complete the data pipeline.  `run`s are executed on an on-going basis and should be scheduled for Hadoop based batch data pipelines. `clean` will drop or destroy all objects related to the data pipeline.
+### Make targets
+
+Targets are a function of a template. Therefore, it's possible for a template to define custom targets. The table below
+documents standards we expect all templates to follow.
+
+#### Command Types
+
+| Syntax      | Description |
+| ----------- | ----------- |
+|`first-run`  | `first-run` will create tables and provision objects necessary to complete the data pipeline. For example creating a Snowflake stage.|
+|`run`        | `run`s are executed on an on-going basis and should be scheduled. These are typically only used for Hadoop based batch data pipelines. |
+|`evolve-schema` |`evolve-schema` keeps your target destination tables in sync with a source system and should be scheduled. This command stores state in source control. If you have already executed `first-run` then you will need to generate the appropriate state.|
+|`drop`        |`drop` will drop or destroy all objects related to the data pipeline.  |
+
+#### Actual Commands
+
+| Syntax      | Description |
+| ----------- | ----------- |
+|`first-run-all` | Run `first-run` on all configured tables.|
+|`first-run-<TABLE_NAME>`  | Run `first-run` only on `<TABLE_NAME>`|
+|`run-all` | Run `run` on all configured tables.|
+|`run-<TABLE_NAME>`  | Run `run` only on `<TABLE_NAME>`|
+|`evolve-schema-all` | Run `evolve-schema` on all configured tables.|
+|`evolve-schema-<TABLE_NAME>`  | Run `evolve-schema` only on `<TABLE_NAME>`|
+|`drop-all` | Run `drop` on all configured tables.|
+|`drop-<TABLE_NAME>`  | Run `drop` only on `<TABLE_NAME>`|
+
 ### Hadoop Templates
 #### Incremental With Kudu
 See `templates/hadoop/incremental-with-kudu`
@@ -277,7 +306,7 @@ Creates an incremental ingestion pipeline using Sqoop and Apache Kudu.
 9. UPSERT INTO kudu table FROM staging table
 10. Compute states on the kudu table
 
-`clean` Steps:
+`drop` Steps:
 1. Delete the sqoop job definition
 2. Drop the archive table
 3. Drop the report table
@@ -297,7 +326,7 @@ Creates kudu tables.
 `run` Steps:
 1. Compute stats on Kudu table
 
-`clean` Steps:
+`drop` Steps:
 1. Drop Kudu table
 
 #### Truncate Reload
@@ -324,7 +353,7 @@ Build a full truncate and reload data pipeline using Sqoop and Impala tables.  S
 5. Compute stats on reporting table
 6. Validate row count between source system and Impala table
 
-`clean` Steps:
+`drop` Steps:
 1. Drop partitioned table
 2. Drop report table
 3. Drop staging table
@@ -357,7 +386,7 @@ Snowflake's continous ingest tool Snowpipe automatically copies data into the st
 1. Copy any incremental CDC events into staging table
 2. Create Snowpipe for ongoing ingestion
 
-`clean` Steps:
+`drop` Steps:
 1. Suspend task execution
 2. Drop Snowflake task
 3. Drop Snowpipe
@@ -365,7 +394,7 @@ Snowflake's continous ingest tool Snowpipe automatically copies data into the st
 5. Drop report table
 6. Drop staging table
 
-*NOTE:* `clean` does not remove the `staging` and `report` schemas nor does it the `stage` which can be cleaned by `make drop-stage`.
+*NOTE:* `drop` does not remove the `staging` and `report` schemas nor does it the `stage` which can be cleaned by `make drop-stage`.
 
 #### Snowflake Snowpipe Append
 See `templates/snowflake/snowflake-snowpipe-append`
@@ -380,11 +409,11 @@ The Snowpipe Append template is A Snowflake data pipeline to append newly arrivi
 4. Copy into table from external stage
 5. Create Snowpipe
 
-`clean` Steps:
+`drop` Steps:
 1. Drop table
 2. Drop Snowpipe
 
-*NOTE:* `clean` does not remove the schema nor does it the `stage` which can be cleaned by `make drop-stage`.
+*NOTE:* `drop` does not remove the schema nor does it the `stage` which can be cleaned by `make drop-stage`.
 
 ## QA Process 
 
