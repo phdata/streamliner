@@ -33,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 @Setter
 public class TableDiff {
   private String type;
+  public String sourceName;
   public String destinationName;
   public boolean existsInDestination;
   public boolean existsInSource;
@@ -42,11 +43,13 @@ public class TableDiff {
 
   public TableDiff(
       String type,
+      String sourceName,
       String destinationName,
       List<ColumnDiff> columnDiffs,
       boolean existsInDestination,
       boolean existsInSource) {
     this.type = type;
+    this.sourceName = sourceName;
     this.destinationName = destinationName;
     this.columnDiffs = columnDiffs;
     this.existsInDestination = existsInDestination;

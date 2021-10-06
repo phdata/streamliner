@@ -1,0 +1,15 @@
+
+
+
+USE DATABASE SANDBOX_POC1;
+
+USE SCHEMA EMPLOYEES;
+
+COPY INTO DEPARTMENT (DeptId,DeptName,EmployeeCount,DeptHead,Building)
+FROM ( SELECT $1:DeptId::int,
+$1:DeptName::VARCHAR(255),
+$1:EmployeeCount::int,
+$1:DeptHead::VARCHAR(255),
+$1:Building::VARCHAR(255)
+FROM @STREAMLINER_QUICKSTART_1_stage/PHDATA_DEPARTMENT)
+FILE_FORMAT = ( TYPE = PARQUET);

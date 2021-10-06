@@ -1,0 +1,22 @@
+
+
+
+
+
+
+USE DATABASE SANDBOX_POC1;
+
+USE SCHEMA EMPLOYEES;
+
+CREATE PIPE IF NOT EXISTS PHDATA_Persons_pipe
+	AUTO_INGEST = true
+	AS
+		COPY INTO PHDATA_Persons (PersonID,LastName,FirstName,Address,City,Age)
+			FROM ( SELECT $1:PersonID::int,
+$1:LastName::VARCHAR(255),
+$1:FirstName::VARCHAR(255),
+$1:Address::VARCHAR(255),
+$1:City::VARCHAR(255),
+$1:Age::VARCHAR(40)
+				FROM @STREAMLINER_QUICKSTART_1_stage/Persons)
+		FILE_FORMAT = ( TYPE = PARQUET);

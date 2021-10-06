@@ -97,7 +97,12 @@ public class DiffGenerator {
                       });
               tableDiff =
                   new TableDiff(
-                      tableDef.getType(), tableDef.getDestinationName(), columnDiffs, true, false);
+                      tableDef.getType(),
+                      tableDef.getSourceName(),
+                      tableDef.getDestinationName(),
+                      columnDiffs,
+                      true,
+                      false);
               tableDiffList.add(tableDiff);
             });
   }
@@ -147,6 +152,7 @@ public class DiffGenerator {
                 tableDiff =
                     new TableDiff(
                         currTableDef.getType(),
+                        currTableDef.getSourceName(),
                         currTableDef.getDestinationName(),
                         columnDiffs,
                         true,
@@ -176,7 +182,12 @@ public class DiffGenerator {
                       });
               tableDiff =
                   new TableDiff(
-                      tableDef.getType(), tableDef.getDestinationName(), columnDiffs, false, true);
+                      tableDef.getType(),
+                      tableDef.getSourceName(),
+                      tableDef.getDestinationName(),
+                      columnDiffs,
+                      false,
+                      true);
               tableDiffList.add(tableDiff);
             });
   }
@@ -277,6 +288,7 @@ public class DiffGenerator {
               TableDiff tableDiff =
                   new TableDiff(
                       tableDef.getType(),
+                      tableDef.getSourceName(),
                       tableDef.getDestinationName(),
                       columnDiffList,
                       false,

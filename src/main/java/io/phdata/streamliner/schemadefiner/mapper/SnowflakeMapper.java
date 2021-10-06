@@ -18,21 +18,26 @@ package io.phdata.streamliner.schemadefiner.mapper;
 
 import io.phdata.streamliner.schemadefiner.GlueCrawler;
 import io.phdata.streamliner.schemadefiner.model.*;
+import io.phdata.streamliner.schemadefiner.util.StreamlinerUtil;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import schemacrawler.schema.Column;
 import schemacrawler.schema.Table;
 
 public class SnowflakeMapper {
+  private static final Logger log = LoggerFactory.getLogger(SnowflakeMapper.class);
+
   public static List<TableDefinition> mapSchemaCrawlerTables(
-      List<Table> tables, List<UserDefinedTable> userDefinedTables) {
+      List<Table> tables, List<UserDefinedTable> userDefinedTables, Snowflake destination) {
     // schema crawler sorts by lower case name so we ensure that behavior here
     List<SnowflakeTable> sortedTableDef =
         tables.stream()
             .sorted(Comparator.comparing(table -> table.getName().toLowerCase()))
-            .map(table -> mapSchemaCrawlerTable(table))
+            .map(table -> mapSchemaCrawlerTable(table, destination))
             .collect(Collectors.toList());
     return userTableDefinitions(sortedTableDef, userDefinedTables).stream()
         .map(userTable -> (TableDefinition) userTable)
@@ -70,7 +75,7 @@ public class SnowflakeMapper {
     }
   }
 
-  private static SnowflakeTable mapSchemaCrawlerTable(Table table) {
+  private static SnowflakeTable mapSchemaCrawlerTable(Table table, Snowflake destination) {
     // columns are sorted based on ordinal position
     table.getColumns().sort(Comparator.comparing(column -> column.getOrdinalPosition()));
     List<Column> columns = table.getColumns();
@@ -91,7 +96,7 @@ public class SnowflakeMapper {
 
     return new SnowflakeTable(
         table.getName(),
-        table.getName(),
+        getSnowflakeTableName(table.getName(), destination),
         table.getRemarks(),
         primaryKey,
         null,
@@ -99,6 +104,14 @@ public class SnowflakeMapper {
         null,
         new FileFormat(table.getName(), "PARQUET"),
         mapSchemaCrawlerColumnDefinition(columns));
+  }
+
+  public static String getSnowflakeTableName(String tableName, Snowflake destination) {
+    try {
+      return StreamlinerUtil.applyTableNameStrategy(tableName, destination.getTableNameStrategy());
+    } catch (Exception e) {
+      throw new RuntimeException(String.format("Error applying table name strategy. Error: %s", e));
+    }
   }
 
   private static List<ColumnDefinition> mapSchemaCrawlerColumnDefinition(List<Column> columns) {

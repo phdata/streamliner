@@ -39,6 +39,7 @@ currentDestination:
       type: ""
 tableDiffs:
 - type: "Snowflake"
+  sourceName: "Employee"
   destinationName: "Employee"
   existsInDestination: true
   existsInSource: true

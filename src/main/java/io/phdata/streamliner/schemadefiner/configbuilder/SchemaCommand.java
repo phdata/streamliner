@@ -191,7 +191,7 @@ public class SchemaCommand {
   }
 
   private static void checkNumberOfMappers(HadoopTable table) {
-    if (table.getNumberOfMappers() > 1) {
+    if (table.getNumberOfMappers() != null && table.getNumberOfMappers() > 1) {
       if (table.getSplitByColumn() == null || table.getSplitByColumn().isEmpty()) {
         throw new RuntimeException(
             String.format(
