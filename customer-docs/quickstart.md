@@ -191,10 +191,10 @@ GRANT ALL ON INTEGRATION STREAMLINER_QUICKSTART_1 TO ROLE sysadmin;
 
 ## Download
 
-Find the [latest version](https://repo.phdata.io/public/streamliner/raw/) and then download:
+Find the [latest version](https://cloudsmith.io/~phdata/repos/streamliner/packages/) and then download:
 
 ```shell
-curl -O https://repo.phdata.io/public/streamliner/raw/versions/<VERSION>/streamliner-<VERSION>.zip
+curl -O https://repo.phdata.io/public/streamliner/maven/io/phdata/streamliner/streamliner/${VERSION}/streamliner-${VERSION}.zip
 ```
 
 and unzip:

@@ -1,6 +1,14 @@
+## 5.3
+- Migrated streamliner build from SBT to Gradle
+- Option to choose allowed schema changes
+- Generate `delta-change-summary.txt` file if there are schema changes
+- Option to ignore tables while schema crawling
+- [Download](https://repo.phdata.io/public/streamliner/maven/io/phdata/streamliner/streamliner/5.3/streamliner-5.3.zip)
+
 ## 5.1
 - Support extending string-like columns, column comments, and nullability changes
 - Documentation updates
+- [Download](https://repo.phdata.io/public/streamliner/raw/versions/5.1/streamliner-5.1.zip)
 
 ## 5.0
 *Please note that migration of templates is required from Strealiner 4.x to 5.0*

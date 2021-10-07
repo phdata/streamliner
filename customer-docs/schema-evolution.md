@@ -195,10 +195,8 @@ Below manual steps are needed to handle table delete.
 
 ### How to ignore tables having incompatible changes?
 
-In ingest config file (example: private-ingest-configuration.yml) add all the tables having incompatible changes in the parameter **ignoreTables** under _source_ section.
-
-This is how the source section will look like:
-
+1. In ingest config file (example: private-ingest-configuration.yml) add all the tables having incompatible changes in the parameter **ignoreTables** under _source_ section. 
+2. This is how the source section will look like:
 ```yaml
 source:
   type: Jdbc
@@ -212,3 +210,4 @@ source:
     - table1
     - table2
 ```
+3. Delete the state files of tables listed under **ignoreTables** from _previous-state-directory_. If state files are not deleted, those tables will be marked as deleted. 

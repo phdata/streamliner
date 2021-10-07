@@ -7,6 +7,7 @@
     + [Pipeline Configuration](#pipeline-configuration)
     + [Data Source Configuration](#data-source-configuration)
       - [Jdbc Data Source](#jdbc-data-source)
+        * [Allowed Schema Changes](#allowed-schema-changes)
       - [AWS Glue Data Catalog](#aws-glue-data-catalog)
         * [User Defined Table](#user-defined-table)
         * [Hadoop User Defined Table](#hadoop-user-defined-table)
@@ -93,12 +94,23 @@ The Jdbc data source configuration defines connection strings and other attribut
 | Property | Data Type | Required | Comment |
 | --- | --- | --- | --- |
 | type | String | True | Jdbc |
-| username | String | True | The jdbc url for the source system (ex: jdbc:oracle:thin:@{host}:{port}:{sid}) |
+| url | String | True | The jdbc url for the source system (ex: jdbc:oracle:thin:@{host}:{port}:{sid}) |
+| username | String | True | JDBC connection username |
 | passwordFile | String | True | Only applicable when destination is Hadoop, should be empty string when destination is Snowflake which will use `--database-password`. Location of the password file stored using Hadoop File System. |
 | schema | String | True | The schema on the source system to parse metadata from. |
-| tableTypes | List[String] | True | Controls which objects get parsed on the source system acceptable values are table and view |
+| tableTypes | List[String] | True | Controls which objects get parsed on the source system acceptable values are **table** and **view** |
 | metadata | Map[String, String] | False | Global metadata map of key value pairs added as metadata on all tables at creation |
-| userDefinedTable | List[UserDefinedTable] | False | [User defined table](#user-defined-table) attributes (provides a whitelisting of tables to be parsed) |
+| userDefinedTable | List[UserDefinedTable] | False | [User defined table](#user-defined-table) attributes (override tables metadata to be parsed) |
+| tables | List[String] | False | Controls which tables to be crawled from source system. |
+| ignoreTables | List[String] | False | Controls which tables  to be ignored from schema crawling. |
+| validSchemaChanges | List[String] | False | Controls the [Allowed Schema Changes](#allowed-schema-changes) in schema evolution. |
+
+#### Allowed Schema Changes
+* TABLE_ADD
+* COLUMN_ADD
+* UPDATE_COLUMN_COMMENT
+* UPDATE_COLUMN_NULLABILITY
+* EXTEND_COLUMN_LENGTH
 
 #### AWS Glue Data Catalog
 The AWS Glue data catalog configuration defines which Glue Data Catalog database to collect metadata from.
@@ -448,7 +460,7 @@ The metrics repo can also be connected to from a visualization tool to allow
 users dig into the values and how they change over time.
 
 ## Installing Streamliner
-You can find the latest version of streamliner in [phData's Artifactory](https://repository.phdata.io/artifactory/list/binary/phdata/streamliner/).
+You can find the latest version of streamliner in [phData's Artifactory](https://cloudsmith.io/~phdata/repos/streamliner/packages/).
 
 The artifact is a zip file contains an executable in `bin/streamliner`, templates in `templates`, and example config in `conf`.
 
@@ -462,11 +474,12 @@ CLI Arguments:
 | name | type | Required | Comment |
 | --- | --- | --- | --- |
 | config | String | True | Location of the initial ingest configuration file |
-| output-path | String | False | Location where Streamliner output should be written to.  Default location will create an `output` directory where ever the script was ran from. |
+| state-directory | String | True | Current run table config directory where Streamliner configuration per table will be written. |
+| previous-state-directory | String | True | Previous run table config directory where Streamliner configuration per table is written to. |
 | database-password | String | False | Relational database password used when parsing Jdbc source types. Not used when importing to Hadoop which uses the `passwordFile` Yaml key. |
 | create-docs | Boolean | False | Control flag to indicate whether an ERD and HTML file should be created when parsing Jdbc source types |
 
-CMD: `<install directory>/bin/streamliner schema --config ingest-config.yml --database-password <pass>`
+CMD: `<install directory>/bin/streamliner schema --config conf/private-ingest-configuration.yml --state-directory <state-directory-path> --database-password <pass>`
 
 ### Script Generation
 Schema parsing must be executed before executing script generation as the table definitions are needed to create the data pipelines.
@@ -476,11 +489,13 @@ CLI Arguments:
 | name | type | Required | Comment |
 | --- | --- | --- | --- |
 | config | String | True | Location of the initial ingest configuration file |
-| output-path | String | False | Location where Streamliner output should be written to.  Default location will create an `output` directory where ever the script was ran from. |
+| state-directory | String | True | Current run table config directory where Streamliner configuration per table is written to. |
+| previous-state-directory | String | True | Previous run table config directory where Streamliner configuration per table was written to. |
+| output-path | String | True | Location where Streamliner output should be written to. |
 | type-mapping | String | True | Location of the type-mapping.yml file |
 | template-directory | String | True | Location of the templates |
 
-CMD : `<install directory>/bin/streamliner scripts --config output/<pipeline name>/<environment>/conf/streamliner-configuration.yml --type-mapping <install-directory>/conf/type-mapping.yml  --template-directory <install directory>/templates/<snowflake | hadoop>`
+CMD : `<install directory>/bin/streamliner scripts --config conf/private-ingest-configuration.yml --state-directory <state-directory-path> --previous-state-directory <previous-state-directory-path> --type-mapping <install-directory>/conf/type-mapping.yml  --template-directory <install directory>/templates/<snowflake | hadoop> --output-path <script-output-path>`
 
 ## Migrating Templates from Streamliner 4.x to 5.0
 1. Replace the imports and variables to use new Java POJO classes.
