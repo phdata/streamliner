@@ -7,3 +7,4 @@ doc-versions:
   - { name: 4.3, tag: 4.3-docs, weight: 996, archive: false }
   - { name: 5.0, tag: 5.0-docs1, weight: 995, archive: false }
   - { name: 5.1, tag: 5.1-docs1, weight: 994, archive: false }
+  - { name: 5.3, tag: 5.3-docs1, weight: 993, archive: false }
