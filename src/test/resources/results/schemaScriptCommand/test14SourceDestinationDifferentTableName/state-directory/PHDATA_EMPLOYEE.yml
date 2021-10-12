@@ -1,0 +1,46 @@
+tables:
+- type: "Snowflake"
+  sourceName: "PHDATA_EMPLOYEE"
+  destinationName: "EMPLOYEE"
+  primaryKeys: []
+  columns:
+  - sourceName: "EmployeeId"
+    destinationName: "EmployeeId"
+    dataType: "INT"
+    comment: ""
+    precision: 10
+    scale: 0
+    nullable: false
+  - sourceName: "LastName"
+    destinationName: "LastName"
+    dataType: "VARCHAR"
+    comment: ""
+    precision: 255
+    scale: 0
+    nullable: true
+  - sourceName: "FirstName"
+    destinationName: "FirstName"
+    dataType: "VARCHAR"
+    comment: ""
+    precision: 255
+    scale: 0
+    nullable: true
+  - sourceName: "Address"
+    destinationName: "Address"
+    dataType: "VARCHAR"
+    comment: ""
+    precision: 255
+    scale: 0
+    nullable: true
+  - sourceName: "City"
+    destinationName: "City"
+    dataType: "VARCHAR"
+    comment: ""
+    precision: 255
+    scale: 0
+    nullable: true
+  comment: ""
+  fileFormat:
+    location: "PHDATA_EMPLOYEE"
+    fileType: "PARQUET"
+  pkList: ""

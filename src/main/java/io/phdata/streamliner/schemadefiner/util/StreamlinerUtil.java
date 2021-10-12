@@ -40,6 +40,9 @@ import java.sql.Connection;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 import org.apache.commons.text.StringSubstitutor;
 import org.apache.log4j.LogManager;
@@ -180,7 +183,9 @@ public class StreamlinerUtil {
     }
     List<TableDefinition> tables = null;
     if (ingestConfig.getDestination() instanceof Snowflake) {
-      tables = SnowflakeMapper.mapSchemaCrawlerTables(tableList, jdbc.getUserDefinedTable());
+      tables =
+          SnowflakeMapper.mapSchemaCrawlerTables(
+              tableList, jdbc.getUserDefinedTable(), (Snowflake) ingestConfig.getDestination());
     } else if (ingestConfig.getDestination() instanceof Hadoop) {
       tables = HadoopMapper.mapSchemaCrawlerTables(tableList, jdbc.getUserDefinedTable());
     } else {
@@ -549,5 +554,72 @@ public class StreamlinerUtil {
               }
             });
     return tempConf.getTables() == null ? null : tempConf;
+  }
+
+  public static String applyTableNameStrategy(
+      String tableName, TableNameStrategy tableNameStrategy) {
+    if (tableNameStrategy != null) {
+      if (tableNameStrategy.isAsIs()) {
+        return tableName;
+      }
+      if (tableNameStrategy.getAddPostfix() != null) {
+        tableName = String.format("%s%s", tableName, tableNameStrategy.getAddPostfix());
+      }
+      if (tableNameStrategy.getAddPrefix() != null) {
+        tableName = String.format("%s%s", tableNameStrategy.getAddPrefix(), tableName);
+      }
+
+      if (tableNameStrategy.getSearchReplace() != null) {
+        TableNameStrategy.SearchReplace searchReplace = tableNameStrategy.getSearchReplace();
+        if (searchReplace.getSearch() != null && searchReplace.getReplace() != null) {
+          if (searchReplace.getOccurrences() != null) {
+            tableName =
+                searchReplaceOccurrence(
+                    tableName,
+                    searchReplace.getSearch(),
+                    searchReplace.getReplace(),
+                    searchReplace.getOccurrences());
+          } else {
+            /* If due to some pattern provided causes exception, original table name will be returned. */
+            try {
+              tableName =
+                  tableName.replaceAll(searchReplace.getSearch(), searchReplace.getReplace());
+            } catch (PatternSyntaxException e) {
+              log.error(
+                  String.format(
+                      "search regex: %s provided caused error", searchReplace.getSearch()),
+                  e);
+            }
+          }
+        } else {
+          log.info(
+              "Either search: {} or replace: {} is null. No changes applied on table name.",
+              searchReplace.getSearch(),
+              searchReplace.getReplace());
+        }
+      }
+      return tableName;
+    }
+    return tableName;
+  }
+
+  public static String searchReplaceOccurrence(
+      String tableName, String search, String replace, Integer occurrence[]) {
+    Matcher m = Pattern.compile(search).matcher(tableName);
+    StringBuffer sb = new StringBuffer();
+    int count = 0;
+    int previousEndIndex = 0;
+    while (m.find()) {
+      count++;
+      if (Arrays.asList(occurrence).contains(count)) {
+        sb.append(tableName.substring(previousEndIndex, m.start()));
+        sb.append(replace);
+        previousEndIndex = m.end();
+      }
+    }
+    if (previousEndIndex != tableName.length()) {
+      sb.append(tableName.substring(previousEndIndex));
+    }
+    return sb.toString();
   }
 }

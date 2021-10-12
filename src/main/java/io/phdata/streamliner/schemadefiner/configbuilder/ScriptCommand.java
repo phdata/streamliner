@@ -136,12 +136,8 @@ public class ScriptCommand {
           table ->
               templateContext.addError(
                   String.format(
-                      "Table %s.%s.%s does not exists in source schema. Currently Streamliner doesn't support table delete. User should delete the table manually from snowflake and config %s.yml from --previous-state-directory: %s",
-                      ((Snowflake) configuration.getDestination()).getStagingDatabase().getName(),
-                      ((Snowflake) configuration.getDestination()).getStagingDatabase().getSchema(),
-                      table.getDestinationName(),
-                      table.getDestinationName(),
-                      previousStateDirectory)));
+                      "Table %s.%s does not exists in source schema. Currently Streamliner doesn't support table delete. User should resolve this incompatible change manually as per the documentation",
+                      ((Jdbc) configuration.getSource()).getSchema(), table.getSourceName())));
 
       List<TableDiff> tablesInSource =
           configDiff.getTableDiffs().stream()
@@ -160,8 +156,10 @@ public class ScriptCommand {
                         templateFile -> {
                           log.info("Rendering file: {} ", templateFile);
                           Map<String, Object> map = new LinkedHashMap<>();
+                          TableDefinition originalTable =
+                              getOriginalTable(configuration, tableDiff);
                           map.put("configurationDiff", configDiff);
-                          map.put("table", getOriginalTable(configuration, tableDiff));
+                          map.put("table", originalTable);
                           map.put("configuration", configuration);
                           map.put("tableDiff", tableDiff);
                           map.put("typeMapping", typeMapping);
@@ -171,7 +169,7 @@ public class ScriptCommand {
                               "currConfigFile",
                               String.format(
                                   "%s/%s.yml",
-                                  getAbsolutePath(stateDirectory), tableDiff.getDestinationName()));
+                                  getAbsolutePath(stateDirectory), originalTable.getSourceName()));
                           map.put("prevStateDir", getAbsolutePath(previousStateDirectory));
                           String rendered = JavaHelper.getLayout(templateFile.getPath(), map);
                           String replaced = rendered.replace("    ", "\t");

@@ -1,0 +1,46 @@
+tables:
+- type: "Snowflake"
+  sourceName: "PHDATA_DEPARTMENT"
+  destinationName: "DEPARTMENT"
+  primaryKeys: []
+  columns:
+  - sourceName: "DeptId"
+    destinationName: "DeptId"
+    dataType: "INT"
+    comment: ""
+    precision: 10
+    scale: 0
+    nullable: false
+  - sourceName: "DeptName"
+    destinationName: "DeptName"
+    dataType: "VARCHAR"
+    comment: ""
+    precision: 255
+    scale: 0
+    nullable: true
+  - sourceName: "EmployeeCount"
+    destinationName: "EmployeeCount"
+    dataType: "INT"
+    comment: ""
+    precision: 10
+    scale: 0
+    nullable: true
+  - sourceName: "DeptHead"
+    destinationName: "DeptHead"
+    dataType: "VARCHAR"
+    comment: ""
+    precision: 255
+    scale: 0
+    nullable: true
+  - sourceName: "Building"
+    destinationName: "Building"
+    dataType: "VARCHAR"
+    comment: ""
+    precision: 255
+    scale: 0
+    nullable: true
+  comment: ""
+  fileFormat:
+    location: "PHDATA_DEPARTMENT"
+    fileType: "PARQUET"
+  pkList: ""

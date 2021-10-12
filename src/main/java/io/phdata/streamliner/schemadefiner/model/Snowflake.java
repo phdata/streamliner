@@ -38,6 +38,7 @@ public class Snowflake extends Destination {
   public SnowflakeDatabase reportingDatabase;
   public String stageName;
   public IngestFileFormat fileFormat;
+  public TableNameStrategy tableNameStrategy;
 
   public Snowflake() {}
 }

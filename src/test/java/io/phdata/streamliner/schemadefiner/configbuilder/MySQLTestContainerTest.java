@@ -52,6 +52,9 @@ public class MySQLTestContainerTest {
   private static final String STREAMLINER_DATABASE_PASSWORD = "streamliner_pwd";
   private static final String SCHEMA_COMMAND_OUTPUT_PATH =
       "src/test/output/conf/streamliner-configuration.yml";
+  private String templateDirectory = "src/test/resources/templates/snowflake";
+  private String typeMapping = "src/main/resources/type-mapping.yml";
+  private String outputDir = "src/test/resources/results/schemaScriptCommand";
   private static Connection con = null;
   private Yaml yaml = new Yaml();
 
@@ -196,11 +199,11 @@ public class MySQLTestContainerTest {
     List<ColumnDiff> colList = new ArrayList<>();
     colList.add(columnDiff1);
     colList.add(columnDiff2);
-    TableDiff tableDiff1 = new TableDiff("Snowflake", "Employee", colList, true, true);
+    TableDiff tableDiff1 = new TableDiff("Snowflake", "Employee", "Employee", colList, true, true);
 
     colList = new ArrayList<>();
     colList.add(columnDiff1);
-    TableDiff tableDiff2 = new TableDiff("Snowflake", "Emp", colList, true, true);
+    TableDiff tableDiff2 = new TableDiff("Snowflake", "Emp", "Emp", colList, true, true);
 
     List<TableDiff> tableList = new ArrayList<>();
     tableList.add(tableDiff1);
@@ -329,7 +332,7 @@ public class MySQLTestContainerTest {
 
     updateSourceDetail(config);
 
-    // Schema comnmand
+    // Schema command
     SchemaCommand.build(config, previousStateDirectory, dbPass, createDocs, null);
 
     // added a column
@@ -384,7 +387,7 @@ public class MySQLTestContainerTest {
 
     updateSourceDetail(config);
 
-    // Schema comnmand
+    // Schema command
     SchemaCommand.build(config, stateDirectory, dbPass, createDocs, null);
 
     Configuration outputConfig =
@@ -427,7 +430,7 @@ public class MySQLTestContainerTest {
 
     updateSourceDetail(config);
 
-    // Schema comnmand
+    // Schema command
     SchemaCommand.build(config, stateDirectory, dbPass, createDocs, null);
 
     Configuration outputConfig =
@@ -440,6 +443,272 @@ public class MySQLTestContainerTest {
     assertEquals("Persons", outputConfig.getTables().get(0).getSourceName());
 
     StreamlinerUtil.deleteDirectory(new File("src/test/output"));
+  }
+
+  @Test
+  public void test14TableNameStrategy_search_replace() throws SQLException, FileNotFoundException {
+    performExecuteUpdate(
+        con,
+        "CREATE TABLE PHDATA_EMPLOYEE (\n"
+            + "    EmployeeId int NOT NULL,\n"
+            + "    LastName varchar(255),\n"
+            + "    FirstName varchar(255),\n"
+            + "    Address varchar(255),\n"
+            + "    City varchar(255)\n"
+            + ");");
+    performExecuteUpdate(
+        con,
+        "CREATE TABLE PHDATA_DEPARTMENT (\n"
+            + "    DeptId int NOT NULL,\n"
+            + "    DeptName varchar(255),\n"
+            + "    EmployeeCount int,\n"
+            + "    DeptHead varchar(255),\n"
+            + "    Building varchar(255)\n"
+            + ");");
+
+    String config =
+        "src/test/resources/conf/ingest-configuration-tableNameStrategy-searchReplace.yml";
+    String stateDirectory =
+        String.format(
+            "%s/%s", outputDir, "test14SourceDestinationDifferentTableName/state-directory");
+    String previousStateDirectory =
+        String.format(
+            "%s/%s",
+            outputDir, "test14SourceDestinationDifferentTableName/previous-state-directory");
+    String dbPass = mysql.getPassword();
+    boolean createDocs = false;
+
+    updateSourceDetail(config);
+
+    // Schema command
+    SchemaCommand.build(config, stateDirectory, dbPass, createDocs, null);
+    File f = new File(stateDirectory);
+    assertTrue(f.exists());
+    String expectedSourceTables[] = {"PHDATA_DEPARTMENT", "PHDATA_EMPLOYEE"};
+    String expectedDestinationTables[] = {"DEPARTMENT", "EMPLOYEE"};
+    Arrays.stream(f.listFiles())
+        .forEach(
+            file -> {
+              Configuration conf = StreamlinerUtil.readYamlFile(file.toString());
+              conf.getTables().stream()
+                  .forEach(
+                      table -> {
+                        assertTrue(
+                            Arrays.asList(expectedSourceTables).contains(table.getSourceName()));
+                        assertTrue(
+                            Arrays.asList(expectedDestinationTables)
+                                .contains(table.getDestinationName()));
+                      });
+            });
+
+    // script command
+    outputDir =
+        String.format("%s/%s", outputDir, "test14SourceDestinationDifferentTableName/scripts");
+    StreamlinerUtil.createDir(outputDir);
+    new ScriptCommand()
+        .build(
+            config,
+            stateDirectory,
+            previousStateDirectory,
+            typeMapping,
+            templateDirectory,
+            outputDir);
+    String[] expectedFolder = {"EMPLOYEE", "DEPARTMENT"};
+    f = new File(outputDir);
+    Arrays.stream(f.listFiles())
+        .forEach(
+            t -> {
+              if (t.isDirectory()) {
+                assertTrue(Arrays.asList(expectedFolder).contains(t.getName()));
+              } else if (t.isFile()) {
+                assertEquals("Makefile", t.getName());
+              }
+            });
+  }
+
+  @Test
+  public void test15TableNameStrategy_search_replace_evolve_schema()
+      throws FileNotFoundException, SQLException {
+    performExecuteUpdate(
+        con,
+        "CREATE TABLE IF NOT EXISTS PHDATA_EMPLOYEE (\n"
+            + "    EmployeeId int NOT NULL,\n"
+            + "    LastName varchar(255),\n"
+            + "    FirstName varchar(255),\n"
+            + "    Address varchar(255),\n"
+            + "    City varchar(255)\n"
+            + ");");
+    performExecuteUpdate(
+        con,
+        "CREATE TABLE IF NOT EXISTS PHDATA_DEPARTMENT (\n"
+            + "    DeptId int NOT NULL,\n"
+            + "    DeptName varchar(255),\n"
+            + "    EmployeeCount int,\n"
+            + "    DeptHead varchar(255),\n"
+            + "    Building varchar(255)\n"
+            + ");");
+    String config =
+        "src/test/resources/conf/ingest-configuration-tableNameStrategy-searchReplace.yml";
+    String stateDirectory =
+        String.format(
+            "%s/%s",
+            outputDir, "test15SourceDestinationDifferentTableName_evolve_schema/state-directory");
+    String previousStateDirectory =
+        String.format(
+            "%s/%s",
+            outputDir,
+            "test15SourceDestinationDifferentTableName_evolve_schema/previous-state-directory");
+    String dbPass = mysql.getPassword();
+    boolean createDocs = false;
+
+    updateSourceDetail(config);
+
+    // Schema command
+    SchemaCommand.build(config, previousStateDirectory, dbPass, createDocs, null);
+
+    // added a column
+    performExecute(con, "ALTER TABLE PHDATA_EMPLOYEE ADD Age VARCHAR(40) NOT NULL;");
+
+    // schema command for schema evolution
+    SchemaCommand.build(config, stateDirectory, dbPass, createDocs, previousStateDirectory);
+    ConfigurationDiff diff =
+        StreamlinerUtil.readConfigDiffFromPath(
+            String.format("%s/%s", stateDirectory, Constants.STREAMLINER_DIFF_FILE.value()));
+
+    assertNotNull(diff);
+    assertNotNull(diff.getTableDiffs());
+    assertEquals(1, diff.getTableDiffs().size());
+
+    TableDiff tableDiff = diff.getTableDiffs().get(0);
+    assertEquals("EMPLOYEE", tableDiff.getDestinationName());
+    assertNotNull(tableDiff.getColumnDiffs());
+    assertEquals(1, tableDiff.getColumnDiffs().size());
+
+    ColumnDiff colDiff = tableDiff.getColumnDiffs().get(0);
+    ColumnDefinition colDef = colDiff.getCurrentColumnDef();
+    assertEquals("Age", colDef.getSourceName());
+    assertEquals("VARCHAR", colDef.getDataType());
+
+    assertTrue(colDiff.getIsAdd());
+
+    // script command
+    outputDir =
+        String.format(
+            "%s/%s", outputDir, "test15SourceDestinationDifferentTableName_evolve_schema/scripts");
+    StreamlinerUtil.createDir(outputDir);
+    new ScriptCommand()
+        .build(
+            config,
+            stateDirectory,
+            previousStateDirectory,
+            typeMapping,
+            templateDirectory,
+            outputDir);
+    String[] expectedFiles = {"Makefile", "delta-change-summary.txt"};
+    File f = new File(outputDir);
+    Arrays.stream(f.listFiles())
+        .forEach(
+            t -> {
+              if (t.isDirectory()) {
+                assertEquals("EMPLOYEE", t.getName());
+              } else if (t.isFile()) {
+                assertTrue(Arrays.asList(expectedFiles).contains(t.getName()));
+              }
+            });
+  }
+
+  @Test
+  public void test16TableNameStrategy_addPostfix() throws FileNotFoundException {
+    String config = "src/test/resources/conf/ingest-configuration-tableNameStrategy-addPostfix.yml";
+    String stateDirectory =
+        String.format("%s/%s", outputDir, "test16TableNameStrategy_addPostfix/state-directory");
+    String previousStateDirectory =
+        String.format(
+            "%s/%s", outputDir, "test16TableNameStrategy_addPostfix/previous-state-directory");
+    String dbPass = mysql.getPassword();
+    boolean createDocs = false;
+
+    updateSourceDetail(config);
+
+    // Schema command
+    SchemaCommand.build(config, stateDirectory, dbPass, createDocs, null);
+    File f = new File(String.format("%s/%s", stateDirectory, "Persons.yml"));
+    assertTrue(f.exists());
+
+    Configuration conf = StreamlinerUtil.readYamlFile(f.toString());
+    TableDefinition tableDef = conf.getTables().get(0);
+    assertEquals("Persons", tableDef.getSourceName());
+    assertEquals("Persons_PHDATA", tableDef.getDestinationName());
+
+    // script command
+    outputDir = String.format("%s/%s", outputDir, "test16TableNameStrategy_addPostfix/scripts");
+    StreamlinerUtil.createDir(outputDir);
+    new ScriptCommand()
+        .build(
+            config,
+            stateDirectory,
+            previousStateDirectory,
+            typeMapping,
+            templateDirectory,
+            outputDir);
+    f = new File(outputDir);
+
+    Arrays.stream(f.listFiles())
+        .forEach(
+            t -> {
+              if (t.isDirectory()) {
+                assertEquals("Persons_PHDATA", t.getName());
+              } else if (t.isFile()) {
+                assertEquals("Makefile", t.getName());
+              }
+            });
+  }
+
+  @Test
+  public void test17TableNameStrategy_addPrefix() throws FileNotFoundException {
+    String config = "src/test/resources/conf/ingest-configuration-tableNameStrategy-addPrefix.yml";
+    String stateDirectory =
+        String.format("%s/%s", outputDir, "test17TableNameStrategy_addPrefix/state-directory");
+    String previousStateDirectory =
+        String.format(
+            "%s/%s", outputDir, "test17TableNameStrategy_addPrefix/previous-state-directory");
+    String dbPass = mysql.getPassword();
+    boolean createDocs = false;
+
+    updateSourceDetail(config);
+
+    // Schema command
+    SchemaCommand.build(config, stateDirectory, dbPass, createDocs, null);
+    File f = new File(String.format("%s/%s", stateDirectory, "Persons.yml"));
+    assertTrue(f.exists());
+
+    Configuration conf = StreamlinerUtil.readYamlFile(f.toString());
+    TableDefinition tableDef = conf.getTables().get(0);
+    assertEquals("Persons", tableDef.getSourceName());
+    assertEquals("PHDATA_Persons", tableDef.getDestinationName());
+
+    // script command
+    outputDir = String.format("%s/%s", outputDir, "test17TableNameStrategy_addPrefix/scripts");
+    StreamlinerUtil.createDir(outputDir);
+    new ScriptCommand()
+        .build(
+            config,
+            stateDirectory,
+            previousStateDirectory,
+            typeMapping,
+            templateDirectory,
+            outputDir);
+    f = new File(outputDir);
+
+    Arrays.stream(f.listFiles())
+        .forEach(
+            t -> {
+              if (t.isDirectory()) {
+                assertEquals("PHDATA_Persons", t.getName());
+              } else if (t.isFile()) {
+                assertEquals("Makefile", t.getName());
+              }
+            });
   }
 
   private void testSchemaCommandOptionalParams(String stateDirectory, String[] schemaCommand1) {
