@@ -1,3 +1,7 @@
+## 5.4 
+- Implemented table naming strategy feature for snowflake tables (ex: adding prefix/postfix, search and replace string)
+- [Download](https://repo.phdata.io/public/streamliner/maven/io/phdata/streamliner/streamliner/5.4/streamliner-5.4.zip)
+
 ## 5.3
 - Migrated streamliner build from SBT to Gradle
 - Option to choose allowed schema changes

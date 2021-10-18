@@ -18,6 +18,8 @@
         * [Hadoop Database](#hadoop-database)
       - [Snowflake Destination](#snowflake-destination)
         * [Snowflake Database](#snowflake-database)
+        * [Table Name Strategy](#table-name-strategy)
+          * [Search Replace](#search-replace)
     + [Initial Configuration Example](#initial-configuration-example)
       - [Jdbc Hadoop Configuration](#jdbc-hadoop-configuration)
       - [Glue Snowflake Configuration](#glue-snowflake-configuration)
@@ -198,6 +200,7 @@ Configuration properties defining the Snowflake destination.
 | taskSchedule | String | False | Snowflake task schedule |
 | stagingDatabase | [SnowflakeDatabase](#snowflake-database) | True | Staging database where data will staged into in Snowflake |
 | reportingDatabase | [SnowflakeDatabase](#snowflake-database) | True | Reporting database where data will be merged into or replicated in Snowflake |
+| tableNameStrategy | [TableNameStrategy](#table-name-strategy) | False | Option to modify snowflake table name. |
 
 ##### Snowflake Database
 Configuration properties defining the Snowflake database.
@@ -207,6 +210,24 @@ Configuration properties defining the Snowflake database.
 | name | String | True | Snowflake database name |
 | schema | String | True | Snowflake schema name |
 
+##### Table Name Strategy
+Configuration properties defining the `tableNameStrategy`. 
+
+| Property | Data Type | Required | Comment |
+| --- | --- | --- | --- |
+| asIs | String | False | No change in the snowflake tables name. |
+| addPostfix | String | False | This will add a postfix to the snowflake tables name. |
+| addPrefix | String | False | This will add a prefix to the snowflake tables name. |
+| searchReplace | [SearchReplace](#search-replace) | False | Option to search and replace string in the snowflake table name. |
+
+##### Search Replace
+Configuration properties defining the `searchReplace`.
+
+| Property | Data Type | Required | Comment |
+| --- | --- | --- | --- |
+| search | String | True | String to be searched in the table name. Regex can also be used. |
+| replace | String | True | String to replace the searched string. |
+| occurrences | Integer[] | False | The searched string will be replaced only at provided occurrence values. |
 
 
 ### Initial Configuration Example
