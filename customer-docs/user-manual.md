@@ -215,7 +215,7 @@ Configuration properties defining the `tableNameStrategy`.
 
 | Property | Data Type | Required | Comment |
 | --- | --- | --- | --- |
-| asIs | String | False | No change in the snowflake tables name. |
+| asIs | Boolean | False | No change in the snowflake tables name. |
 | addPostfix | String | False | This will add a postfix to the snowflake tables name. |
 | addPrefix | String | False | This will add a prefix to the snowflake tables name. |
 | searchReplace | [SearchReplace](#search-replace) | False | Option to search and replace string in the snowflake table name. |
