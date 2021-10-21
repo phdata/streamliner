@@ -18,6 +18,7 @@ package io.phdata.streamliner.schemadefiner.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -34,6 +35,8 @@ public class Configuration {
   public Source source;
   public Destination destination;
   private List<TableDefinition> tables;
+  /* This can be used to pass any other extra fields needed. */
+  public Map<Object, Object> genericProperties;
 
   public Configuration() {}
 
@@ -43,12 +46,14 @@ public class Configuration {
       String pipeline,
       Source source,
       Destination destination,
+      Map<Object, Object> genericProperties,
       List<TableDefinition> tables) {
     this.name = name;
     this.environment = environment;
     this.pipeline = pipeline;
     this.source = source;
     this.destination = destination;
+    this.genericProperties = genericProperties;
     this.tables = tables;
   }
 
@@ -57,12 +62,18 @@ public class Configuration {
   }
 
   public Configuration(
-      String name, String environment, String pipeline, Source source, Destination destination) {
+      String name,
+      String environment,
+      String pipeline,
+      Source source,
+      Destination destination,
+      Map<Object, Object> genericProperties) {
     this.name = name;
     this.environment = environment;
     this.pipeline = pipeline;
     this.source = source;
     this.destination = destination;
+    this.genericProperties = genericProperties;
   }
 
   public void addTableDefinition(TableDefinition table) {
