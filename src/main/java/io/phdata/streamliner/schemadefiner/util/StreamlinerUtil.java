@@ -201,6 +201,7 @@ public class StreamlinerUtil {
             ingestConfig.getPipeline(),
             ingestConfig.getSource(),
             ingestConfig.getDestination(),
+            ingestConfig.getGenericProperties(),
             tables);
     return newConfig;
   }
@@ -537,7 +538,8 @@ public class StreamlinerUtil {
               ingestConfig.getEnvironment(),
               ingestConfig.getPipeline(),
               ingestConfig.source,
-              ingestConfig.getDestination());
+              ingestConfig.getDestination(),
+              ingestConfig.getGenericProperties());
     }
 
     File tablesConfig[] = f.listFiles();
