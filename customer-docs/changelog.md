@@ -12,7 +12,7 @@
 ## 5.1
 - Support extending string-like columns, column comments, and nullability changes
 - Documentation updates
-- [Download](https://repo.phdata.io/public/streamliner/raw/versions/5.1/streamliner-5.1.zip)
+- [Download](https://repo.phdata.io/public/streamliner/maven/io/phdata/streamliner/streamliner/5.1/streamliner-5.1.zip)
 
 ## 5.0
 *Please note that migration of templates is required from Strealiner 4.x to 5.0*
@@ -21,44 +21,44 @@
 - Map date to datetime by default and include additional types for oracle
 - Support `NOT NULL`
 - Ensure primary keys are "quote if needed" like columns
-- [Download](https://repo.phdata.io/public/streamliner/raw/versions/5.0/streamliner-5.0.zip)
+- [Download](https://repo.phdata.io/public/streamliner/maven/io/phdata/streamliner/streamliner/5.0/streamliner-5.0.zip)
 
 ## 4.3
 - Truncate max length to 16,777,216 when required
-- [Download](https://repo.phdata.io/public/streamliner/raw/files/streamliner-4.3.zip)
+- [Download](https://repo.phdata.io/public/streamliner/maven/io/phdata/streamliner/streamliner/4.3/streamliner-4.3.zip)
 
 ## 4.2
 - Support tables without a primary key, but have a unique index.
-- [Download](https://repository.phdata.io/artifactory/binary/phdata/streamliner/streamliner-4.2.zip)
+- [Download](https://repo.phdata.io/public/streamliner/maven/io/phdata/streamliner/streamliner/4.2/streamliner-4.2.zip)
 
 ## 4.1
 - Improved type mapping based on user feedback.
-- [Download](https://repository.phdata.io/artifactory/binary/phdata/streamliner/streamliner-4.1.zip)
+- [Download](https://repo.phdata.io/public/streamliner/maven/io/phdata/streamliner/streamliner/4.1/streamliner-4.1.zip)
 
 ## 4.0
 - Snowflake column names are now quoted if they contain special characters as opposed to “cleansing” them like we do with Hadoop. This is to support easy re-pointing of BI tools, queries, etc.
 - Snowflake data types on the other end of the translation are now enhanced. Specifically NUMBER on oracle without precision scale are now NUMBER(38,8) as opposed to string. Please note any custom templates will need upgrading.
-- [Download](https://repository.phdata.io:443/artifactory/binary/phdata/streamliner/streamliner-4.0.zip)
+- [Download](https://repo.phdata.io/public/streamliner/maven/io/phdata/streamliner/streamliner/4.0/streamliner-4.0.zip)
 
 ## 3.4
 - Add QA Framework
 - Upgrade to SchemaCrawler 16.12.3 which adds Hive Support.
 - Numerous documentation updates
-- [Download](https://repository.phdata.io/artifactory/binary/phdata/streamliner/streamliner-3.4.zip)
+- [Download](https://repo.phdata.io/public/streamliner/maven/io/phdata/streamliner/streamliner/3.4/streamliner-3.4.zip)
 
 ## 3.3
 - Skipped
 
 ## 3.2
 - Added Quickstart to documentation
-- [Download](https://repository.phdata.io/artifactory/binary/phdata/streamliner/streamliner-3.2.zip)
+- [Download](https://repo.phdata.io/public/streamliner/maven/io/phdata/streamliner/streamliner/3.2/streamliner-3.2.zip)
 
 ## 3.1
 - Skipped
 
 ## 3.0
 - Renamed to Streamliner
-- [Download](https://repository.phdata.io/artifactory/binary/phdata/streamliner/streamliner-3.0.0.zip)
+- [Download](https://repo.phdata.io/public/streamliner/maven/io/phdata/streamliner/streamliner/3.0.0/streamliner-3.0.0.zip)
 
 ## 2.3
 *Fixed*
