@@ -156,9 +156,7 @@ public class StreamlinerUtil {
     Jdbc jdbc = (Jdbc) ingestConfig.getSource();
     // here filtering of schema will be valid if catalog will come from schema crawler library.
     List<Schema> schema =
-        catalog.getSchemas().stream()
-            .filter(matchDatabaseOrSchema(jdbc))
-            .collect(Collectors.toList());
+        catalog.getSchemas().stream().filter(matchSchemaName(jdbc)).collect(Collectors.toList());
     if (schema.isEmpty()) {
       throw new IllegalStateException(String.format("No result found for %s", jdbc.getSchema()));
     } else if (schema.size() > 1) {
@@ -206,15 +204,10 @@ public class StreamlinerUtil {
     return newConfig;
   }
 
-  private static Predicate<Schema> matchDatabaseOrSchema(Jdbc jdbc) {
-    // In mysql database & schema are synonym. Hence matching config file Schema name with mysql
-    // database name.
-    // https://dev.mysql.com/doc/refman/8.0/en/create-database.html
-    if (jdbc.getUrl().startsWith("jdbc:mysql")) {
-      return db -> db.getCatalogName().equals(jdbc.getSchema());
-    } else {
-      return db -> db.getName().equals(jdbc.getSchema());
-    }
+  private static Predicate<Schema> matchSchemaName(Jdbc jdbc) {
+    return catalogSchema ->
+        jdbc.getSchema().equals(catalogSchema.getName())
+            || jdbc.getSchema().equals(catalogSchema.getFullName());
   }
 
   public static void writeConfigToYaml(
