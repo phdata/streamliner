@@ -43,6 +43,7 @@
     + [Schema Parsing](#schema-parsing)
     + [Script Generation](#script-generation)
   * [Migrating Templates from Streamliner 4.x to 5.0](#template-migration)
+  * [Connect streamliner to hive with jdbc kerberos authentication](#hive-kerberos-authentication-steps)
 
 # Introduction
 Streamliner is a Data Pipeline Automation tool that simplifies the process of ingesting data onto a new platform. It is not a data ingestion tool in and of itself; rather, it automates other commonly used tools that ingest and manipulate data on platforms like Snowflake, Amazon Redshift, Cloudera, and Databricks.
@@ -608,3 +609,34 @@ CMD : `<install directory>/bin/streamliner scripts --config conf/private-ingest-
     )
     COMMENT = '${table.comment}';
    ```
+
+## Connect streamliner to hive with jdbc kerberos authentication
+
+1. Connect to hive edge node.
+2. Create ticket cache using `kinit` command. Or to create ticket cache using keytab file, please follow these steps:
+   1. Execute `ktutil` command.
+   2. Execute 
+    ```
+       add_entry -password -p yourusername@YOURDOMAIN -k 1 -e aes256-cts
+    ```
+   3. Provide password for yourusername@YOURDOMAIN
+   4. Execute
+    ```
+        wkt yourusername.keytab
+    ```
+   5. Execute `exit` command.
+   6. Till step 5, a keytab should be created.
+   7. To create the ticket cache using keytab file, execute command
+    ```
+        kinit yourusername@YOURDOMAIN -k -t yourusername.keytab
+    ```
+3. Validate hive jdbc connection using beeline. Please make sure ticket cache exists and it's not expired using `klist` command.
+   ```
+       beeline -u "jdbc:hive2://<host_name>:<port>/<db>;principal=<hive_princ_name>"
+   ```
+4. Copy streamliner to hive edge node.
+5. Provide correct hive jdbc url to streamliner config. The hive jdbc url should look like below
+    ```
+        jdbc:hive2://<host_name>:<port>/<db>;AuthMech=1;KrbHostFQDN=<host_name>;KrbServiceName=<service_name>;KrbRealm=<Realm>;SSL=1;SSLTrustStore=<ssl_trust_store>
+    ```
+6. Execute streamliner schema command from streamliner folder. Please make sure ticket cache exits before executing schema command.   
