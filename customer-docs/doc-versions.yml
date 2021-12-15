@@ -3,10 +3,11 @@ doc-versions:
   - { name: 3.2, tag: 3.2-docs-typos, weight: 1000, archive: true }
   - { name: 3.4, tag: 3.4-docs2, weight: 999, archive: true }
   - { name: 4.0, tag: 4.0, weight: 998, archive: true }
-  - { name: 4.2, tag: 4.2-docs2, weight: 997, archive: false }
-  - { name: 4.3, tag: 4.3-docs, weight: 996, archive: false }
-  - { name: 5.0, tag: 5.0-docs1, weight: 995, archive: false }
-  - { name: 5.1, tag: 5.1-docs1, weight: 994, archive: false }
-  - { name: 5.3, tag: 5.3-docs1, weight: 993, archive: false }
-  - { name: 5.4, tag: 5.4-docs, weight: 992, archive: false }
-  - { name: 5.4, tag: 5.4-docs2, weight: 992, archive: false }
+  - { name: 4.2, tag: 4.2-docs2, weight: 997, archive: true }
+  - { name: 4.3, tag: 4.3-docs, weight: 996, archive: true }
+  - { name: 4.4, tag: 4.4, weight: 995, archive: true }
+  - { name: 5.0, tag: 5.0-docs1, weight: 994, archive: true }
+  - { name: 5.1, tag: 5.1-docs1, weight: 993, archive: false }
+  - { name: 5.3, tag: 5.3-docs1, weight: 992, archive: false }
+  - { name: 5.4, tag: 5.4-docs2, weight: 991, archive: false }
+  - { name: 5.5.0, tag: 5.5.0, weight: 990, archive: false }
