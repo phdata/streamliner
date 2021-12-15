@@ -1,3 +1,8 @@
+## 5.5.0
+- Introduced a parameter `genericProperties` in ingest-config file to pass custom parameters to the template.
+- Updated ingest-config file source schema parameter to accept schema_name or dbname.schema_name.
+- [Download](https://repo.phdata.io/public/streamliner/maven/io/phdata/streamliner/streamliner/5.5.0/streamliner-5.5.0.zip)
+
 ## 5.4 
 - Implemented table naming strategy feature for snowflake tables (ex: adding prefix/postfix, search and replace string)
 - [Download](https://repo.phdata.io/public/streamliner/maven/io/phdata/streamliner/streamliner/5.4/streamliner-5.4.zip)
