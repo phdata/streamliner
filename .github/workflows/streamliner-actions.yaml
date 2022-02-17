@@ -13,7 +13,7 @@ jobs:
       uses: actions/setup-java@v2
       with:
         distribution: adopt
-        java-version: 1.11
+        java-version: 11.0.14+101
     - name: Run tests
       run: ./gradlew test
     - name: Run scalafmt
