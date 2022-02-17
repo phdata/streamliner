@@ -188,4 +188,12 @@ public class StreamlinerUtilTest {
       assertEquals(expectedLevel, actualLevel);
     }
   }
+
+  @Test
+  public void github_action_test(){
+    int a = 5;
+    int b = 9;
+    assertEquals(a+b, 14);
+
+  }
 }
