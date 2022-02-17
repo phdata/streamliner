@@ -68,7 +68,7 @@ docker cp $(docker create streamliner):/assets/templates templates
 Use Streamliner:
 
 ```bash
-docker run streamliner --help                                                                                                                                                                                                                                                                                      phdata/streamliner - (actions)
+docker run streamliner --help
      # --help   Show help message
      # ...
 ```
