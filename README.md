@@ -51,3 +51,25 @@ Note: Some tests require Docker to be running.
 ./gradlew test
 ```
 
+### Running the Docker Container
+
+Create a Docker image:
+```bash
+./gradlew installDist
+docker build -t streamliner .
+```
+
+Copy the configuration and templates from the image:
+```bash
+docker cp $(docker create streamliner):/assets/conf conf
+docker cp $(docker create streamliner):/assets/templates templates
+```
+
+Use Streamliner:
+
+```bash
+docker run streamliner --help                                                                                                                                                                                                                                                                                      phdata/streamliner - (actions)
+     # --help   Show help message
+     # ...
+```
+
