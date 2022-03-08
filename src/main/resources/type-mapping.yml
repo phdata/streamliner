@@ -22,6 +22,12 @@ int:
   parquet: int
   avro: int
   snowflake: int
+int2:
+  snowflake: number
+int4:
+  snowflake: number
+int8:
+  snowflake: number
 number:
   kudu: string
   impala: decimal
@@ -52,6 +58,10 @@ float:
   parquet: float
   avro: float
   snowflake: float
+float4:
+  snowflake: float4
+float8:
+  snowflake: float8
 long:
   kudu: bigint
   parquet: bigint
@@ -190,6 +200,10 @@ char:
   parquet: string
   avro: string
   snowflake: char
+character:
+  snowflake: char
+bpchar:
+  snowflake: char
 longvarchar:
   kudu: string
   impala: string
@@ -249,6 +263,8 @@ boolean:
   impala: boolean
   parquet: boolean
   avro: boolean
+  snowflake: boolean
+bool:
   snowflake: boolean
 enum:
   kudu: string
