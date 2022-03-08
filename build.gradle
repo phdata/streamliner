@@ -60,6 +60,7 @@ dependencies {
     implementation libs.graphvizJava
     implementation libs.jacksonDataformatYaml
     implementation libs.openCsv
+    implementation libs.redshift
     implementation libs.scalaLibrary
     implementation libs.scalateCore
     implementation libs.scallop
