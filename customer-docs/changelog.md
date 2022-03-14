@@ -1,3 +1,7 @@
+## 5.6.1
+- Fixed a bug to use environment variables in ingest-configuration file. Example `url: “${env:URL}"`. Streamliner will read the url from the environment variable URL. 
+- [Download](https://repo.phdata.io/public/streamliner/maven/io/phdata/streamliner/streamliner/5.6.1/streamliner-5.6.1.zip)
+
 ## 5.6.0
 - Added support to connect to Redshift via JDBC.
 - [Download](https://repo.phdata.io/public/streamliner/maven/io/phdata/streamliner/streamliner/5.6.0/streamliner-5.6.0.zip)

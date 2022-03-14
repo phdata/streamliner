@@ -38,6 +38,16 @@ public class EnvSubstTest {
   }
 
   @Test
+  public void testEnv2() throws IOException {
+    Configuration c1 = new Configuration();
+    c1.setName("Testing --path=${env:PATH}");
+    File yamlFile = dir.newFile();
+    StreamlinerUtil.writeYamlFile(c1, yamlFile.getAbsolutePath());
+    Configuration c2 = StreamlinerUtil.readYamlFile(yamlFile.getAbsolutePath());
+    Assert.assertEquals(String.format("Testing --path=%s", System.getenv("PATH")), c2.getName());
+  }
+
+  @Test
   public void testNoReplacementWithoutEnv1() throws IOException {
     Configuration c1 = new Configuration();
     c1.setName("${PATH}");
