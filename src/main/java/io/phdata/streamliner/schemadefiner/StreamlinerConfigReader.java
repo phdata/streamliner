@@ -40,7 +40,7 @@ public class StreamlinerConfigReader implements SchemaDefiner {
     if (!StreamlinerUtil.fileExists(configFilePath)) {
       throw new RuntimeException(String.format("Configuration File not found: %s", configFilePath));
     }
-    Configuration config = StreamlinerUtil.readConfigFromPath(configFilePath);
+    Configuration config = StreamlinerUtil.readYamlFile(configFilePath);
     return SchemaDefinerHelper.mapTableDefToStreamlinerCatalog(config);
   }
 }

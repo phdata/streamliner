@@ -70,22 +70,6 @@ import us.fatehi.utility.LoggingConfig;
 public class StreamlinerUtil {
   private static final Logger log = LoggerFactory.getLogger(StreamlinerUtil.class);
 
-  public static Configuration readConfigFromPath(String path) {
-    if (path == null) return null;
-    if (!fileExists(path)) {
-      throw new RuntimeException(String.format("Configuration file not found: %s", path));
-    }
-    ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    Configuration config = null;
-    try {
-      config = mapper.readValue(new File(path), Configuration.class);
-    } catch (IOException e) {
-      throw new RuntimeException(String.format("Error reading configuration file %s", path), e);
-    }
-    return config;
-  }
-
   private static class EnvSubstStringDeserializer extends StdScalarDeserializer<String> {
     private final StringDeserializer delegate;
 
@@ -104,6 +88,9 @@ public class StreamlinerUtil {
 
   public static Configuration readYamlFile(String path) {
     if (path == null) return null;
+    if (!fileExists(path)) {
+      throw new RuntimeException(String.format("Configuration file not found: %s", path));
+    }
     Path yamlFile = Paths.get(path);
     // this method handles even if yaml file is empty. Through normal process jackson throws
     // exception
@@ -124,7 +111,7 @@ public class StreamlinerUtil {
       objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
       return objectMapper.treeToValue(tree, Configuration.class);
     } catch (IOException e) {
-      throw new RuntimeException("Error reading file: " + path, e);
+      throw new RuntimeException(String.format("Error reading file: %s", path), e);
     }
   }
 

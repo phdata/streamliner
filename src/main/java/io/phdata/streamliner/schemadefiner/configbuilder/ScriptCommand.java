@@ -40,7 +40,7 @@ public class ScriptCommand {
       String templateDirectory,
       String outputDirectory) {
 
-    Configuration ingestConfig = StreamlinerUtil.readConfigFromPath(config);
+    Configuration ingestConfig = StreamlinerUtil.readYamlFile(config);
     if (ingestConfig == null) {
       throw new RuntimeException(
           "--config file(example: private-ingest-configuration.yml ) can not be empty or config file path is null.");

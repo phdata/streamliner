@@ -180,9 +180,9 @@ public class MySQLTestContainerTest {
     String configPath2 = "src/test/resources/conf/ingest-configuration-glue.yml";
 
     // reading previous destination config
-    Configuration conf1 = StreamlinerUtil.readConfigFromPath(configPath1);
+    Configuration conf1 = StreamlinerUtil.readYamlFile(configPath1);
     // reading current destination config
-    Configuration conf2 = StreamlinerUtil.readConfigFromPath(configPath2);
+    Configuration conf2 = StreamlinerUtil.readYamlFile(configPath2);
 
     ColumnDefinition prevColDef1 =
         new ColumnDefinition("ID", "ID", "Number", "Emp Id", 255, 0, true);
@@ -277,10 +277,10 @@ public class MySQLTestContainerTest {
             });
 
     Configuration config1 =
-        StreamlinerUtil.readConfigFromPath(
+        StreamlinerUtil.readYamlFile(
             "src/test/resources/scalaConf/glue/snowflake/ingest-configuration.yml");
     Configuration config2 =
-        StreamlinerUtil.readConfigFromPath(
+        StreamlinerUtil.readYamlFile(
             "src/test/resources/scalaConf/glue/snowflake/streamliner-configuration.yml");
     assertFalse(config1.equals(config2));
   }
@@ -741,18 +741,18 @@ public class MySQLTestContainerTest {
 
     StreamlinerUtil.deleteDirectory(new File(outputPath));
     // deserialize
-    Configuration config = StreamlinerUtil.readConfigFromPath(inputConfig);
+    Configuration config = StreamlinerUtil.readYamlFile(inputConfig);
     StreamlinerUtil.createDir(outputPath);
     // serialize
     StreamlinerUtil.writeYamlFile(config, outputConfig1);
     // deserialzie
-    Configuration tempConfig = StreamlinerUtil.readConfigFromPath(outputConfig1);
+    Configuration tempConfig = StreamlinerUtil.readYamlFile(outputConfig1);
     assertTrue(config.equals(tempConfig));
 
     // serialize
     StreamlinerUtil.writeYamlFile(tempConfig, outputConfig2);
     // deserialzie
-    Configuration tempConfig2 = StreamlinerUtil.readConfigFromPath(outputConfig2);
+    Configuration tempConfig2 = StreamlinerUtil.readYamlFile(outputConfig2);
     assertTrue(config.equals(tempConfig2));
     assertTrue(tempConfig.equals(tempConfig2));
   }
