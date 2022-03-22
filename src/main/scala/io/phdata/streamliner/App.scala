@@ -20,6 +20,7 @@ import io.phdata.streamliner.schemadefiner.configbuilder.GenerateStateCommand
 import io.phdata.streamliner.schemadefiner.configbuilder.SchemaCommand
 import io.phdata.streamliner.schemadefiner.configbuilder.ScriptCommand
 import org.apache.log4j.LogManager
+import org.apache.log4j.PropertyConfigurator
 
 import scala.language.reflectiveCalls
 
@@ -29,24 +30,28 @@ object App {
 
   def main(args: Array[String]): Unit = {
     val cli = new Cli(args)
+    // load the log4j.properties file from artifact.
+    PropertyConfigurator.configure("conf/log4j.properties")
     cli.subcommand match {
       case Some(cli.schema) =>
-        SchemaCommand.build(
+        SchemaCommand.buildSchema(
           cli.schema.config(),
           cli.schema.stateDirectory(),
           cli.schema.databasePassword.getOrElse(""),
           cli.schema.createDocs.getOrElse(false),
-          cli.schema.previousStateDirectory.getOrElse(null)
+          cli.schema.previousStateDirectory.getOrElse(null),
+          cli.schema.logLevel.getOrElse(null)
         )
 
       case Some(cli.produceScripts) =>
-        new ScriptCommand().build(
+        new ScriptCommand().buildScript(
           cli.produceScripts.config(),
           cli.produceScripts.stateDirectory(),
           cli.produceScripts.previousStateDirectory(),
           cli.produceScripts.typeMappingFile(),
           cli.produceScripts.templateDirectory(),
-          cli.produceScripts.outputPath()
+          cli.produceScripts.outputPath(),
+          cli.produceScripts.logLevel.getOrElse(null)
         )
 
       case Some(cli.generateState) =>

@@ -31,6 +31,17 @@ import schemacrawler.crawl.StreamlinerCatalog;
 public class SchemaCommand {
   private static final Logger log = LoggerFactory.getLogger(SchemaCommand.class);
   // --config is ingest-configuration.yml
+  public static void buildSchema(
+      String config,
+      String stateDirectory,
+      String password,
+      boolean createDocs,
+      String previousStateDirectory,
+      String logLevel) {
+    StreamlinerUtil.setStreamlinerLogLevel(logLevel);
+    build(config, stateDirectory, password, createDocs, previousStateDirectory);
+  }
+
   public static void build(
       String config,
       String stateDirectory,

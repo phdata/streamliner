@@ -28,10 +28,28 @@ import org.slf4j.LoggerFactory;
 
 public class ScriptCommand {
   private static final Logger log = LoggerFactory.getLogger(ScriptCommand.class);
-  private Map<String, Map<String, List>> commonTables = new LinkedHashMap<>();;
-  private Map<String, Collection> addedOrDeletedorIncompatibleTables = new LinkedHashMap<>();;
+  private Map<String, Map<String, List>> commonTables = new LinkedHashMap<>();
+  private Map<String, Collection> addedOrDeletedorIncompatibleTables = new LinkedHashMap<>();
 
   // config is ingest-configuration.yml
+  public void buildScript(
+      String config,
+      String stateDirectory,
+      String previousStateDirectory,
+      String typeMappingFile,
+      String templateDirectory,
+      String outputDirectory,
+      String logLevel) {
+    StreamlinerUtil.setStreamlinerLogLevel(logLevel);
+    build(
+        config,
+        stateDirectory,
+        previousStateDirectory,
+        typeMappingFile,
+        templateDirectory,
+        outputDirectory);
+  }
+
   public void build(
       String config,
       String stateDirectory,

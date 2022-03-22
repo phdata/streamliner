@@ -53,6 +53,12 @@ class Cli(args: Seq[String]) extends ScallopConf(args) {
       required = false,
       default = Some(false)
     )
+
+    val logLevel: ScallopOption[String] = opt[String](
+      "log-level",
+      descr = "Parameter to change the log level",
+      required = false
+    )
   }
 
   val produceScripts = new Subcommand("scripts") {
@@ -87,6 +93,12 @@ class Cli(args: Seq[String]) extends ScallopConf(args) {
       "template-directory",
       descr = "Template directory path",
       required = true
+    )
+
+    val logLevel: ScallopOption[String] = opt[String](
+      "log-level",
+      descr = "Param to change the log level",
+      required = false
     )
   }
 
