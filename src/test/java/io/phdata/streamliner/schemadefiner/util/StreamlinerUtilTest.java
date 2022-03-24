@@ -19,6 +19,8 @@ package io.phdata.streamliner.schemadefiner.util;
 import static org.junit.Assert.*;
 
 import io.phdata.streamliner.schemadefiner.model.TableNameStrategy;
+import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.junit.Test;
 
 public class StreamlinerUtilTest {
@@ -169,5 +171,21 @@ public class StreamlinerUtilTest {
     String expected = "_PROD_EMPLOYEE_DEV_COUNTRY_PROD";
     String actual = StreamlinerUtil.applyTableNameStrategy(tableName, tableNameStrategy);
     assertEquals(expected, actual);
+  }
+
+  @Test
+  public void log_level_test() {
+    {
+      StreamlinerUtil.setStreamlinerLogLevel("INFO");
+      Level actualLevel = LogManager.getRootLogger().getLevel();
+      Level expectedLevel = Level.INFO;
+      assertEquals(expectedLevel, actualLevel);
+    }
+    {
+      StreamlinerUtil.setStreamlinerLogLevel("OFF");
+      Level actualLevel = LogManager.getLogger("org.fusesource.scalate").getLevel();
+      Level expectedLevel = Level.OFF;
+      assertEquals(expectedLevel, actualLevel);
+    }
   }
 }

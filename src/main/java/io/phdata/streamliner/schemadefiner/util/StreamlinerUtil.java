@@ -294,7 +294,7 @@ public class StreamlinerUtil {
   }
 
   public static SchemaCrawlerOptions getOptions(Jdbc jdbc) {
-    setLogLevel();
+    setSchemaCrawlerLogLevel();
 
     SchemaCrawlerOptions options = SchemaCrawlerOptionsBuilder.newSchemaCrawlerOptions();
     LimitOptionsBuilder limitOptionsBuilder = LimitOptionsBuilder.builder();
@@ -330,7 +330,7 @@ public class StreamlinerUtil {
         .collect(Collectors.toList());
   }
 
-  private static void setLogLevel() {
+  private static void setSchemaCrawlerLogLevel() {
     if (System.getenv().containsKey("SCHEMA_CRAWLER_DEBUG")) {
       new LoggingConfig(Level.ALL);
     } else {
@@ -603,5 +603,26 @@ public class StreamlinerUtil {
       sb.append(tableName.substring(previousEndIndex));
     }
     return sb.toString();
+  }
+
+  public static void setStreamlinerLogLevel(String logLevel) {
+    // setting the root logger
+    LogManager.getRootLogger()
+        .setLevel(
+            org.apache.log4j.Level.toLevel(
+                logLevel,
+                org.apache.log4j.Level.toLevel(LogManager.getRootLogger().getLevel().toString())));
+
+    // setting log level for other loggers based on --log-level param
+    Enumeration loggers = LogManager.getCurrentLoggers();
+    while (loggers.hasMoreElements()) {
+      Object nextElem = loggers.nextElement();
+      if (nextElem instanceof org.apache.log4j.Logger) {
+        org.apache.log4j.Logger logger = (org.apache.log4j.Logger) nextElem;
+        org.apache.log4j.Level defaultLevel =
+            logger.getLevel() == null ? LogManager.getRootLogger().getLevel() : logger.getLevel();
+        logger.setLevel(org.apache.log4j.Level.toLevel(logLevel, defaultLevel));
+      }
+    }
   }
 }
