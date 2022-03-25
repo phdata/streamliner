@@ -56,7 +56,7 @@ class Cli(args: Seq[String]) extends ScallopConf(args) {
 
     val logLevel: ScallopOption[String] = opt[String](
       "log-level",
-      descr = "Parameter to change the log level",
+      descr = "Parameter to change the application log level",
       required = false
     )
   }
@@ -97,7 +97,7 @@ class Cli(args: Seq[String]) extends ScallopConf(args) {
 
     val logLevel: ScallopOption[String] = opt[String](
       "log-level",
-      descr = "Param to change the log level",
+      descr = "Parameter to change the application log level",
       required = false
     )
   }
