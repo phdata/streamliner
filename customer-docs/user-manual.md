@@ -42,8 +42,8 @@
   * [Executing Streamliner](#executing-streamliner)
     + [Schema Parsing](#schema-parsing)
     + [Script Generation](#script-generation)
-  * [Migrating Templates from Streamliner 4.x to 5.0](#template-migration)
-  * [Connect streamliner to hive with jdbc kerberos authentication](#hive-kerberos-authentication-steps)
+  * [Migrating Templates from Streamliner 4.x to 5.x](#migrating-templates-from-streamliner-4x-to-5x)
+  * [Connect streamliner to hive with jdbc kerberos authentication](#connect-streamliner-to-hive-with-jdbc-kerberos-authentication)
 
 # Introduction
 Streamliner is a Data Pipeline Automation tool that simplifies the process of ingesting data onto a new platform. It is not a data ingestion tool in and of itself; rather, it automates other commonly used tools that ingest and manipulate data on platforms like Snowflake, Amazon Redshift, Cloudera, and Databricks.
@@ -71,6 +71,8 @@ Streamliner uses configuration files which applied to templates to create DDL an
 
 ## Configuration
 The initial Streamliner configuration contains properties about the data source (Jdbc or Glue AWS data catalog) and destinations (Hadoop or Snowflake).  The configurations are created as yaml files and passed into the `schema` and `scripts` subcommands on execution.
+
+Environment variable can be set to the property. Example `url: "${env:URL}"`. Streamliner will read the url from the environment variable URL. 
 
 ### Pipeline Configuration
 The base level pipeline configuration has 3 properties that define the pipeline.
@@ -500,8 +502,9 @@ CLI Arguments:
 | previous-state-directory | String | True | Previous run table config directory where Streamliner configuration per table is written to. |
 | database-password | String | False | Relational database password used when parsing Jdbc source types. Not used when importing to Hadoop which uses the `passwordFile` Yaml key. |
 | create-docs | Boolean | False | Control flag to indicate whether an ERD and HTML file should be created when parsing Jdbc source types |
+| log-level | String | False | Parameter to change the application log level. Log level set in `log4j.properties` file present in `conf` folder is the default value. |
 
-CMD: `<install directory>/bin/streamliner schema --config conf/private-ingest-configuration.yml --state-directory <state-directory-path> --database-password <pass>`
+CMD: `<install directory>/bin/streamliner schema --config conf/private-ingest-configuration.yml --state-directory <state-directory-path> --database-password <pass> --log-level INFO`
 
 ### Script Generation
 Schema parsing must be executed before executing script generation as the table definitions are needed to create the data pipelines.
@@ -516,10 +519,11 @@ CLI Arguments:
 | output-path | String | True | Location where Streamliner output should be written to. |
 | type-mapping | String | True | Location of the type-mapping.yml file |
 | template-directory | String | True | Location of the templates |
+| log-level | String | False | Parameter to change the application log level. Log level set in `log4j.properties` file present in `conf` folder is the default value. |
 
-CMD : `<install directory>/bin/streamliner scripts --config conf/private-ingest-configuration.yml --state-directory <state-directory-path> --previous-state-directory <previous-state-directory-path> --type-mapping <install-directory>/conf/type-mapping.yml  --template-directory <install directory>/templates/<snowflake | hadoop> --output-path <script-output-path>`
+CMD : `<install directory>/bin/streamliner scripts --config conf/private-ingest-configuration.yml --state-directory <state-directory-path> --previous-state-directory <previous-state-directory-path> --type-mapping <install-directory>/conf/type-mapping.yml  --template-directory <install directory>/templates/<snowflake | hadoop> --output-path <script-output-path> --log-level INFO`
 
-## Migrating Templates from Streamliner 4.x to 5.0
+## Migrating Templates from Streamliner 4.x to 5.x
 1. Replace the imports and variables to use new Java POJO classes.
    
    Example : 
@@ -530,7 +534,7 @@ CMD : `<install directory>/bin/streamliner scripts --config conf/private-ingest-
    
    `<%@ val configuration: io.phdata.streamliner.configuration.Configuration %>`
    
-   Streamliner 5.0:
+   Streamliner 5.x:
 
    `#import(io.phdata.streamliner.schemadefiner.model.Snowflake)`
    
@@ -560,7 +564,7 @@ CMD : `<install directory>/bin/streamliner scripts --config conf/private-ingest-
         WHEN NOT MATCHED AND s.dms_operation != 'D' OR s.dms_operation IS NULL THEN INSERT (${table.columnList()}, dms_operation, dms_ts) VALUES (${table.columnList(Some("s"))}, s.dms_operation, s.max_dms_ts);
    ```
    
-   Streamliner 5.0:
+   Streamliner 5.x:
 
    ```
     CREATE TASK IF NOT EXISTS ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName}_task
@@ -580,7 +584,7 @@ CMD : `<install directory>/bin/streamliner scripts --config conf/private-ingest-
         WHEN MATCHED AND s.dms_operation = 'D' THEN DELETE
         WHEN NOT MATCHED AND s.dms_operation != 'D' OR s.dms_operation IS NULL THEN INSERT (${table.columnList(null)}, dms_operation, dms_ts) VALUES (${table.columnList("s")}, s.dms_operation, s.max_dms_ts);
    ```
-3. Since Streamliner 5.0 is written in JAVA, we might have to convert few Java code into Scala to support in SSP template. For example we converted Java List to Scala Seq to use few scala methods in SSP template.
+3. Since Streamliner 5.x is written in JAVA, we might have to convert few Java code into Scala to support in SSP template. For example, we converted Java List to Scala Seq to use few scala methods in SSP template.
 
    Example:
 
@@ -597,7 +601,7 @@ CMD : `<install directory>/bin/streamliner scripts --config conf/private-ingest-
     COMMENT = '${table.comment.getOrElse("")}';
    ```
 
-   Streamliner 5.0:
+   Streamliner 5.x:
 
    ```
     CREATE TABLE IF NOT EXISTS ${destination.reportingDatabase.name}.${destination.reportingDatabase.schema}.${table.destinationName} (

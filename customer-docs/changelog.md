@@ -1,3 +1,8 @@
+## 5.7.0
+- Added an optional parameter `log-level` in the streamliner commands to change the application log level.
+- Fixed a bug to change the application log level from `log4j.properties` file present in the `conf` folder in the artifact. 
+- [Download](https://repo.phdata.io/public/streamliner/maven/io/phdata/streamliner/streamliner/5.7.0/streamliner-5.7.0.zip)
+
 ## 5.6.1
 - Fixed a bug to use environment variables in ingest-configuration file. Example `url: “${env:URL}"`. Streamliner will read the url from the environment variable URL. 
 - [Download](https://repo.phdata.io/public/streamliner/maven/io/phdata/streamliner/streamliner/5.6.1/streamliner-5.6.1.zip)
