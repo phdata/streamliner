@@ -16,6 +16,7 @@
 // under the License.
 package io.phdata.streamliner.schemadefiner.model;
 
+import java.util.List;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,10 +27,10 @@ import lombok.ToString;
 @Getter
 @Setter
 public class FileFormat {
-  private String location;
-  private String fileType;
-  private String delimiter;
-  private String nullIf;
+  public String location;
+  public String fileType;
+  public String delimiter;
+  public List<String> nullIf;
 
   public FileFormat() {}
 
@@ -38,7 +39,7 @@ public class FileFormat {
     this.fileType = fileType;
   }
 
-  public FileFormat(String location, String fileType, String delimiter, String nullIf) {
+  public FileFormat(String location, String fileType, String delimiter, List<String> nullIf) {
     this.location = location;
     this.fileType = fileType;
     this.delimiter = delimiter;

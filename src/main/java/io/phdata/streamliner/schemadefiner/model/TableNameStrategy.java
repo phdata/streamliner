@@ -26,10 +26,10 @@ import lombok.ToString;
 @Getter
 @Setter
 public class TableNameStrategy {
-  private String addPrefix;
-  private String addPostfix;
-  private boolean asIs;
-  private SearchReplace searchReplace;
+  public String addPrefix;
+  public String addPostfix;
+  public boolean asIs;
+  public SearchReplace searchReplace;
 
   public TableNameStrategy(
       String addPrefix, String addPostfix, boolean asIs, SearchReplace searchReplace) {

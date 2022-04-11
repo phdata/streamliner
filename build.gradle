@@ -76,6 +76,10 @@ dependencies {
     }
     implementation libs.mysqlConnector
     implementation libs.ojdbc
+    implementation libs.snowflakeJdbc
+
+    // Hive and Impala JDBC jars from lib directory
+    implementation fileTree(dir: 'lib', include: ['*.jar'])
 
     // Logging
     implementation libs.slf4j

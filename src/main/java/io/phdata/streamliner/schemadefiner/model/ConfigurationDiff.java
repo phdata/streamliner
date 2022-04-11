@@ -27,12 +27,12 @@ import lombok.ToString;
 @Getter
 @Setter
 public class ConfigurationDiff {
-  private String name;
-  private String environment;
-  private String pipeline;
-  private Destination previousDestination;
+  public String name;
+  public String environment;
+  public String pipeline;
+  public Destination previousDestination;
   public Destination currentDestination;
-  private List<TableDiff> tableDiffs;
+  public List<TableDiff> tableDiffs;
 
   public ConfigurationDiff() {}
 

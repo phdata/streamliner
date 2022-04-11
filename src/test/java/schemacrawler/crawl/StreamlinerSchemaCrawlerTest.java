@@ -72,6 +72,14 @@ public class StreamlinerSchemaCrawlerTest {
     Map<String, Object> index = new HashMap<>();
     index.put("TABLE_NAME", "t1");
     index.put("COLUMN_NAME", "c2");
+    {
+      ORACLE_TABLES_TEMPLATE =
+          ORACLE_TABLES_TEMPLATE.replace("{{TABLE_FILTER}}", "").replace("{{VIEW_FILTER}}", "");
+      ORACLE_COLUMNS_TEMPLATE = ORACLE_COLUMNS_TEMPLATE.replace("{{TABLE_FILTER}}", "");
+      ORACLE_CONSTRAINTS_TEMPLATE = ORACLE_CONSTRAINTS_TEMPLATE.replace("{{TABLE_FILTER}}", "");
+      ORACLE_UNIQUE_INDEXES_TEMPLATE =
+          ORACLE_UNIQUE_INDEXES_TEMPLATE.replace("{{TABLE_FILTER}}", "");
+    }
     resultSet.put(ORACLE_TABLES_TEMPLATE, Arrays.asList(table1, table2));
     resultSet.put(ORACLE_COLUMNS_TEMPLATE, Arrays.asList(column1, column2));
     resultSet.put(ORACLE_CONSTRAINTS_TEMPLATE, Arrays.asList(constraint));

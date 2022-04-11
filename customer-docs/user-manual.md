@@ -3,8 +3,10 @@
 - [Introduction](#introduction)
   * [Why Streamliner](#why-streamliner)
 - [User Guide](#user-guide)
+  * [Compatible JDK](#compatible-jdk)
   * [Configuration](#configuration)
     + [Pipeline Configuration](#pipeline-configuration)
+    + [Generic Properties](#generic-properties)
     + [Data Source Configuration](#data-source-configuration)
       - [Jdbc Data Source](#jdbc-data-source)
         * [Allowed Schema Changes](#allowed-schema-changes)
@@ -69,6 +71,9 @@ Streamliner uses configuration files which applied to templates to create DDL an
 1. `schema` metadata parsing - Collects table metadata information from a relational database or Amazon Web Services Glue Data Catalog.  The output of the `schema` command enhances the original configuration to the be applied to pipeline templates.
 2. `scripts` DDL and DML creation - Applies configuration properties to templates to produce DDL and DML scripts.  Templates are a collection of operations producing a data ingestion pipeline for a single table.
 
+## Compatible JDK
+Streamliner 5.x compatible JDK is Java 11.
+
 ## Configuration
 The initial Streamliner configuration contains properties about the data source (Jdbc or Glue AWS data catalog) and destinations (Hadoop or Snowflake).  The configurations are created as yaml files and passed into the `schema` and `scripts` subcommands on execution.
 
@@ -84,6 +89,22 @@ The base level pipeline configuration has 3 properties that define the pipeline.
 | pipeline | String | True | The name of the pipeline template (ex: snowflake-snowpipe-append or truncate-reload) |
 | source | Source | [Data Source Configuration](#data-source-configuration) |
 | destination | Destination | [Destination Configuration](#destination-configuration) |
+| genericProperties | Map[Object, Object] | False | [Generic Properties](#generic-properties) |
+
+### Generic Properties
+It can be used to pass any generic parameter that are not pre-defined in the model classes. This attribute will be at the same level of source and destination.
+
+For example, we can pass `tableName` using `genericProperties` like below:
+```yaml
+source:
+  // attributes
+destination:
+  // attributes
+genericProperties:
+   tableName: "employee"
+```
+
+It can be accessed in the template with `${configuration.genericProperties.get("tableName")}`
 
 ### Data Source Configuration
 Streamliner collects metadata from two types of sources:
@@ -204,6 +225,7 @@ Configuration properties defining the Snowflake destination.
 | stagingDatabase | [SnowflakeDatabase](#snowflake-database) | True | Staging database where data will staged into in Snowflake |
 | reportingDatabase | [SnowflakeDatabase](#snowflake-database) | True | Reporting database where data will be merged into or replicated in Snowflake |
 | tableNameStrategy | [TableNameStrategy](#table-name-strategy) | False | Option to modify snowflake table name. |
+| errorIntegration | String | False | Snowpipe notification integration name. |
 
 ##### Snowflake Database
 Configuration properties defining the Snowflake database.

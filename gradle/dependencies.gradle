@@ -47,6 +47,7 @@ versions += [
   scallop                 : "3.1.1",
   schemacrawler           : "16.12.3",
   slf4j                   : "1.7.32",
+  snowflakeJdbc           : "3.13.8",
   spotBugs                : "4.4.1",
 ]
 
@@ -85,4 +86,5 @@ libs += [
   schemacrawlerSqlserver  : "us.fatehi:schemacrawler-sqlserver:$versions.schemacrawler",
   slf4j                   : "org.slf4j:slf4j-api:$versions.slf4j",
   slf4jLog4j12            : "org.slf4j:slf4j-log4j12:$versions.slf4j",
+  snowflakeJdbc           : "net.snowflake:snowflake-jdbc:$versions.snowflakeJdbc"
 ]

@@ -28,10 +28,10 @@ import lombok.ToString;
 @Setter
 public class SnowflakeUserDefinedTable extends UserDefinedTable {
 
-  private String type;
-  private String name;
-  private List<String> primaryKeys;
-  private FileFormat fileFormat;
+  public String type;
+  public String name;
+  public List<String> primaryKeys;
+  public FileFormat fileFormat;
 
   public SnowflakeUserDefinedTable() {}
 }

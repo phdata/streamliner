@@ -41,11 +41,11 @@ import org.apache.commons.lang3.StringUtils;
 @Getter
 @Setter
 public class TableDefinition {
-  private String type;
-  private String sourceName;
+  public String type;
+  public String sourceName;
   public String destinationName;
-  private List<String> primaryKeys;
-  private List<ColumnDefinition> columns;
+  public List<String> primaryKeys;
+  public List<ColumnDefinition> columns;
 
   public TableDefinition() {}
 

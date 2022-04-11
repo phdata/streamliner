@@ -47,16 +47,16 @@ public class StreamlinerSchemaCrawler {
   private static final String ORACLE_COLUMNS = "oracle-schema-crawler-columns.sql";
   private static final String ORACLE_CONSTRAINTS = "oracle-schema-crawler-constraints.sql";
   private static final String ORACLE_UNIQUE_INDEXES = "oracle-schema-crawler-unique-indexes.sql";
-  protected static final String ORACLE_TABLES_TEMPLATE;
-  protected static final String ORACLE_COLUMNS_TEMPLATE;
-  protected static final String ORACLE_CONSTRAINTS_TEMPLATE;
-  protected static final String ORACLE_UNIQUE_INDEXES_TEMPLATE;
+  protected static String ORACLE_TABLES_TEMPLATE;
+  protected static String ORACLE_COLUMNS_TEMPLATE;
+  protected static String ORACLE_CONSTRAINTS_TEMPLATE;
+  protected static String ORACLE_UNIQUE_INDEXES_TEMPLATE;
   private static final String SNOWFLAKE_TABLES = "snowflake-schema-crawler-tables.sql";
   private static final String SNOWFLAKE_COLUMNS = "snowflake-schema-crawler-columns.sql";
   private static final String SNOWFLAKE_SCHEMAS = "snowflake-schema-crawler-schemas.sql";
-  protected static final String SNOWFLAKE_TABLES_TEMPLATE;
-  protected static final String SNOWFLAKE_COLUMNS_TEMPLATE;
-  protected static final String SNOWFLAKE_SCHEMAS_TEMPLATE;
+  protected static String SNOWFLAKE_TABLES_TEMPLATE;
+  protected static String SNOWFLAKE_COLUMNS_TEMPLATE;
+  protected static String SNOWFLAKE_SCHEMAS_TEMPLATE;
 
   private static String find(String name) {
     try (InputStream is =
@@ -102,6 +102,40 @@ public class StreamlinerSchemaCrawler {
     Schema schema = new SchemaReference(schemaName, schemaName);
     boolean findTables = tableTypes.contains("table");
     boolean findViews = tableTypes.contains("view");
+
+    if (tableWhitelist != null && !tableWhitelist.isEmpty()) {
+      ORACLE_TABLES_TEMPLATE =
+          ORACLE_TABLES_TEMPLATE
+              .replace(
+                  "{{TABLE_FILTER}}",
+                  String.format(
+                      "AND TABLES.TABLE_NAME IN (%s)", encloseWithSingleQuotes(tableWhitelist)))
+              .replace(
+                  "{{VIEW_FILTER}}",
+                  String.format(
+                      "AND MVIEWS.MVIEW_NAME IN (%s)", encloseWithSingleQuotes(tableWhitelist)));
+      ORACLE_COLUMNS_TEMPLATE =
+          ORACLE_COLUMNS_TEMPLATE.replace(
+              "{{TABLE_FILTER}}",
+              String.format(
+                  "AND COLUMNS.TABLE_NAME IN (%s)", encloseWithSingleQuotes(tableWhitelist)));
+      ORACLE_CONSTRAINTS_TEMPLATE =
+          ORACLE_CONSTRAINTS_TEMPLATE.replace(
+              "{{TABLE_FILTER}}",
+              String.format("AND PC.TABLE_NAME IN (%s)", encloseWithSingleQuotes(tableWhitelist)));
+      ORACLE_UNIQUE_INDEXES_TEMPLATE =
+          ORACLE_UNIQUE_INDEXES_TEMPLATE.replace(
+              "{{TABLE_FILTER}}",
+              String.format(
+                  "AND INDEXES.TABLE_NAME IN (%s)", encloseWithSingleQuotes(tableWhitelist)));
+    } else {
+      ORACLE_TABLES_TEMPLATE =
+          ORACLE_TABLES_TEMPLATE.replace("{{TABLE_FILTER}}", "").replace("{{VIEW_FILTER}}", "");
+      ORACLE_COLUMNS_TEMPLATE = ORACLE_COLUMNS_TEMPLATE.replace("{{TABLE_FILTER}}", "");
+      ORACLE_CONSTRAINTS_TEMPLATE = ORACLE_CONSTRAINTS_TEMPLATE.replace("{{TABLE_FILTER}}", "");
+      ORACLE_UNIQUE_INDEXES_TEMPLATE =
+          ORACLE_UNIQUE_INDEXES_TEMPLATE.replace("{{TABLE_FILTER}}", "");
+    }
     {
       for (Map<String, Object> row : queryHandler.queryToList(ORACLE_TABLES_TEMPLATE, schemaName)) {
         String tableName = (String) row.get("TABLE_NAME");
@@ -187,15 +221,7 @@ public class StreamlinerSchemaCrawler {
       }
     }
     Map<Schema, List<Table>> result = new HashMap<>();
-    if (tableWhitelist != null) {
-      List<Table> tableFiltered =
-          tables.values().stream()
-              .filter(table -> tableWhitelist.contains(table.getName()))
-              .collect(Collectors.toList());
-      result.put(schema, tableFiltered);
-    } else {
-      result.put(schema, new ArrayList<>(tables.values()));
-    }
+    result.put(schema, new ArrayList<>(tables.values()));
     return new StreamlinerCatalog("oracle.jdbc.OracleDriver", Arrays.asList(schema), result);
   }
 
@@ -269,24 +295,21 @@ public class StreamlinerSchemaCrawler {
     // This will check if schema name provided in config is valid or not.
     {
       List<Map<String, Object>> schemas =
-          queryHandler.queryToList(SNOWFLAKE_SCHEMAS_TEMPLATE, "", "");
-      boolean isSchemaValid =
-          schemas.stream()
-              .anyMatch(
-                  row -> {
-                    if (((String) row.get("SCHEMA_NAME")).equalsIgnoreCase(schemaName)) {
-                      return true;
-                    } else {
-                      return false;
-                    }
-                  });
-      if (!isSchemaValid) {
+          queryHandler.queryToList(SNOWFLAKE_SCHEMAS_TEMPLATE, schemaName, "");
+      if (schemas != null && schemas.isEmpty()) {
         throw new IllegalStateException(
             String.format("%s database does not have %s schema.", database, schemaName));
       }
     }
-
     {
+      if (tableWhitelist != null && !tableWhitelist.isEmpty()) {
+        SNOWFLAKE_TABLES_TEMPLATE =
+            SNOWFLAKE_TABLES_TEMPLATE.replace(
+                "{{TABLE_FILTER}}",
+                String.format("TABLE_NAME in (%s) AND", encloseWithSingleQuotes(tableWhitelist)));
+      } else {
+        SNOWFLAKE_TABLES_TEMPLATE = SNOWFLAKE_TABLES_TEMPLATE.replace("{{TABLE_FILTER}}", "");
+      }
       for (Map<String, Object> row :
           queryHandler.queryToList(SNOWFLAKE_TABLES_TEMPLATE, schemaName, "")) {
         snowflakeSchemaName = (String) row.get("TABLE_SCHEMA");
@@ -344,15 +367,7 @@ public class StreamlinerSchemaCrawler {
       }
     }
     Map<Schema, List<Table>> result = new HashMap<>();
-    if (tableWhitelist != null) {
-      List<Table> tableFiltered =
-          tables.values().stream()
-              .filter(table -> tableWhitelist.contains(table.getName()))
-              .collect(Collectors.toList());
-      result.put(schema, tableFiltered);
-    } else {
-      result.put(schema, new ArrayList<>(tables.values()));
-    }
+    result.put(schema, new ArrayList<>(tables.values()));
     return new StreamlinerCatalog(
         "net.snowflake.client.jdbc.SnowflakeDriver", Arrays.asList(schema), result);
   }
@@ -485,5 +500,9 @@ public class StreamlinerSchemaCrawler {
         throw new IllegalStateException(e);
       }
     }
+  }
+
+  public static String encloseWithSingleQuotes(List<String> list) {
+    return list.stream().collect(Collectors.joining("','", "'", "'"));
   }
 }
