@@ -1,3 +1,9 @@
+## 5.8.0
+- Performance improvement for Oracle and Snowflake schema crawling.
+- Added support to connect to Hive and Impala via JDBC.
+- Snowpipe notification integration name can be passed using optional parameter `errorIntegration` under destination in ingest-config.
+- [Download](https://repo.phdata.io/public/streamliner/maven/io/phdata/streamliner/streamliner/5.8.0/streamliner-5.8.0.zip)
+
 ## 5.7.0
 - Added an optional parameter `log-level` in the streamliner commands to change the application log level.
 - Fixed a bug to change the application log level from `log4j.properties` file present in the `conf` folder in the artifact. 

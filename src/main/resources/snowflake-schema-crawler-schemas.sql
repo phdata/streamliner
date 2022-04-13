@@ -1,1 +1,1 @@
-select CATALOG_NAME, SCHEMA_NAME from information_schema.schemata;
+select CATALOG_NAME, SCHEMA_NAME from information_schema.schemata where SCHEMA_NAME = '{{SCHEMA_NAME}}';

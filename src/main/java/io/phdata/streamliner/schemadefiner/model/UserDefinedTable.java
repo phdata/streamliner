@@ -35,9 +35,9 @@ import lombok.ToString;
 @Setter
 public class UserDefinedTable {
   /* after jackson de-serialization type will be null. In case if type value is needed, add visible = true at line 15 */
-  private String type;
-  private String name;
-  private List<String> primaryKeys;
+  public String type;
+  public String name;
+  public List<String> primaryKeys;
 
   public UserDefinedTable() {}
 }

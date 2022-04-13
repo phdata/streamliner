@@ -26,11 +26,11 @@ import lombok.ToString;
 @Getter
 @Setter
 public class ColumnDiff {
-  private ColumnDefinition previousColumnDef;
-  private ColumnDefinition currentColumnDef;
-  private Boolean isDeleted;
-  private Boolean isAdd;
-  private Boolean isUpdate;
+  public ColumnDefinition previousColumnDef;
+  public ColumnDefinition currentColumnDef;
+  public Boolean isDeleted;
+  public Boolean isAdd;
+  public Boolean isUpdate;
 
   public ColumnDiff() {}
 

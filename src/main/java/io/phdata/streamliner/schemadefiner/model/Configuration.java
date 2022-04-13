@@ -31,10 +31,10 @@ import lombok.ToString;
 public class Configuration {
   public String name;
   public String environment;
-  private String pipeline;
+  public String pipeline;
   public Source source;
   public Destination destination;
-  private List<TableDefinition> tables;
+  public List<TableDefinition> tables;
   /* This can be used to pass any other extra fields needed. */
   public Map<Object, Object> genericProperties;
 

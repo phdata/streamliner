@@ -26,7 +26,7 @@ import lombok.ToString;
 @Getter
 @Setter
 public class Options {
-  private String type;
+  public String type;
 
   public Options() {}
 }

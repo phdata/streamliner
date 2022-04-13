@@ -32,15 +32,15 @@ import org.apache.commons.lang3.StringUtils;
 @Getter
 @Setter
 public class SnowflakeTable extends TableDefinition {
-  private String type;
+  public String type;
   public String sourceName;
   public String destinationName;
   public String comment = "";
-  private List<String> primaryKeys;
-  private String changeColumn;
-  private String incrementalTimeStamp;
-  private Map<String, String> metadata;
-  private FileFormat fileFormat;
+  public List<String> primaryKeys;
+  public String changeColumn;
+  public String incrementalTimeStamp;
+  public Map<String, String> metadata;
+  public FileFormat fileFormat;
   public List<ColumnDefinition> columns;
   public String pkList;
 

@@ -32,12 +32,12 @@ import org.apache.commons.lang3.StringUtils;
 @Getter
 @Setter
 public class TableDiff {
-  private String type;
+  public String type;
   public String sourceName;
   public String destinationName;
   public boolean existsInDestination;
   public boolean existsInSource;
-  private List<ColumnDiff> columnDiffs;
+  public List<ColumnDiff> columnDiffs;
 
   public TableDiff() {}
 

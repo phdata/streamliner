@@ -28,14 +28,14 @@ import lombok.ToString;
 @Getter
 @Setter
 public class HadoopUserDefinedTable extends UserDefinedTable {
-  private String type;
-  private String name;
-  private List<String> primaryKeys;
-  private String checkColumn;
-  private Integer numberOfMappers;
-  private String splitByColumn;
-  private Integer numberOfPartitions;
-  private Map<String, String> metadata;
+  public String type;
+  public String name;
+  public List<String> primaryKeys;
+  public String checkColumn;
+  public Integer numberOfMappers;
+  public String splitByColumn;
+  public Integer numberOfPartitions;
+  public Map<String, String> metadata;
 
   public HadoopUserDefinedTable() {}
 }

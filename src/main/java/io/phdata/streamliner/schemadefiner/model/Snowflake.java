@@ -26,7 +26,7 @@ import lombok.ToString;
 @Getter
 @Setter
 public class Snowflake extends Destination {
-  private String type;
+  public String type;
   public String snowSqlCommand;
   public String storagePath;
   public String storageIntegration;
@@ -39,6 +39,7 @@ public class Snowflake extends Destination {
   public String stageName;
   public IngestFileFormat fileFormat;
   public TableNameStrategy tableNameStrategy;
+  public String errorIntegration;
 
   public Snowflake() {}
 }

@@ -32,7 +32,7 @@ import org.apache.commons.lang3.StringUtils;
 @Getter
 @Setter
 public class HadoopTable extends TableDefinition {
-  private String type;
+  public String type;
   public String sourceName;
   public String destinationName;
   public String checkColumn;
