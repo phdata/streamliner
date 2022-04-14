@@ -46,6 +46,7 @@
     + [Script Generation](#script-generation)
   * [Migrating Templates from Streamliner 4.x to 5.x](#migrating-templates-from-streamliner-4x-to-5x)
   * [Connect streamliner to hive with jdbc kerberos authentication](#connect-streamliner-to-hive-with-jdbc-kerberos-authentication)
+  * [Connect streamliner to impala with jdbc kerberos authentication](#connect-streamliner-to-impala-with-jdbc-kerberos-authentication)
 
 # Introduction
 Streamliner is a Data Pipeline Automation tool that simplifies the process of ingesting data onto a new platform. It is not a data ingestion tool in and of itself; rather, it automates other commonly used tools that ingest and manipulate data on platforms like Snowflake, Amazon Redshift, Cloudera, and Databricks.
@@ -663,6 +664,15 @@ CMD : `<install directory>/bin/streamliner scripts --config conf/private-ingest-
 4. Copy streamliner to hive edge node.
 5. Provide correct hive jdbc url to streamliner config. The hive jdbc url should look like below
     ```
-        jdbc:hive2://<host_name>:<port>/<db>;AuthMech=1;KrbHostFQDN=<host_name>;KrbServiceName=<service_name>;KrbRealm=<Realm>;SSL=1;SSLTrustStore=<ssl_trust_store>
+        jdbc:hive2://<host_name>:<port>/<db>;AuthMech=1;KrbHostFQDN=<host_name>;KrbServiceName=hive;KrbRealm=<Realm>;SSL=1;SSLTrustStore=<ssl_trust_store>
     ```
-6. Execute streamliner schema command from streamliner folder. Please make sure ticket cache exits before executing schema command.   
+6. Execute streamliner schema command from streamliner folder. Please make sure ticket cache exist before executing schema command.
+
+## Connect streamliner to impala with jdbc kerberos authentication
+
+Steps are same as [Connect streamliner to hive with jdbc kerberos authentication](#connect-streamliner-to-hive-with-jdbc-kerberos-authentication) except the impala jdbc url pattern.
+
+Provide below impala jdbc url to streamliner config.
+    ```
+        "jdbc:impala://<host_name>:<port>/<db>;AuthMech=1;KrbHostFQDN=<host_name>;KrbServiceName=impala;KrbRealm=<Realm>;SSLTrustStore=<ssl_trust_store>"
+    ```
