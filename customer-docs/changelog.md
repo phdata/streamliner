@@ -47,6 +47,11 @@
 - Ensure primary keys are "quote if needed" like columns
 - [Download](https://repo.phdata.io/public/streamliner/maven/io/phdata/streamliner/streamliner/5.0/streamliner-5.0.zip)
 
+## 4.4
+- Fixed the bug where no tables were found in the schema.
+- Schema crawler library logging level can be set to `ALL` by adding `SCHEMA_CRAWLER_DEBUG` in the environment variable.
+- [Download](https://repo.phdata.io/public/streamliner/maven/io/phdata/streamliner/streamliner/4.4/streamliner-4.4.zip)
+
 ## 4.3
 - Truncate max length to 16,777,216 when required
 - [Download](https://repo.phdata.io/public/streamliner/maven/io/phdata/streamliner/streamliner/4.3/streamliner-4.3.zip)
