@@ -1,3 +1,7 @@
+## 5.8.1
+- Removed log4j2 vulnerable unused dependency.
+- [Download](https://repo.phdata.io/public/streamliner/maven/io/phdata/streamliner/streamliner/5.8.1/streamliner-5.8.1.zip)
+
 ## 5.8.0
 - Performance improvement for Oracle and Snowflake schema crawling.
 - Added support to connect to Hive and Impala via JDBC.

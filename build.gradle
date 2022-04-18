@@ -71,9 +71,6 @@ dependencies {
     implementation libs.schemacrawlerSqlserver
 
     // JDBC Drivers
-    implementation (libs.hiveJdbc) {
-        exclude group: "org.slf4j", module: "slf4j-api"
-    }
     implementation libs.mysqlConnector
     implementation libs.ojdbc
     implementation libs.snowflakeJdbc
