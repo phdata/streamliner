@@ -17,11 +17,17 @@
 package io.phdata.streamliner.schemadefiner.mapper;
 
 import io.phdata.streamliner.schemadefiner.GlueCrawler;
+import io.phdata.streamliner.schemadefiner.attributeretriever.AttributeRetriever;
+import io.phdata.streamliner.schemadefiner.attributeretriever.AttributeRetrieverFactory;
+import io.phdata.streamliner.schemadefiner.attributeretriever.HiveAttributeRetriever;
+import io.phdata.streamliner.schemadefiner.attributeretriever.NoOpAttributeRetriever;
 import io.phdata.streamliner.schemadefiner.model.*;
 import io.phdata.streamliner.schemadefiner.util.StreamlinerUtil;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,13 +37,35 @@ import schemacrawler.schema.Table;
 public class SnowflakeMapper {
   private static final Logger log = LoggerFactory.getLogger(SnowflakeMapper.class);
 
-  public static List<TableDefinition> mapSchemaCrawlerTables(
-      List<Table> tables, List<UserDefinedTable> userDefinedTables, Snowflake destination) {
+  private final Jdbc source;
+  private final Snowflake destination;
+  private final String jdbcPassword;
+  private final AttributeRetriever attributeRetriever;
+  private final Supplier<Connection> conSupplier =
+      new Supplier<Connection>() {
+        @Override
+        public Connection get() {
+          return StreamlinerUtil.getConnection(source.getUrl(), source.getUsername(), jdbcPassword);
+        }
+      };
+
+  public SnowflakeMapper(
+      final Jdbc source, final Snowflake destination, final String jdbcPassword) {
+    this.source = source;
+    this.destination = destination;
+    this.jdbcPassword = jdbcPassword;
+    this.attributeRetriever =
+        AttributeRetrieverFactory.getAttributeRetriever(
+            StreamlinerUtil.schema(source.getUrl()), conSupplier);
+  }
+
+  public List<TableDefinition> mapSchemaCrawlerTables(List<Table> tables) {
+    List<UserDefinedTable> userDefinedTables = source.getUserDefinedTable();
     // schema crawler sorts by lower case name so we ensure that behavior here
     List<SnowflakeTable> sortedTableDef =
         tables.stream()
             .sorted(Comparator.comparing(table -> table.getName().toLowerCase()))
-            .map(table -> mapSchemaCrawlerTable(table, destination))
+            .map(table -> mapSchemaCrawlerTable(table))
             .collect(Collectors.toList());
     return userTableDefinitions(sortedTableDef, userDefinedTables).stream()
         .map(userTable -> (TableDefinition) userTable)
@@ -75,7 +103,7 @@ public class SnowflakeMapper {
     }
   }
 
-  private static SnowflakeTable mapSchemaCrawlerTable(Table table, Snowflake destination) {
+  private SnowflakeTable mapSchemaCrawlerTable(Table table) {
     // columns are sorted based on ordinal position
     table.getColumns().sort(Comparator.comparing(column -> column.getOrdinalPosition()));
     List<Column> columns = table.getColumns();
@@ -96,17 +124,29 @@ public class SnowflakeMapper {
 
     return new SnowflakeTable(
         table.getName(),
-        getSnowflakeTableName(table.getName(), destination),
+        getSnowflakeTableName(table.getName()),
         table.getRemarks(),
         primaryKey,
         null,
         null,
         null,
-        new FileFormat(table.getName(), "PARQUET"),
+        createFileFormat(table.getName()),
         mapSchemaCrawlerColumnDefinition(columns));
   }
 
-  public static String getSnowflakeTableName(String tableName, Snowflake destination) {
+  private FileFormat createFileFormat(String tableName) {
+    if (attributeRetriever instanceof NoOpAttributeRetriever) {
+      return ((NoOpAttributeRetriever) attributeRetriever).calculateFileFormat(tableName);
+    } else if (attributeRetriever instanceof HiveAttributeRetriever) {
+      return ((HiveAttributeRetriever) attributeRetriever)
+          .calculateFileFormat(attributeRetriever.retrieve(source.getSchema(), tableName));
+    } else {
+      throw new RuntimeException(
+          String.format("Unknown attribute retriever: %s", attributeRetriever.type()));
+    }
+  }
+
+  private String getSnowflakeTableName(String tableName) {
     try {
       return StreamlinerUtil.applyTableNameStrategy(tableName, destination.getTableNameStrategy());
     } catch (Exception e) {
@@ -114,7 +154,7 @@ public class SnowflakeMapper {
     }
   }
 
-  private static List<ColumnDefinition> mapSchemaCrawlerColumnDefinition(List<Column> columns) {
+  private List<ColumnDefinition> mapSchemaCrawlerColumnDefinition(List<Column> columns) {
     return columns.stream()
         .map(
             column ->
