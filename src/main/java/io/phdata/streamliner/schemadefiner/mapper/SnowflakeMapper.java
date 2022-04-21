@@ -17,16 +17,12 @@
 package io.phdata.streamliner.schemadefiner.mapper;
 
 import io.phdata.streamliner.schemadefiner.GlueCrawler;
-import io.phdata.streamliner.schemadefiner.attributeretriever.AttributeRetriever;
-import io.phdata.streamliner.schemadefiner.attributeretriever.AttributeRetrieverFactory;
 import io.phdata.streamliner.schemadefiner.attributeretriever.HiveAttributeRetriever;
-import io.phdata.streamliner.schemadefiner.attributeretriever.NoOpAttributeRetriever;
 import io.phdata.streamliner.schemadefiner.model.*;
 import io.phdata.streamliner.schemadefiner.util.StreamlinerUtil;
 import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.sql.SQLException;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -40,7 +36,6 @@ public class SnowflakeMapper {
   private final Jdbc source;
   private final Snowflake destination;
   private final String jdbcPassword;
-  private final AttributeRetriever attributeRetriever;
   private final Supplier<Connection> conSupplier =
       new Supplier<Connection>() {
         @Override
@@ -54,22 +49,50 @@ public class SnowflakeMapper {
     this.source = source;
     this.destination = destination;
     this.jdbcPassword = jdbcPassword;
-    this.attributeRetriever =
-        AttributeRetrieverFactory.getAttributeRetriever(
-            StreamlinerUtil.schema(source.getUrl()), conSupplier);
   }
 
   public List<TableDefinition> mapSchemaCrawlerTables(List<Table> tables) {
     List<UserDefinedTable> userDefinedTables = source.getUserDefinedTable();
+
+    Map<String, FileFormat> hiveTableAttributes = getHiveTableAttributes(tables);
+
     // schema crawler sorts by lower case name so we ensure that behavior here
     List<SnowflakeTable> sortedTableDef =
         tables.stream()
             .sorted(Comparator.comparing(table -> table.getName().toLowerCase()))
-            .map(table -> mapSchemaCrawlerTable(table))
+            .map(table -> mapSchemaCrawlerTable(table, hiveTableAttributes))
             .collect(Collectors.toList());
     return userTableDefinitions(sortedTableDef, userDefinedTables).stream()
         .map(userTable -> (TableDefinition) userTable)
         .collect(Collectors.toList());
+  }
+
+  private Map<String, FileFormat> getHiveTableAttributes(List<Table> tables) {
+    /* retrieving the hive attributes here because,
+    after this tables will go under iteration, and we have to create the JDBC connection per iteration.
+    The process will become very slow for larger databases.
+    With one connection, retrieving all the tables attribute is faster. */
+    String dbType = StreamlinerUtil.schema(source.getUrl());
+    Map<String, FileFormat> hiveTableAttributes = null;
+    if (source.isIncludeHiveAttributes() && Arrays.asList(hiveFamilyDbs).contains(dbType)) {
+      hiveTableAttributes = new HashMap<>();
+      try (Connection con = conSupplier.get()) {
+        HiveAttributeRetriever attributeRetriever = new HiveAttributeRetriever(con);
+        for (Table table : tables) {
+          hiveTableAttributes.put(
+              table.getName(),
+              attributeRetriever.calculateFileFormat(source.getSchema(), table.getName()));
+        }
+      } catch (SQLException e) {
+        throw new RuntimeException(
+            String.format(
+                "Error while creating JDBC connection url: {}, user: {}",
+                source.getUrl(),
+                source.getUsername()),
+            e);
+      }
+    }
+    return hiveTableAttributes;
   }
 
   private static List<SnowflakeTable> userTableDefinitions(
@@ -103,7 +126,8 @@ public class SnowflakeMapper {
     }
   }
 
-  private SnowflakeTable mapSchemaCrawlerTable(Table table) {
+  private SnowflakeTable mapSchemaCrawlerTable(
+      Table table, Map<String, FileFormat> hiveTablesAttributes) {
     // columns are sorted based on ordinal position
     table.getColumns().sort(Comparator.comparing(column -> column.getOrdinalPosition()));
     List<Column> columns = table.getColumns();
@@ -130,21 +154,20 @@ public class SnowflakeMapper {
         null,
         null,
         null,
-        createFileFormat(table.getName()),
+        createFileFormat(table.getName(), hiveTablesAttributes),
         mapSchemaCrawlerColumnDefinition(columns));
   }
 
-  private FileFormat createFileFormat(String tableName) {
-    if (attributeRetriever instanceof NoOpAttributeRetriever) {
-      return ((NoOpAttributeRetriever) attributeRetriever).calculateFileFormat(tableName);
-    } else if (attributeRetriever instanceof HiveAttributeRetriever) {
-      return ((HiveAttributeRetriever) attributeRetriever)
-          .calculateFileFormat(attributeRetriever.retrieve(source.getSchema(), tableName));
+  private FileFormat createFileFormat(
+      String tableName, Map<String, FileFormat> hiveTablesAttributes) {
+    if (hiveTablesAttributes != null) {
+      return hiveTablesAttributes.get(tableName);
     } else {
-      throw new RuntimeException(
-          String.format("Unknown attribute retriever: %s", attributeRetriever.type()));
+      return new FileFormat(tableName, "PARQUET");
     }
   }
+
+  private String[] hiveFamilyDbs = {"hive", "hive2", "impala"};
 
   private String getSnowflakeTableName(String tableName) {
     try {

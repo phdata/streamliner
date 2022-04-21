@@ -53,6 +53,10 @@ public class Jdbc extends Source {
    * */
   public Set<String> ignoreTables;
 
+  /* Flag to decide extra attributes(location & fileType) should be crawled from Hive/Impala after schema crawler operation is done.
+   * This can be avoided if location and fileType is not needed for faster operation */
+  public boolean includeHiveAttributes;
+
   public Jdbc() {}
 
   public Jdbc(String url, String username, String schema, List<String> tableTypes) {
