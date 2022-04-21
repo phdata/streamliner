@@ -19,6 +19,7 @@ package io.phdata.streamliner.schemadefiner.configbuilder;
 import io.phdata.streamliner.schemadefiner.GlueCrawler;
 import io.phdata.streamliner.schemadefiner.JdbcCrawler;
 import io.phdata.streamliner.schemadefiner.SchemaDefiner;
+import io.phdata.streamliner.schemadefiner.mapper.CatalogMapper;
 import io.phdata.streamliner.schemadefiner.model.*;
 import io.phdata.streamliner.schemadefiner.util.StreamlinerUtil;
 import java.io.File;
@@ -77,7 +78,7 @@ public class SchemaCommand {
       }
       SchemaDefiner schemaDef = new JdbcCrawler((Jdbc) ingestConfig.getSource(), password);
       StreamlinerCatalog catalog = schemaDef.retrieveSchema();
-      outputConfig = StreamlinerUtil.mapJdbcCatalogToConfig(ingestConfig, catalog);
+      outputConfig = new CatalogMapper(ingestConfig, catalog, password).mapJdbcCatalogToConfig();
     } else if (ingestConfig.getSource() instanceof GlueCatalog) {
       GlueCatalog glue = (GlueCatalog) ingestConfig.getSource();
       SchemaDefiner schemaDef = new GlueCrawler(glue);

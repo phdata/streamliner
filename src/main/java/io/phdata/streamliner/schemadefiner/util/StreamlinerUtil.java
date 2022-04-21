@@ -33,12 +33,13 @@ import io.phdata.streamliner.schemadefiner.mapper.HadoopMapper;
 import io.phdata.streamliner.schemadefiner.mapper.SnowflakeMapper;
 import io.phdata.streamliner.schemadefiner.model.*;
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -136,65 +137,6 @@ public class StreamlinerUtil {
     DatabaseConnectionSource dataSource = new DatabaseConnectionSource(jdbcUrl);
     dataSource.setUserCredentials(new SingleUseUserCredentials(userName, password));
     return dataSource.get();
-  }
-
-  public static Configuration mapJdbcCatalogToConfig(
-      Configuration ingestConfig, StreamlinerCatalog catalog) {
-    Jdbc jdbc = (Jdbc) ingestConfig.getSource();
-    // here filtering of schema will be valid if catalog will come from schema crawler library.
-    List<Schema> schema =
-        catalog.getSchemas().stream().filter(matchSchemaName(jdbc)).collect(Collectors.toList());
-    if (schema.isEmpty()) {
-      throw new IllegalStateException(String.format("No result found for %s", jdbc.getSchema()));
-    } else if (schema.size() > 1) {
-      throw new IllegalStateException(
-          String.format("Found more than one result for %s: %s", jdbc.getSchema(), schema));
-    }
-    List<Table> tableList = (List<Table>) catalog.getTables(schema.get(0));
-    if (tableList == null || tableList.isEmpty()) {
-      throw new RuntimeException(
-          String.format(
-              "%s schema does not  have %s in source system",
-              jdbc.getSchema(), jdbc.getTableTypes().toString()));
-    }
-    if (jdbc.getIgnoreTables() != null && !jdbc.getIgnoreTables().isEmpty()) {
-      tableList =
-          tableList.stream()
-              .filter(table -> !jdbc.getIgnoreTables().contains(table.getName()))
-              .collect(Collectors.toList());
-    }
-    if (tableList.isEmpty()) {
-      throw new RuntimeException("No tables found or all tables ignored.");
-    }
-    List<TableDefinition> tables = null;
-    if (ingestConfig.getDestination() instanceof Snowflake) {
-      tables =
-          SnowflakeMapper.mapSchemaCrawlerTables(
-              tableList, jdbc.getUserDefinedTable(), (Snowflake) ingestConfig.getDestination());
-    } else if (ingestConfig.getDestination() instanceof Hadoop) {
-      tables = HadoopMapper.mapSchemaCrawlerTables(tableList, jdbc.getUserDefinedTable());
-    } else {
-      throw new RuntimeException(
-          String.format(
-              "Unknown Destination provided: %s", ingestConfig.getDestination().getType()));
-    }
-    jdbc.setDriverClass(catalog.getDriverClassName());
-    Configuration newConfig =
-        new Configuration(
-            ingestConfig.getName(),
-            ingestConfig.getEnvironment(),
-            ingestConfig.getPipeline(),
-            ingestConfig.getSource(),
-            ingestConfig.getDestination(),
-            ingestConfig.getGenericProperties(),
-            tables);
-    return newConfig;
-  }
-
-  private static Predicate<Schema> matchSchemaName(Jdbc jdbc) {
-    return catalogSchema ->
-        jdbc.getSchema().equals(catalogSchema.getName())
-            || jdbc.getSchema().equals(catalogSchema.getFullName());
   }
 
   public static void writeConfigToYaml(
@@ -623,6 +565,15 @@ public class StreamlinerUtil {
             logger.getLevel() == null ? LogManager.getRootLogger().getLevel() : logger.getLevel();
         logger.setLevel(org.apache.log4j.Level.toLevel(logLevel, defaultLevel));
       }
+    }
+  }
+
+  public static String schema(String connectionString) {
+    String cleanString = connectionString.replace("jdbc:", "");
+    try {
+      return new URI(cleanString).getScheme();
+    } catch (URISyntaxException e) {
+      throw new RuntimeException("Invalid connection string: " + connectionString, e);
     }
   }
 }
