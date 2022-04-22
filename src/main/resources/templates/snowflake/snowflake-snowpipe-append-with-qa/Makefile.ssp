@@ -19,7 +19,7 @@ limitations under the License.
 #{
     val destination = configuration.destination.asInstanceOf[Snowflake]
 }#
-snowsql-cmd=${destination.snowSqlCommand} -f
+snowsql-cmd=${unescape(destination.snowSqlCommand)} -f
 
 copy-into: copy-into.sql
     $(snowsql-cmd) copy-into.sql

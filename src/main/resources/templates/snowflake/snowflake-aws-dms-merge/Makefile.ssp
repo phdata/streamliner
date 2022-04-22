@@ -19,7 +19,7 @@ limitations under the License.
 #{
     val destination = configuration.destination.asInstanceOf[Snowflake]
 }#
-snowsql-cmd=${destination.snowSqlCommand} -f
+snowsql-cmd=${unescape(destination.snowSqlCommand)} -f
 
 alter-task-resume: alter-task-resume.sql
     $(snowsql-cmd) alter-task-resume.sql

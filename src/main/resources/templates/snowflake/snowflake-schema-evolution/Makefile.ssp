@@ -12,7 +12,7 @@
     val source = configuration.source.asInstanceOf[Jdbc]
     val validSchemaChanges = source.getValidSchemaChanges
 }#
-snowsql-cmd=${destination.snowSqlCommand} -f
+snowsql-cmd=${unescape(destination.snowSqlCommand)} -f
 
 currTableStateFile=${currConfigFile}
 previousStateDirectory=${prevStateDir}

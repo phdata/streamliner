@@ -9,6 +9,7 @@
     + [Generic Properties](#generic-properties)
     + [Data Source Configuration](#data-source-configuration)
       - [Jdbc Data Source](#jdbc-data-source)
+        * [Hive attribute collection](#hive-attribute-collection)
         * [Allowed Schema Changes](#allowed-schema-changes)
       - [AWS Glue Data Catalog](#aws-glue-data-catalog)
         * [User Defined Table](#user-defined-table)
@@ -131,6 +132,32 @@ The Jdbc data source configuration defines connection strings and other attribut
 | tables | List[String] | False | Controls which tables to be crawled from source system. |
 | ignoreTables | List[String] | False | Controls which tables  to be ignored from schema crawling. |
 | validSchemaChanges | List[String] | False | Controls the [Allowed Schema Changes](#allowed-schema-changes) in schema evolution. |
+| includeHiveAttributes | Boolean | False | Controls the [Hive attribute collection](#hive-attribute-collection). Default value is false. |
+
+### Hive attribute collection
+Only applicable when source is Hive/Impala. Hive attributes `InputFormat` and `Location` can be collected using an optional boolean parameter `includeHiveAttributes` under [Jdbc Data Source](#jdbc-data-source) in [Pipeline Configuration](#pipeline-configuration).
+To enable this feature, user has to include it in the pipeline configuration as `includeHiveAttributes: true`. The attributes are collected in the output state files in the `--state-directory` folder.
+
+This is an example of the attributes collected in the state file.
+```yaml
+// other parameters
+fileFormat:
+    location: "hdfs://nameservice1/user/hive/data/avro_only_sql_columns"
+    fileType: "AVRO"
+```
+
+Hive `Location` and `InputFormat` is mapped to [FileFormat](#file-format) `location` and `fileType` respectively.
+
+User will not get the exact `InputFormat` value, rather a snowflake [file format type](https://docs.snowflake.com/en/sql-reference/sql/create-file-format.html) equivalent value.
+
+Below is the Hive `InputFormat` and Snowflake file format mapping.
+
+| Hive InputFormat | Snowflake File Format |
+| --- | --- |
+| org.apache.hadoop.mapred.TextInputFormat | CSV |
+| org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat | AVRO |
+| org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat | PARQUET |
+| org.apache.hadoop.hive.ql.io.orc.OrcInputFormat | ORC |
 
 #### Allowed Schema Changes
 * TABLE_ADD
