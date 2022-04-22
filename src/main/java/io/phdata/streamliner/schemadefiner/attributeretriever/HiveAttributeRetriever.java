@@ -22,7 +22,7 @@ import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HiveAttributeRetriever implements AttributeRetriever {
+public class HiveAttributeRetriever {
   private static final Logger log = LoggerFactory.getLogger(HiveAttributeRetriever.class);
   private final Connection con;
 
@@ -44,7 +44,6 @@ public class HiveAttributeRetriever implements AttributeRetriever {
     this.con = con;
   }
 
-  @Override
   public List<Map<String, Object>> retrieve(String database, String tableName) {
     log.info("Retrieving additional attributes information for table {}.{}", database, tableName);
     List<Map<String, Object>> result = Collections.synchronizedList(new ArrayList<>());
@@ -74,7 +73,8 @@ public class HiveAttributeRetriever implements AttributeRetriever {
     return result;
   }
 
-  public FileFormat calculateFileFormat(List<Map<String, Object>> hiveAttributes) {
+  public FileFormat calculateFileFormat(String database, String tableName) {
+    List<Map<String, Object>> hiveAttributes = retrieve(database, tableName);
     String fileType = "";
     String location = "";
     for (Map<String, Object> attribute : hiveAttributes) {
@@ -86,10 +86,5 @@ public class HiveAttributeRetriever implements AttributeRetriever {
       }
     }
     return new FileFormat(location, hiveSnowflakeFileTypeMapping.getOrDefault(fileType, fileType));
-  }
-
-  @Override
-  public String type() {
-    return this.getClass().getSimpleName();
   }
 }
