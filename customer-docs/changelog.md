@@ -1,3 +1,7 @@
+## 5.9.0
+- Hive attributes `InputFormat` and `Location` can be collected using an optional boolean parameter `includeHiveAttributes` under source in ingest-config.
+- [Download](https://repo.phdata.io/public/streamliner/maven/io/phdata/streamliner/streamliner/5.9.0/streamliner-5.9.0.zip)
+
 ## 5.8.1
 - Removed log4j2 vulnerable unused dependency.
 - [Download](https://repo.phdata.io/public/streamliner/maven/io/phdata/streamliner/streamliner/5.8.1/streamliner-5.8.1.zip)
@@ -43,7 +47,7 @@
 - [Download](https://repo.phdata.io/public/streamliner/maven/io/phdata/streamliner/streamliner/5.1/streamliner-5.1.zip)
 
 ## 5.0
-*Please note that migration of templates is required from Strealiner 4.x to 5.0*
+*Please note that migration of templates is required from Streamliner 4.x to 5.x*
 - Support Schema Evolution
 - Rename `clean` to `drop`
 - Map date to datetime by default and include additional types for oracle

@@ -9,6 +9,8 @@ source:
   schema: "" # JDBC Schema / database name
   tableTypes: # Controls the types of tables included in the configuration output
     - table
+# OPTIONAL: Controls the collection of location and inputformat from hive/impala. Default value is false.
+#  includeHiveAttributes: true
 # OPTIONAL: Used to ignore the tables. In case tables(used for table whitelisting) and ignoreTables are used simultaneously then tables are ignored from whitelisted tables.
 #  ignoreTables:
 #    - table1
