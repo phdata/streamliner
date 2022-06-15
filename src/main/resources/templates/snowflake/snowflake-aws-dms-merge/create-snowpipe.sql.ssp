@@ -27,7 +27,10 @@ USE SCHEMA ${destination.stagingDatabase.schema};
 
 CREATE PIPE IF NOT EXISTS ${table.destinationName}_pipe
     AUTO_INGEST = true
-#if (destination.snsTopic != null)
+#if (destination.pipeErrorIntegration != null && destination.pipeErrorIntegration.length>0)
+    ERROR_INTEGRATION = '${destination.pipeErrorIntegration}'
+#end
+#if (destination.snsTopic != null && destination.snsTopic.length>0)
     AWS_SNS_TOPIC = '${destination.snsTopic}'
 #end
     AS
