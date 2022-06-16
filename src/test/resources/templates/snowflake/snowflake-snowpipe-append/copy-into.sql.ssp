@@ -16,16 +16,30 @@ limitations under the License.
 #import(io.phdata.streamliner.schemadefiner.model.Snowflake)
 <%@ val configuration: io.phdata.streamliner.schemadefiner.model.Configuration %>
 <%@ val table: io.phdata.streamliner.schemadefiner.model.SnowflakeTable %>
+<%@ val util: io.phdata.streamliner.schemadefiner.util.StreamlinerUtil %>
+<%@ val fileType: String = table.getFileFormat().fileType %>
 <%@ val typeMapping: Map[String, Map[String, String]]%>
 #{
     val destination = configuration.destination.asInstanceOf[Snowflake]
     val sourceColumnStr = table.sourceColumnConversion(typeMapping)
+    val columnList = util.convertListToSeq(table.columns).zipWithIndex.map { case (c, i) =>
+    "$" + s"${i +1}"
+    }.mkString(",\n")
 }#
 USE DATABASE ${destination.stagingDatabase.name};
 
 USE SCHEMA ${destination.stagingDatabase.schema};
 
 COPY INTO ${table.destinationName} (${unescape(table.columnList(null))})
-FROM ( SELECT ${unescape(sourceColumnStr)}
+FROM ( SELECT
+#if (fileType == "CSV")
+    ${unescape(columnList)}
+#else
+    ${unescape(sourceColumnStr)}
+#end
 FROM @${configuration.name}_stage/${table.sourceName})
-FILE_FORMAT = ( TYPE = PARQUET);
+#if (fileType == "CSV")
+    FILE_FORMAT = ( TYPE = '${fileType}', field_delimiter = '0x01', ESCAPE_UNENCLOSED_FIELD = NONE);
+#else
+    FILE_FORMAT = ( TYPE = ${fileType});
+#end

@@ -253,7 +253,8 @@ Configuration properties defining the Snowflake destination.
 | stagingDatabase | [SnowflakeDatabase](#snowflake-database) | True | Staging database where data will staged into in Snowflake |
 | reportingDatabase | [SnowflakeDatabase](#snowflake-database) | True | Reporting database where data will be merged into or replicated in Snowflake |
 | tableNameStrategy | [TableNameStrategy](#table-name-strategy) | False | Option to modify snowflake table name. |
-| errorIntegration | String | False | Snowpipe notification integration name. |
+| pipeErrorIntegration | String | False | Snowpipe notification integration name. |
+| taskErrorIntegration | String | False | Snowflake Task notification integration name. |
 
 ##### Snowflake Database
 Configuration properties defining the Snowflake database.

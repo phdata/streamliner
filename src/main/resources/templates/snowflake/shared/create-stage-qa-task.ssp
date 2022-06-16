@@ -24,6 +24,9 @@ limitations under the License.
 CREATE TASK IF NOT EXISTS ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName}_qa_task
     WAREHOUSE = ${destination.warehouse}
     SCHEDULE = '${destination.quality.taskSchedule}'
+#if (destination.taskErrorIntegration != null && destination.taskErrorIntegration.length>0)
+    ERROR_INTEGRATION = '${destination.taskErrorIntegration}'
+#end
     WHEN SYSTEM$STREAM_HAS_DATA('${table.destinationName}_QA_STREAM')
     AS
     call table_run_qa('${destination.stagingDatabase.schema}',

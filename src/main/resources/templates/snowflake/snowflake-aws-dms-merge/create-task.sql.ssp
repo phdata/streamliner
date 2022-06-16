@@ -22,6 +22,9 @@ limitations under the License.
 CREATE TASK IF NOT EXISTS ${destination.stagingDatabase.name}.${destination.stagingDatabase.schema}.${table.destinationName}_task
     WAREHOUSE = ${destination.warehouse}
     SCHEDULE = '${destination.taskSchedule}'
+#if (destination.taskErrorIntegration != null && destination.taskErrorIntegration.length>0)
+    ERROR_INTEGRATION = '${destination.taskErrorIntegration}'
+#end
     WHEN SYSTEM$STREAM_HAS_DATA('${table.destinationName}_stg_stream')
     AS
     MERGE INTO ${destination.reportingDatabase.name}.${destination.reportingDatabase.schema}.${table.destinationName} t

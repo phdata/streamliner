@@ -1,3 +1,8 @@
+## 5.10.0
+- Snowflake Task notification integration name can be passed using optional parameter `taskErrorIntegration` under destination in ingest-config.
+- Renamed Snowpipe notification integration name to `pipeErrorIntegration`.
+- [Download](https://repo.phdata.io/public/streamliner/maven/io/phdata/streamliner/streamliner/5.10.0/streamliner-5.10.0.zip)
+
 ## 5.9.0
 - Hive attributes `InputFormat` and `Location` can be collected using an optional boolean parameter `includeHiveAttributes` under source in ingest-config.
 - [Download](https://repo.phdata.io/public/streamliner/maven/io/phdata/streamliner/streamliner/5.9.0/streamliner-5.9.0.zip)

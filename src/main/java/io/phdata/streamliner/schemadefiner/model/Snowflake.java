@@ -39,7 +39,8 @@ public class Snowflake extends Destination {
   public String stageName;
   public IngestFileFormat fileFormat;
   public TableNameStrategy tableNameStrategy;
-  public String errorIntegration;
+  public String pipeErrorIntegration;
+  public String taskErrorIntegration;
 
   public Snowflake() {}
 }
