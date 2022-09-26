@@ -37,7 +37,7 @@ FROM ( SELECT
 #else
     ${unescape(sourceColumnStr)}
 #end
-FROM @${configuration.name}_stage/${table.sourceName})
+FROM @${configuration.name}_stage/${table.sourceName}/)
 #if (fileType == "CSV")
     FILE_FORMAT = ( TYPE = '${fileType}', field_delimiter = '0x01', ESCAPE_UNENCLOSED_FIELD = NONE);
 #else
