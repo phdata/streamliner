@@ -1,8 +1,8 @@
-![Streamliner Logo](customer-docs/images/streamliner_logo.png)
+![Streamliner Logo](docs/images/streamliner_logo.png)
 
 # User Documentation
 
-See the [phData Streamliner User Documentation site](https://docs.customer.phdata.io/docs/streamliner/) for user docs.
+See the [Docs Directory](docs/) for user docs.
 
 # Developer Documentation
 

@@ -1,0 +1,20 @@
+image::../images/streamliner_logo.png[Streamliner Logo]
+
+== Introduction
+Streamliner is a Data Pipeline Automation tool that simplifies the process of ingesting data onto a new platform. It is not a data ingestion tool in and of itself rather, it automates other commonly used tools that ingest and manipulate data on platforms like Snowflake, Amazon Redshift, Cloudera, and Databricks.
+
+Streamliner uses SchemaCrawler to query database table metadata through JDBC. It then generates pipeline code from a series of templates, which can be used to ingest or transform data.
+
+For example, in order to perform Change Data Capture (CDC) -based continuous replication from a source system to Snowflake, Streamliner could be used to generate the SnowSQL needed to create the required Snowpipe tasks, staging tables, and Snowflake Streams, and merge tasks.
+
+image::../images/streamliner_pipeline.png[Streamliner pipeline example]
+
+Alternatively, Streamliner might also be used in a very different use case to facilitate data ingestion from relational databases (DBMS) to Hadoop by generating the necessary Sqoop ingest scripts and Impala merge statements.
+
+image::../images/streamliner_hadoop_example.png[Streamliner_hadoop example]
+
+== Why Streamliner
+- Ingest hundreds or thousands of data sources quickly and easily
+- Quickly develop highly complex, templated, and reusable data pipelines into Snowflake, Amazon Redshift, Cloudera, and Databricks.
+- Automate the ingestion of business and technical metadata, and the generation of data catalog artifacts, including documentation, ERDs, and integration code.
+- Quickly respond to changing requirements like new columns, changing metadata, and new data sources.

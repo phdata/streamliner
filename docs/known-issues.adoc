@@ -1,0 +1,8 @@
+== Streamliner Known Issues
+---
+
+=== "This site can’t be reached" error while trying to download streamliner
+This error is triggered due to Streamliner repository migration. Follow the link:quickstart.html#_download[Download] instructions for latest streamliner artifact.
+
+=== "Could not resolve host: repository.phdata.io" error while running streamliner-fetch script
+This error is triggered due to Streamliner repository migration and the `streamliner-fetch` script is still referring to Streamliner's old repository. To resolve this issue, update the Streamliner `bin/streamliner-fetch` script with the updated download url. You can find the updated download url link:quickstart.html#_download[here].
